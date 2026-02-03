@@ -68,10 +68,12 @@
 
     
 .layout {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 520px;
   gap: 32px;
-  align-items: flex-start;
+  align-items: start;
 }
+
 
   </style>
 </head>
@@ -147,51 +149,58 @@
 </div>
 
 <script type="module">
-  import { supabase } from "/assets/js/supabase.js";
+import { supabase } from "/assets/js/supabase.js";
 
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData?.session?.user;
+/* ---------- AUTH ---------- */
+const { data: sessionData } = await supabase.auth.getSession();
+const user = sessionData?.session?.user;
 
-  if (!user || user.user_metadata.role !== "admin") {
-    window.location.href = "/admin/login/";
-    throw new Error("Not authorised");
-  }
+if (!user || user.user_metadata.role !== "admin") {
+  window.location.href = "/admin/login/";
+  throw new Error("Not authorised");
+}
 
-  async function loadPosts(client) {
-    const { data, error } = await supabase
-      .from("posts")
-      .select("*")
-      .eq("client", client)
-      .order("slot");
+/* ---------- DOM ---------- */
+const grid = document.getElementById("grid");
+const preview = document.getElementById("preview");
+const carousel = document.getElementById("carousel");
+const captionEl = document.getElementById("caption");
 
-    if (error) {
-      alert("Failed to load posts");
-      console.error(error);
-      return [];
-    }
-let currentSlideIndex = 0;
+const clientSelect = document.getElementById("clientSelect");
+const aspectSelect = document.getElementById("aspectSelect");
+const captionInput = document.getElementById("captionInput");
+const saveBtn = document.getElementById("saveBtn");
+const editor = document.getElementById("editor");
 
-    return data;
-  }
-
-  const grid = document.getElementById("grid");
-  const preview = document.getElementById("preview");
-  const previewImg = document.getElementById("previewImg");
-  const captionEl = document.getElementById("caption");
-  const clientSelect = document.getElementById("clientSelect");
-  const aspectSelect = document.getElementById("aspectSelect");
-  const captionInput = document.getElementById("captionInput");
-  const saveBtn = document.getElementById("saveBtn");
-  const editor = document.getElementById("editor");
-  const thumbInput = document.getElementById("thumbInput");
+const thumbInput = document.getElementById("thumbInput");
 const mediaInput = document.getElementById("mediaInput");
-  const carousel = document.getElementById("carousel");
 
-let currentSlideIndex = 0;
+const prevBtn = document.getElementById("prevSlide");
+const nextBtn = document.getElementById("nextSlide");
+
+/* ---------- STATE ---------- */
+let currentClient = clientSelect.value;
+let currentPost = null;
 let slides = [];
+let currentSlideIndex = 0;
 
+/* ---------- HELPERS ---------- */
+async function loadPosts(client) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("client", client)
+    .order("slot");
 
-  async function uploadFile(path, file) {
+  if (error) {
+    console.error(error);
+    return [];
+  }
+
+  return data;
+}
+
+async function uploadFile(path, file) {
   const { error } = await supabase.storage
     .from("social-media")
     .upload(path, file, { upsert: true });
@@ -203,107 +212,93 @@ let slides = [];
     .getPublicUrl(path).data.publicUrl;
 }
 
-
-  let currentClient = clientSelect.value;
-  let currentPost = null;
-
-  async function render(client) {
-    grid.innerHTML = "";
-    preview.hidden = true;
-    editor.hidden = true;
-
-    const posts = await loadPosts(client);
-    const slots = Array.from({ length: 12 }, (_, i) => i + 1);
-
-    slots.forEach(slot => {
-      const post = posts.find(p => p.slot === slot);
-
-      const img = document.createElement("img");
-img.src = post?.thumbnail_url || "/assets/empty.png";
-
-
-img.onclick = () => {
-  currentPost = {
-    id: post?.id || null,
-    client: currentClient,
-    slot: slot
-  };
-
-  preview.hidden = false;
-  editor.hidden = false;
-
-  // 🔁 BUILD ADMIN CAROUSEL
-carousel.innerHTML = "";
-slides = [];
-
-(post?.media_urls || []).forEach((url, i) => {
-  let el;
-
-  if (url.endsWith(".webm") || url.endsWith(".mp4")) {
-    el = document.createElement("video");
-    el.src = url;
-    el.muted = true;
-    el.playsInline = true;
-    el.loop = true;
-    el.autoplay = true;
-  } else {
-    el = document.createElement("img");
-    el.src = url;
-  }
-
-  el.classList.toggle("active", i === 0);
-  carousel.appendChild(el);
-  slides.push(el);
-});
-
-currentSlideIndex = 0;
-
-
 function showSlide(index) {
   slides.forEach((el, i) => {
     el.classList.toggle("active", i === index);
   });
 }
 
-document.getElementById("prevSlide").onclick = () => {
+/* ---------- GRID RENDER ---------- */
+async function render(client) {
+  grid.innerHTML = "";
+  preview.hidden = true;
+  editor.hidden = true;
+
+  const posts = await loadPosts(client);
+  const slots = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  slots.forEach(slot => {
+    const post = posts.find(p => p.slot === slot);
+
+    const img = document.createElement("img");
+    img.src = post?.thumbnail_url || "/assets/empty.png";
+
+    img.onclick = () => {
+      currentPost = {
+        id: post?.id || null,
+        client: currentClient,
+        slot: slot
+      };
+
+      preview.hidden = false;
+      editor.hidden = false;
+
+      /* Build carousel */
+      carousel.innerHTML = "";
+      slides = [];
+      currentSlideIndex = 0;
+
+      (post?.media_urls || []).forEach((url, i) => {
+        let el;
+
+        if (url.endsWith(".webm") || url.endsWith(".mp4")) {
+          el = document.createElement("video");
+          el.src = url;
+          el.muted = true;
+          el.playsInline = true;
+          el.loop = true;
+          el.autoplay = true;
+        } else {
+          el = document.createElement("img");
+          el.src = url;
+        }
+
+        if (i === 0) el.classList.add("active");
+        carousel.appendChild(el);
+        slides.push(el);
+      });
+
+      captionInput.value = post?.caption || "";
+      aspectSelect.value = post?.aspect || "5:4";
+      captionEl.textContent = post?.caption || "";
+    };
+
+    grid.appendChild(img);
+  });
+}
+
+/* ---------- NAV ---------- */
+prevBtn.onclick = () => {
   if (!slides.length) return;
   currentSlideIndex =
     (currentSlideIndex - 1 + slides.length) % slides.length;
   showSlide(currentSlideIndex);
 };
 
-document.getElementById("nextSlide").onclick = () => {
+nextBtn.onclick = () => {
   if (!slides.length) return;
   currentSlideIndex =
     (currentSlideIndex + 1) % slides.length;
   showSlide(currentSlideIndex);
 };
 
-
-  // ABOVE IS WHERE I ENTERED THE NEW CAROUSEL CODE
-
-  
-  captionInput.value = post?.caption || "";
-  aspectSelect.value = post?.aspect || "5:4";
-};
-
-
-      grid.appendChild(img);
-    });
-  }
-
-  clientSelect.onchange = () => {
-    currentClient = clientSelect.value;
-    render(currentClient);
-  };
-
+/* ---------- SAVE ---------- */
 saveBtn.onclick = async () => {
   if (!currentPost) return;
 
   let thumbnailUrl = null;
   let mediaUrls = null;
 
-  // Upload thumbnail if provided
   if (thumbInput.files[0]) {
     thumbnailUrl = await uploadFile(
       `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
@@ -311,10 +306,8 @@ saveBtn.onclick = async () => {
     );
   }
 
-  // Upload media files if provided
   if (mediaInput.files.length) {
     mediaUrls = [];
-
     for (let i = 0; i < mediaInput.files.length; i++) {
       const file = mediaInput.files[i];
       const ext = file.name.split(".").pop();
@@ -349,18 +342,21 @@ saveBtn.onclick = async () => {
   }
 
   if (result.error) {
-    alert("Save failed: " + result.error.message);
-    console.error("SUPABASE SAVE ERROR:", result.error);
+    alert("Save failed");
+    console.error(result.error);
     return;
   }
 
-  console.log("SAVE OK", result.data);
   render(currentClient);
 };
 
-
-
+/* ---------- INIT ---------- */
+clientSelect.onchange = () => {
+  currentClient = clientSelect.value;
   render(currentClient);
+};
+
+render(currentClient);
 </script>
 
 
