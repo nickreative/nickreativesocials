@@ -111,7 +111,7 @@
   const aspectSelect = document.getElementById("aspectSelect");
   const captionInput = document.getElementById("captionInput");
   const saveBtn = document.getElementById("saveBtn");
-  const editor = document.getElementById("editor"); // 🔴 THIS WAS MISSING
+  const editor = document.getElementById("editor");
 
   let currentClient = clientSelect.value;
   let currentPost = null;
@@ -128,8 +128,7 @@
       const post = posts.find(p => p.slot === slot);
 
       const img = document.createElement("img");
-img.src = post ? "/assets/filled.png" : "/assets/empty.png";
-
+      img.src = post ? "/assets/filled.png" : "/assets/empty.png";
 
       img.onclick = () => {
         currentPost = {
@@ -177,19 +176,20 @@ img.src = post ? "/assets/filled.png" : "/assets/empty.png";
         .insert(payload);
     }
 
-if (result.error) {
-  alert("Save failed: " + result.error.message);
-  console.error("SUPABASE SAVE ERROR:", result.error);
-  return;
-}
-
-console.log("SAVE OK", result.data);
-render(currentClient);
-
+    if (result.error) {
+      alert("Save failed: " + result.error.message);
+      console.error("SUPABASE SAVE ERROR:", result.error);
+      return;
     }
+
+    console.log("SAVE OK", result.data);
+    render(currentClient);
   };
 
+  // ✅ THIS WAS MISSING
+  render(currentClient);
 </script>
+
 
 
 </body>
