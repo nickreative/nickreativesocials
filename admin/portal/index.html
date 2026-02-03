@@ -183,69 +183,67 @@ const mediaInput = document.getElementById("mediaInput");
     render(currentClient);
   };
 
-  saveBtn.onclick = async () => {
-    if (!currentPost) return;
-    let thumbnailUrl = null;
-let mediaUrls = null;
+saveBtn.onclick = async () => {
+  if (!currentPost) return;
 
-    
+  let thumbnailUrl = null;
+  let mediaUrls = null;
 
-const payload = {
-  client: currentPost.client,
-  slot: currentPost.slot,
-  caption: captionInput.value,
-  aspect: aspectSelect.value,
-  ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
-  ...(mediaUrls && { media_urls: mediaUrls })
+  // Upload thumbnail if provided
+  if (thumbInput.files[0]) {
+    thumbnailUrl = await uploadFile(
+      `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
+      thumbInput.files[0]
+    );
+  }
+
+  // Upload media files if provided
+  if (mediaInput.files.length) {
+    mediaUrls = [];
+
+    for (let i = 0; i < mediaInput.files.length; i++) {
+      const file = mediaInput.files[i];
+      const ext = file.name.split(".").pop();
+      const url = await uploadFile(
+        `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+        file
+      );
+      mediaUrls.push(url);
+    }
+  }
+
+  const payload = {
+    client: currentPost.client,
+    slot: currentPost.slot,
+    caption: captionInput.value,
+    aspect: aspectSelect.value,
+    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
+    ...(mediaUrls && { media_urls: mediaUrls })
+  };
+
+  let result;
+
+  if (currentPost.id) {
+    result = await supabase
+      .from("posts")
+      .update(payload)
+      .eq("id", currentPost.id);
+  } else {
+    result = await supabase
+      .from("posts")
+      .insert(payload);
+  }
+
+  if (result.error) {
+    alert("Save failed: " + result.error.message);
+    console.error("SUPABASE SAVE ERROR:", result.error);
+    return;
+  }
+
+  console.log("SAVE OK", result.data);
+  render(currentClient);
 };
 
-
-    let result;
-// Upload thumbnail if provided
-let thumbnailUrl = null;
-if (thumbInput.files[0]) {
-  thumbnailUrl = await uploadFile(
-    `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
-    thumbInput.files[0]
-  );
-}
-
-// Upload media files if provided
-let mediaUrls = null;
-if (mediaInput.files.length) {
-  mediaUrls = [];
-
-  for (let i = 0; i < mediaInput.files.length; i++) {
-    const file = mediaInput.files[i];
-    const ext = file.name.split(".").pop();
-    const url = await uploadFile(
-      `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-      file
-    );
-    mediaUrls.push(url);
-  }
-}
-
-    if (currentPost.id) {
-      result = await supabase
-        .from("posts")
-        .update(payload)
-        .eq("id", currentPost.id);
-    } else {
-      result = await supabase
-        .from("posts")
-        .insert(payload);
-    }
-
-    if (result.error) {
-      alert("Save failed: " + result.error.message);
-      console.error("SUPABASE SAVE ERROR:", result.error);
-      return;
-    }
-
-    console.log("SAVE OK", result.data);
-    render(currentClient);
-  };
 
 
   render(currentClient);
