@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Portal</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 24px;
+    }
+    select {
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 120px);
+      gap: 12px;
+    }
+    .grid img {
+      width: 100%;
+      border: 1px solid #ccc;
+    }
+    .preview {
+      margin-top: 24px;
+      max-width: 420px;
+    }
+    .preview img {
+      width: 100%;
+      aspect-ratio: 5 / 4;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Admin — Social Previews</h2>
+
+<label>
+  Select client:
+  <select id="clientSelect">
+    <option value="suitecollection">Suite Collection</option>
+    <option value="pocky">Pocky</option>
+    <option value="vicalates">Vicalates</option>
+    <option value="livencommunities">Liven Communities</option>
+  </select>
+</label>
+
+<div class="grid" id="grid"></div>
+
+<div class="preview" id="preview" hidden>
+  <img id="previewImg" />
+  <p id="caption"></p>
+</div>
+
+<script type="module">
+  import { supabase } from "/assets/js/supabase.js";
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData?.session?.user;
+
+  if (!user || user.user_metadata.role !== "admin") {
+    window.location.href = "/admin/login/";
+    throw new Error("Not authorised");
+  }
+
+  const postsByClient = {
+    suitecollection: [],
+    pocky: [],
+    vicalates: [],
+    livencommunities: []
+  };
+
+  function seedPosts(client) {
+    return Array.from({ length: 12 }).map((_, i) => ({
+      id: i + 1,
+      thumb: `https://via.placeholder.com/300x240?text=${client}+${i + 1}`,
+      full: "https://via.placeholder.com/600x480",
+      caption: `Caption for ${client} post ${i + 1}`
+    }));
+  }
+
+  Object.keys(postsByClient).forEach(
+    c => postsByClient[c] = seedPosts(c)
+  );
+
+  const grid = document.getElementById("grid");
+  const preview = document.getElementById("preview");
+  const previewImg = document.getElementById("previewImg");
+  const captionEl = document.getElementById("caption");
+  const clientSelect = document.getElementById("clientSelect");
+
+  function render(client) {
+    grid.innerHTML = "";
+    preview.hidden = true;
+
+    postsByClient[client].forEach(post => {
+      const img = document.createElement("img");
+      img.src = post.thumb;
+      img.onclick = () => {
+        preview.hidden = false;
+        previewImg.src = post.full;
+        captionEl.textContent = post.caption;
+      };
+      grid.appendChild(img);
+    });
+  }
+
+  render(clientSelect.value);
+
+  clientSelect.onchange = () => render(clientSelect.value);
+</script>
+
+</body>
+</html>
