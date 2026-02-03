@@ -21,16 +21,15 @@
   object-fit: cover;
 }
 
-    .preview {
-      margin-top: 24px;
-      max-width: 420px;
-    }
-    .preview img {
-      width: 100%;
-      aspect-ratio: 5 / 4;
-      object-fit: cover;
-      border: 1px solid #ccc;
-    }
+.preview {
+  width: 520px;
+}
+
+.carousel {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+}
+
     .actions {
       margin-top: 12px;
     }
@@ -93,22 +92,19 @@
   <div class="grid" id="grid"></div>
 
   <div class="preview" id="preview" hidden>
-    <!-- existing preview content -->
-  </div>
-</div>
+    <div id="carousel" class="carousel"></div>
 
-  <div id="carousel" class="carousel"></div>
+    <div class="carousel-controls">
+      <button id="prevBtn">←</button>
+      <button id="nextBtn">→</button>
+    </div>
 
-  <div class="carousel-controls">
-    <button id="prevBtn">←</button>
-    <button id="nextBtn">→</button>
-  </div>
+    <p id="caption"></p>
 
-  <p id="caption"></p>
-
-  <div class="actions">
-    <button id="approveBtn">Approve</button>
-    <button id="changesBtn">Request changes</button>
+    <div class="actions">
+      <button id="approveBtn">Approve</button>
+      <button id="changesBtn">Request changes</button>
+    </div>
   </div>
 </div>
 
@@ -149,6 +145,8 @@ const captionEl = document.getElementById("caption");
 
 let slides = [];
 let currentSlide = 0;
+let currentPost = null;
+
 
 function renderCarousel(post) {
   carousel.innerHTML = "";
@@ -220,7 +218,6 @@ posts.forEach(post => {
 });
 
 
-  let currentPost = null;
 
   function openMail(subject) {
     if (!currentPost) return;
