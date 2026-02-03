@@ -128,9 +128,8 @@
       const post = posts.find(p => p.slot === slot);
 
       const img = document.createElement("img");
-      img.src = post
-        ? `https://via.placeholder.com/300x240?text=Slot+${slot}`
-        : `https://via.placeholder.com/300x240?text=Empty+${slot}`;
+img.src = post ? "/assets/filled.png" : "/assets/empty.png";
+
 
       img.onclick = () => {
         currentPost = {
