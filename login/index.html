@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Client Login</title>
+</head>
+<body>
 
+<h2>Client Login</h2>
+
+<form id="loginForm">
+  <input type="email" id="email" placeholder="Email" required />
+  <br><br>
+  <input type="password" id="password" placeholder="Password" required />
+  <br><br>
+  <button type="submit">Login</button>
+</form>
+
+<p id="error"></p>
+
+<script type="module">
+  import { supabase } from "/assets/js/supabase.js";
+
+  const form = document.getElementById("loginForm");
+  const errorEl = document.getElementById("error");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      errorEl.textContent = error.message;
+      return;
+    }
+
+    const meta = data.user.user_metadata;
+
+    if (meta.role === "client") {
+      window.location.href = `/client/portal/?client=${meta.client}`;
+    } else {
+      errorEl.textContent = "Not a client account.";
+    }
+  });
+</script>
+
+</body>
+</html>
