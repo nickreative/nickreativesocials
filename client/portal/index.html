@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Client Portal</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 120px);
+      gap: 12px;
+    }
+    .grid img {
+      width: 100%;
+      cursor: pointer;
+      border: 1px solid #ccc;
+    }
+    .preview {
+      margin-top: 24px;
+      max-width: 420px;
+    }
+    .preview img {
+      width: 100%;
+      aspect-ratio: 5 / 4;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .actions {
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<h2 id="clientHeading"></h2>
+
+<div class="grid" id="grid"></div>
+
+<div class="preview" id="preview" hidden>
+  <img id="previewImg" />
+  <p id="caption"></p>
+  <div class="actions">
+    <button id="approveBtn">Approve</button>
+    <button id="changesBtn">Request changes</button>
+  </div>
+</div>
+
+<script type="module">
+  import { supabase } from "/assets/js/supabase.js";
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData?.session?.user;
+
+  if (!user || user.user_metadata.role !== "client") {
+    window.location.href = "/login/";
+    throw new Error("Not authorised");
+  }
+
+  const client = user.user_metadata.client;
+  document.getElementById("clientHeading").textContent =
+    `Social previews — ${client}`;
+
+  // --- TEMP data (will come from DB later) ---
+  const posts = Array.from({ length: 12 }).map((_, i) => ({
+    id: i + 1,
+    thumb: "https://via.placeholder.com/300x240?text=Post+" + (i + 1),
+    full: "https://via.placeholder.com/600x480",
+    caption: `Caption for post ${i + 1}`
+  }));
+
+  const grid = document.getElementById("grid");
+  const preview = document.getElementById("preview");
+  const previewImg = document.getElementById("previewImg");
+  const captionEl = document.getElementById("caption");
+
+  posts.forEach(post => {
+    const img = document.createElement("img");
+    img.src = post.thumb;
+    img.addEventListener("click", () => {
+      preview.hidden = false;
+      previewImg.src = post.full;
+      captionEl.textContent = post.caption;
+      currentPost = post;
+    });
+    grid.appendChild(img);
+  });
+
+  let currentPost = null;
+
+  function openMail(subject) {
+    if (!currentPost) return;
+    const body = encodeURIComponent(
+      `Hi Nick,\n\n${subject}:\nPost ${currentPost.id}\n`
+    );
+    window.location.href =
+      `mailto:nick@nickreative.com?subject=Social feedback&body=${body}`;
+  }
+
+  document.getElementById("approveBtn").onclick =
+    () => openMail("I approve the following posts");
+
+  document.getElementById("changesBtn").onclick =
+    () => openMail("Could you make changes to the following posts");
+</script>
+
+</body>
+</html>
