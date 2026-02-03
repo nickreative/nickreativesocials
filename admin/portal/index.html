@@ -53,6 +53,34 @@
   <img id="previewImg" />
   <p id="caption"></p>
 </div>
+<div id="editor" hidden>
+  <h3>Edit post</h3>
+
+  <label>
+    Slot:
+    <select id="slotSelect">
+      ${[...Array(12)].map((_, i) => `<option>${i+1}</option>`).join("")}
+    </select>
+  </label>
+
+  <br><br>
+
+  <label>
+    Aspect:
+    <select id="aspectSelect">
+      <option value="5:4">5:4 (grid / carousel)</option>
+      <option value="9:16">9:16 (reel)</option>
+    </select>
+  </label>
+
+  <br><br>
+
+  <textarea id="captionInput" rows="4" cols="40"></textarea>
+
+  <br><br>
+
+  <button id="saveBtn">Save</button>
+</div>
 
 <script type="module">
   import { supabase } from "/assets/js/supabase.js";
@@ -65,25 +93,22 @@
     throw new Error("Not authorised");
   }
 
-  const postsByClient = {
-    suitecollection: [],
-    pocky: [],
-    vicalates: [],
-    livencommunities: []
-  };
+async function loadPosts(client) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("client", client)
+    .order("slot");
 
-  function seedPosts(client) {
-    return Array.from({ length: 12 }).map((_, i) => ({
-      id: i + 1,
-      thumb: `https://via.placeholder.com/300x240?text=${client}+${i + 1}`,
-      full: "https://via.placeholder.com/600x480",
-      caption: `Caption for ${client} post ${i + 1}`
-    }));
+  if (error) {
+    alert("Failed to load posts");
+    console.error(error);
+    return [];
   }
 
-  Object.keys(postsByClient).forEach(
-    c => postsByClient[c] = seedPosts(c)
-  );
+  return data;
+}
+
 
   const grid = document.getElementById("grid");
   const preview = document.getElementById("preview");
@@ -91,25 +116,74 @@
   const captionEl = document.getElementById("caption");
   const clientSelect = document.getElementById("clientSelect");
 
-  function render(client) {
+  const editor = document.getElementById("editor");
+  const slotSelect = document.getElementById("slotSelect");
+  const aspectSelect = document.getElementById("aspectSelect");
+  const captionInput = document.getElementById("captionInput");
+  const saveBtn = document.getElementById("saveBtn");
+
+  let currentClient = clientSelect.value;
+  let currentPost = null;
+
+  async function render(client) {
     grid.innerHTML = "";
     preview.hidden = true;
+    editor.hidden = true;
 
-    postsByClient[client].forEach(post => {
+    const posts = await loadPosts(client);
+
+    posts.forEach(post => {
       const img = document.createElement("img");
-      img.src = post.thumb;
+      img.src = `https://via.placeholder.com/300x240?text=Slot+${post.slot}`;
+
       img.onclick = () => {
+        currentPost = post;
+
         preview.hidden = false;
-        previewImg.src = post.full;
-        captionEl.textContent = post.caption;
+        previewImg.src = img.src;
+        captionEl.textContent = post.caption || "";
+
+        editor.hidden = false;
+        slotSelect.value = post.slot;
+        aspectSelect.value = post.aspect || "5:4";
+        captionInput.value = post.caption || "";
       };
+
       grid.appendChild(img);
     });
   }
 
-  render(clientSelect.value);
+  clientSelect.onchange = () => {
+    currentClient = clientSelect.value;
+    render(currentClient);
+  };
 
-  clientSelect.onchange = () => render(clientSelect.value);
+  saveBtn.onclick = async () => {
+    if (!currentPost) return;
+
+    const updates = {
+      slot: Number(slotSelect.value),
+      aspect: aspectSelect.value,
+      caption: captionInput.value
+    };
+
+    const { error } = await supabase
+      .from("posts")
+      .update(updates)
+      .eq("id", currentPost.id);
+
+    if (error) {
+      alert("Save failed");
+      console.error(error);
+    } else {
+      render(currentClient);
+    }
+  };
+
+  render(currentClient);
+
+
+  
 </script>
 
 </body>
