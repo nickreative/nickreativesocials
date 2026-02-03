@@ -177,11 +177,15 @@ img.src = post ? "/assets/filled.png" : "/assets/empty.png";
         .insert(payload);
     }
 
-    if (result.error) {
-      alert("Save failed");
-      console.error(result.error);
-    } else {
-      render(currentClient);
+if (result.error) {
+  alert("Save failed: " + result.error.message);
+  console.error("SUPABASE SAVE ERROR:", result.error);
+  return;
+}
+
+console.log("SAVE OK", result.data);
+render(currentClient);
+
     }
   };
 
