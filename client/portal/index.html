@@ -5,85 +5,81 @@
   <title>Client Portal</title>
   <meta name="robots" content="noindex,nofollow" />
   <style>
-    body {
-      font-family: Helvetica, Arial, sans-serif;
-      padding: 24px;
-    }
+body {
+font-family: Helvetica, Arial, sans-serif;
+padding: 24px;
+}
+
+/* ---------- Layout ---------- */
+.layout {
+display: grid;
+grid-template-columns: max-content 520px;
+gap: 32px;
+align-items: start;
+}
+
+/* ---------- Grid ---------- */
 .grid {
-  display: grid;
-  width: fit-content;
-  grid-template-columns: repeat(3, 120px);
-  grid-template-rows: repeat(4, 150px);
-  gap: 6px;
-≈
+display: grid;
+width: fit-content;
+grid-template-columns: repeat(3, 120px);
+grid-template-rows: repeat(4, 150px); /* 5:4 vertical */
+gap: 6px;
 }
 
-}
 .grid img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+width: 100%;
+height: 100%;
+object-fit: cover;
+border: 1px solid #ccc;
+cursor: pointer;
 }
 
+/* ---------- Preview ---------- */
 .preview {
-      margin-top: 24px;
-      max-width: 630px;
-    }
-    .preview img {
-      width: 100%;
-      aspect-ratio: 5 / 4;
-      object-fit: cover;
-      border: 1px solid #ccc;
-    }
-    .carousel {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #ccc;
+width: 520px;
+}
+
+.carousel {
+position: relative;
+width: 100%;
+aspect-ratio: 4 / 5;
+overflow: hidden;
+border: 1px solid #ccc;
 }
 
 .carousel img,
 .carousel video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+position: absolute;
+inset: 0;
+width: 100%;
+height: 100%;
+object-fit: cover;
+opacity: 0;
+transition: opacity 0.3s ease;
 }
 
 .carousel .active {
-  opacity: 1;
-  position: relative;
+opacity: 1;
+position: relative;
 }
 
 .carousel-controls {
-  margin: 8px 0;
-}
-
-.layout {
-  display: grid;
-  grid-template-columns: max-content 520px;
-  gap: 32px;
-  align-items: start;
-}
-
-
-    .preview {
-  width: 520px;
+margin: 8px 0;
 }
 
 .preview img,
 .preview video {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  object-fit: cover;
+width: 100%;
+aspect-ratio: 4 / 5;
+object-fit: cover;
 }
 
-
-  </style>
+/* ---------- Actions ---------- */
+.actions {
+margin-top: 12px;
+}
+</style>
 </head>
 <body>
 
