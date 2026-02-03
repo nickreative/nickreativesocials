@@ -16,7 +16,7 @@
   display: grid;
   grid-template-columns: repeat(3, 120px);
   grid-template-rows: repeat(4, 150px); /* 5:4 vertical */
-  gap: 12px;
+  gap: 6px;
 }
 .grid img {
   width: 100%;
@@ -29,7 +29,7 @@
 
     .preview {
       margin-top: 24px;
-      max-width: 420px;
+      max-width: 630px;
     }
     .preview img {
       width: 100%;
@@ -38,8 +38,8 @@
       border: 1px solid #ccc;
     }
     .carousel {
-  width: 420px;
-  aspect-ratio: 5 / 4;
+  width: 100%;
+  aspect-ratio: 4 / 5;
   position: relative;
   overflow: hidden;
   border: 1px solid #ccc;
@@ -60,6 +60,18 @@
   opacity: 1;
   position: relative;
 }
+    .carousel-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+    
+.layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
 
   </style>
 </head>
@@ -77,10 +89,16 @@
   </select>
 </label>
 
-<div class="grid" id="grid"></div>
+<div class="layout">
+  <div class="grid" id="grid"></div>
 
-<div class="preview" id="preview" hidden>
+  <div class="preview" id="preview" hidden></div>
   <div id="carousel" class="carousel"></div>
+  <div class="carousel-controls">
+  <button id="prevSlide">←</button>
+  <button id="nextSlide">→</button>
+</div>
+
   <p id="caption"></p>
 </div>
 
@@ -145,6 +163,7 @@
       console.error(error);
       return [];
     }
+let currentSlideIndex = 0;
 
     return data;
   }
@@ -203,28 +222,51 @@ img.onclick = () => {
   editor.hidden = false;
 
   // 🔁 BUILD ADMIN CAROUSEL
-  const carousel = document.getElementById("carousel");
-  carousel.innerHTML = "";
+const slides = [];
 
-  (post?.media_urls || []).forEach((url, i) => {
-    let el;
+(post?.media_urls || []).forEach((url, i) => {
+  let el;
 
-    if (url.endsWith(".webm") || url.endsWith(".mp4")) {
-      el = document.createElement("video");
-      el.src = url;
-      el.muted = true;
-      el.playsInline = true;
-      el.loop = true;
-      el.autoplay = true;
-    } else {
-      el = document.createElement("img");
-      el.src = url;
-    }
+  if (url.endsWith(".webm") || url.endsWith(".mp4")) {
+    el = document.createElement("video");
+    el.src = url;
+    el.muted = true;
+    el.playsInline = true;
+    el.loop = true;
+    el.autoplay = true;
+  } else {
+    el = document.createElement("img");
+    el.src = url;
+  }
 
-    if (i === 0) el.classList.add("active");
-    carousel.appendChild(el);
+  el.classList.toggle("active", i === 0);
+  carousel.appendChild(el);
+  slides.push(el);
+});
+
+currentSlideIndex = 0;
+
+function showSlide(index) {
+  slides.forEach((el, i) => {
+    el.classList.toggle("active", i === index);
   });
+}
 
+document.getElementById("prevSlide").onclick = () => {
+  currentSlideIndex =
+    (currentSlideIndex - 1 + slides.length) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+document.getElementById("nextSlide").onclick = () => {
+  currentSlideIndex =
+    (currentSlideIndex + 1) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+  // ABOVE IS WHERE I ENTERED THE NEW CAROUSEL CODE
+
+  
   captionInput.value = post?.caption || "";
   aspectSelect.value = post?.aspect || "5:4";
 };
