@@ -1,4 +1,4 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "/assets/js/vendor/supabase.js";
 
 export const supabase = createClient(
   "https://tgvtmwdmwnzwqjzqxbkj.supabase.co",
