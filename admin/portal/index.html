@@ -56,11 +56,6 @@
 <div id="editor" hidden>
   <h3>Edit post</h3>
 
-  <label>
-    Slot:
-    <select id="slotSelect">
-    </select>
-  </label>
 
   <br><br>
 
@@ -114,16 +109,6 @@ async function loadPosts(client) {
   const previewImg = document.getElementById("previewImg");
   const captionEl = document.getElementById("caption");
   const clientSelect = document.getElementById("clientSelect");
-
-  const editor = document.getElementById("editor");
-  const slotSelect = document.getElementById("slotSelect");
-  for (let i = 1; i <= 12; i++) {
-  const opt = document.createElement("option");
-  opt.value = i;
-  opt.textContent = i;
-  slotSelect.appendChild(opt);
-}
-
   const aspectSelect = document.getElementById("aspectSelect");
   const captionInput = document.getElementById("captionInput");
   const saveBtn = document.getElementById("saveBtn");
@@ -150,17 +135,19 @@ slots.forEach(slot => {
     : `https://via.placeholder.com/300x240?text=Empty+${slot}`;
 
   img.onclick = () => {
-    currentPost = post || { client, slot };
-
-    preview.hidden = false;
-    previewImg.src = img.src;
-    captionEl.textContent = post?.caption || "";
-
-    editor.hidden = false;
-    slotSelect.value = slot;
-    aspectSelect.value = post?.aspect || "5:4";
-    captionInput.value = post?.caption || "";
+  currentPost = {
+    id: post?.id || null,
+    client: currentClient,
+    slot: slot
   };
+
+  preview.hidden = false;
+  editor.hidden = false;
+
+  captionInput.value = post?.caption || "";
+  aspectSelect.value = post?.aspect || "5:4";
+};
+
 
   grid.appendChild(img);
 });
@@ -172,31 +159,34 @@ slots.forEach(slot => {
     render(currentClient);
   };
 
-  saveBtn.onclick = async () => {
-    if (!currentPost) return;
+saveBtn.onclick = async () => {
+  const payload = {
+    client: currentPost.client,
+    slot: currentPost.slot,
+    caption: captionInput.value,
+    aspect: aspectSelect.value
+  };
 
-    const updates = {
-      slot: Number(slotSelect.value),
-      aspect: aspectSelect.value,
-      caption: captionInput.value
-    };
+  let result;
 
-let response;
+  if (currentPost.id) {
+    result = await supabase
+      .from("posts")
+      .update(payload)
+      .eq("id", currentPost.id);
+  } else {
+    result = await supabase
+      .from("posts")
+      .insert(payload);
+  }
 
-if (currentPost.id) {
-  response = await supabase
-    .from("posts")
-    .update(updates)
-    .eq("id", currentPost.id);
-} else {
-  response = await supabase
-    .from("posts")
-    .insert({
-      client: currentClient,
-      slot: currentPost.slot,
-      ...updates
-    });
-}
+  if (result.error) {
+    console.error(result.error);
+    alert("Save failed");
+  } else {
+    await render(currentClient);
+  }
+};
 
 if (response.error) {
   alert("Save failed");
