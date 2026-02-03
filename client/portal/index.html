@@ -64,20 +64,25 @@
   document.getElementById("clientHeading").textContent =
     `Social previews — ${client}`;
 
-  // --- TEMP data (will come from DB later) ---
-  const posts = Array.from({ length: 12 }).map((_, i) => ({
-    id: i + 1,
-    thumb: "https://via.placeholder.com/300x240?text=Post+" + (i + 1),
-    full: "https://via.placeholder.com/600x480",
-    caption: `Caption for post ${i + 1}`
-  }));
+ const { data: posts, error } = await supabase
+  .from("posts")
+  .select("*")
+  .eq("client", client)
+  .order("slot");
+
+if (error) {
+  alert("Failed to load posts");
+  console.error(error);
+}
+
 
   const grid = document.getElementById("grid");
   const preview = document.getElementById("preview");
   const previewImg = document.getElementById("previewImg");
   const captionEl = document.getElementById("caption");
 
-  posts.forEach(post => {
+posts.forEach(post => {
+  if (!post) return;
     const img = document.createElement("img");
     img.src = post.thumb;
     img.addEventListener("click", () => {
