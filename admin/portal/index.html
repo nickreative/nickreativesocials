@@ -59,7 +59,6 @@
   <label>
     Slot:
     <select id="slotSelect">
-      ${[...Array(12)].map((_, i) => `<option>${i+1}</option>`).join("")}
     </select>
   </label>
 
@@ -118,6 +117,13 @@ async function loadPosts(client) {
 
   const editor = document.getElementById("editor");
   const slotSelect = document.getElementById("slotSelect");
+  for (let i = 1; i <= 12; i++) {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = i;
+  slotSelect.appendChild(opt);
+}
+
   const aspectSelect = document.getElementById("aspectSelect");
   const captionInput = document.getElementById("captionInput");
   const saveBtn = document.getElementById("saveBtn");
