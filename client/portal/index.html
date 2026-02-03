@@ -9,16 +9,18 @@
       font-family: Helvetica, Arial, sans-serif;
       padding: 24px;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(4, 120px);
-      gap: 12px;
-    }
-    .grid img {
-      width: 100%;
-      cursor: pointer;
-      border: 1px solid #ccc;
-    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 120px);
+  grid-template-rows: repeat(4, 150px);
+  gap: 6px;
+}
+.grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
     .preview {
       margin-top: 24px;
       max-width: 420px;
@@ -62,15 +64,39 @@
   margin: 8px 0;
 }
 
+    .layout {
+  display: grid;
+  grid-template-columns: auto 520px;
+  gap: 32px;
+  align-items: start;
+}
+
+    .preview {
+  width: 520px;
+}
+
+.preview img,
+.preview video {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+
   </style>
 </head>
 <body>
 
 <h2 id="clientHeading"></h2>
 
-<div class="grid" id="grid"></div>
+<div class="layout">
+  <div class="grid" id="grid"></div>
 
-<div class="preview" id="preview" hidden>
+  <div class="preview" id="preview" hidden>
+    <!-- existing preview content -->
+  </div>
+</div>
+
   <div id="carousel" class="carousel"></div>
 
   <div class="carousel-controls">
