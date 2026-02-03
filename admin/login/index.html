@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Login</title>
+</head>
+<body>
 
+<h2>Admin Login</h2>
+
+<form id="adminLoginForm">
+  <input type="email" id="email" placeholder="Email" required />
+  <br><br>
+  <input type="password" id="password" placeholder="Password" required />
+  <br><br>
+  <button type="submit">Unlock</button>
+</form>
+
+<p id="error"></p>
+
+<script type="module">
+  import { supabase } from "/assets/js/supabase.js";
+
+  const form = document.getElementById("adminLoginForm");
+  const errorEl = document.getElementById("error");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      errorEl.textContent = error.message;
+      return;
+    }
+
+    const meta = data.user.user_metadata;
+
+    if (meta.role === "admin") {
+      window.location.href = "/admin/portal/";
+    } else {
+      errorEl.textContent = "Not an admin account.";
+    }
+  });
+</script>
+
+</body>
+</html>
