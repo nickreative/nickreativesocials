@@ -132,25 +132,33 @@ async function loadPosts(client) {
 
     const posts = await loadPosts(client);
 
-    posts.forEach(post => {
-      const img = document.createElement("img");
-      img.src = `https://via.placeholder.com/300x240?text=Slot+${post.slot}`;
+    const slots = Array.from({ length: 12 }, (_, i) => i + 1);
 
-      img.onclick = () => {
-        currentPost = post;
+slots.forEach(slot => {
+  const post = posts.find(p => p.slot === slot);
 
-        preview.hidden = false;
-        previewImg.src = img.src;
-        captionEl.textContent = post.caption || "";
+  const img = document.createElement("img");
 
-        editor.hidden = false;
-        slotSelect.value = post.slot;
-        aspectSelect.value = post.aspect || "5:4";
-        captionInput.value = post.caption || "";
-      };
+  img.src = post
+    ? `https://via.placeholder.com/300x240?text=Slot+${slot}`
+    : `https://via.placeholder.com/300x240?text=Empty+${slot}`;
 
-      grid.appendChild(img);
-    });
+  img.onclick = () => {
+    currentPost = post || { client, slot };
+
+    preview.hidden = false;
+    previewImg.src = img.src;
+    captionEl.textContent = post?.caption || "";
+
+    editor.hidden = false;
+    slotSelect.value = slot;
+    aspectSelect.value = post?.aspect || "5:4";
+    captionInput.value = post?.caption || "";
+  };
+
+  grid.appendChild(img);
+});
+
   }
 
   clientSelect.onchange = () => {
@@ -167,10 +175,30 @@ async function loadPosts(client) {
       caption: captionInput.value
     };
 
-    const { error } = await supabase
-      .from("posts")
-      .update(updates)
-      .eq("id", currentPost.id);
+let response;
+
+if (currentPost.id) {
+  response = await supabase
+    .from("posts")
+    .update(updates)
+    .eq("id", currentPost.id);
+} else {
+  response = await supabase
+    .from("posts")
+    .insert({
+      client: currentClient,
+      slot: currentPost.slot,
+      ...updates
+    });
+}
+
+if (response.error) {
+  alert("Save failed");
+  console.error(response.error);
+} else {
+  render(currentClient);
+}
+
 
     if (error) {
       alert("Save failed");
