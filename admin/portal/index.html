@@ -185,6 +185,10 @@ const mediaInput = document.getElementById("mediaInput");
 
   saveBtn.onclick = async () => {
     if (!currentPost) return;
+    let thumbnailUrl = null;
+let mediaUrls = null;
+
+    
 
 const payload = {
   client: currentPost.client,
