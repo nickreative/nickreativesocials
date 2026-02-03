@@ -87,22 +87,21 @@
     throw new Error("Not authorised");
   }
 
-async function loadPosts(client) {
-  const { data, error } = await supabase
-    .from("posts")
-    .select("*")
-    .eq("client", client)
-    .order("slot");
+  async function loadPosts(client) {
+    const { data, error } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("client", client)
+      .order("slot");
 
-  if (error) {
-    alert("Failed to load posts");
-    console.error(error);
-    return [];
+    if (error) {
+      alert("Failed to load posts");
+      console.error(error);
+      return [];
+    }
+
+    return data;
   }
-
-  return data;
-}
-
 
   const grid = document.getElementById("grid");
   const preview = document.getElementById("preview");
@@ -112,6 +111,7 @@ async function loadPosts(client) {
   const aspectSelect = document.getElementById("aspectSelect");
   const captionInput = document.getElementById("captionInput");
   const saveBtn = document.getElementById("saveBtn");
+  const editor = document.getElementById("editor"); // 🔴 THIS WAS MISSING
 
   let currentClient = clientSelect.value;
   let currentPost = null;
@@ -122,36 +122,32 @@ async function loadPosts(client) {
     editor.hidden = true;
 
     const posts = await loadPosts(client);
-
     const slots = Array.from({ length: 12 }, (_, i) => i + 1);
 
-slots.forEach(slot => {
-  const post = posts.find(p => p.slot === slot);
+    slots.forEach(slot => {
+      const post = posts.find(p => p.slot === slot);
 
-  const img = document.createElement("img");
+      const img = document.createElement("img");
+      img.src = post
+        ? `https://via.placeholder.com/300x240?text=Slot+${slot}`
+        : `https://via.placeholder.com/300x240?text=Empty+${slot}`;
 
-  img.src = post
-    ? `https://via.placeholder.com/300x240?text=Slot+${slot}`
-    : `https://via.placeholder.com/300x240?text=Empty+${slot}`;
+      img.onclick = () => {
+        currentPost = {
+          id: post?.id || null,
+          client: currentClient,
+          slot: slot
+        };
 
-  img.onclick = () => {
-  currentPost = {
-    id: post?.id || null,
-    client: currentClient,
-    slot: slot
-  };
+        preview.hidden = false;
+        editor.hidden = false;
 
-  preview.hidden = false;
-  editor.hidden = false;
+        captionInput.value = post?.caption || "";
+        aspectSelect.value = post?.aspect || "5:4";
+      };
 
-  captionInput.value = post?.caption || "";
-  aspectSelect.value = post?.aspect || "5:4";
-};
-
-
-  grid.appendChild(img);
-});
-
+      grid.appendChild(img);
+    });
   }
 
   clientSelect.onchange = () => {
@@ -159,56 +155,40 @@ slots.forEach(slot => {
     render(currentClient);
   };
 
-saveBtn.onclick = async () => {
-  const payload = {
-    client: currentPost.client,
-    slot: currentPost.slot,
-    caption: captionInput.value,
-    aspect: aspectSelect.value
-  };
+  saveBtn.onclick = async () => {
+    if (!currentPost) return;
 
-  let result;
+    const payload = {
+      client: currentPost.client,
+      slot: currentPost.slot,
+      caption: captionInput.value,
+      aspect: aspectSelect.value
+    };
 
-  if (currentPost.id) {
-    result = await supabase
-      .from("posts")
-      .update(payload)
-      .eq("id", currentPost.id);
-  } else {
-    result = await supabase
-      .from("posts")
-      .insert(payload);
-  }
+    let result;
 
-  if (result.error) {
-    console.error(result.error);
-    alert("Save failed");
-  } else {
-    await render(currentClient);
-  }
-};
+    if (currentPost.id) {
+      result = await supabase
+        .from("posts")
+        .update(payload)
+        .eq("id", currentPost.id);
+    } else {
+      result = await supabase
+        .from("posts")
+        .insert(payload);
+    }
 
-if (response.error) {
-  alert("Save failed");
-  console.error(response.error);
-} else {
-  render(currentClient);
-}
-
-
-    if (error) {
+    if (result.error) {
       alert("Save failed");
-      console.error(error);
+      console.error(result.error);
     } else {
       render(currentClient);
     }
   };
 
   render(currentClient);
-
-
-  
 </script>
+
 
 </body>
 </html>
