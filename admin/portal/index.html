@@ -72,6 +72,21 @@
   <textarea id="captionInput" rows="4" cols="40"></textarea>
 
   <br><br>
+<hr>
+
+<label>
+  Thumbnail:
+  <input type="file" id="thumbInput" accept="image/*">
+</label>
+
+<br><br>
+
+<label>
+  Media (images / videos):
+  <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
+</label>
+
+<br><br>
 
   <button id="saveBtn">Save</button>
 </div>
@@ -112,6 +127,21 @@
   const captionInput = document.getElementById("captionInput");
   const saveBtn = document.getElementById("saveBtn");
   const editor = document.getElementById("editor");
+  const thumbInput = document.getElementById("thumbInput");
+const mediaInput = document.getElementById("mediaInput");
+
+  async function uploadFile(path, file) {
+  const { error } = await supabase.storage
+    .from("social-media")
+    .upload(path, file, { upsert: true });
+
+  if (error) throw error;
+
+  return supabase.storage
+    .from("social-media")
+    .getPublicUrl(path).data.publicUrl;
+}
+
 
   let currentClient = clientSelect.value;
   let currentPost = null;
@@ -156,14 +186,41 @@
   saveBtn.onclick = async () => {
     if (!currentPost) return;
 
-    const payload = {
-      client: currentPost.client,
-      slot: currentPost.slot,
-      caption: captionInput.value,
-      aspect: aspectSelect.value
-    };
+const payload = {
+  client: currentPost.client,
+  slot: currentPost.slot,
+  caption: captionInput.value,
+  aspect: aspectSelect.value,
+  ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
+  ...(mediaUrls && { media_urls: mediaUrls })
+};
+
 
     let result;
+// Upload thumbnail if provided
+let thumbnailUrl = null;
+if (thumbInput.files[0]) {
+  thumbnailUrl = await uploadFile(
+    `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
+    thumbInput.files[0]
+  );
+}
+
+// Upload media files if provided
+let mediaUrls = null;
+if (mediaInput.files.length) {
+  mediaUrls = [];
+
+  for (let i = 0; i < mediaInput.files.length; i++) {
+    const file = mediaInput.files[i];
+    const ext = file.name.split(".").pop();
+    const url = await uploadFile(
+      `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+      file
+    );
+    mediaUrls.push(url);
+  }
+}
 
     if (currentPost.id) {
       result = await supabase
@@ -186,7 +243,7 @@
     render(currentClient);
   };
 
-  // ✅ THIS WAS MISSING
+
   render(currentClient);
 </script>
 
