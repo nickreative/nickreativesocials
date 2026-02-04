@@ -259,7 +259,15 @@ currentSlideIndex = 0;
       slides = [];
       currentSlideIndex = 0;
 
-      (post?.media_urls || []).forEach((url, i) => {
+(post?.media_urls || [])
+  .slice()
+  .sort((a, b) => {
+    const aName = a.split("/").pop();
+    const bName = b.split("/").pop();
+    return aName.localeCompare(bName, undefined, { numeric: true });
+  })
+  .forEach((url, i) => {
+
         let el;
 
         if (url.endsWith(".webm") || url.endsWith(".mp4")) {
