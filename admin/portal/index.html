@@ -259,33 +259,25 @@ currentSlideIndex = 0;
       slides = [];
       currentSlideIndex = 0;
 
-(post?.media_urls || [])
-  .slice()
-  .sort((a, b) => {
-    const cleanA = a.split("?")[0].split("/").pop();
-    const cleanB = b.split("?")[0].split("/").pop();
-    return cleanA.localeCompare(cleanB, undefined, { numeric: true });
-  })
-  .forEach((url, i) => {
-    let el;
+      (post?.media_urls || []).forEach((url, i) => {
+        let el;
 
-    if (url.endsWith(".webm") || url.endsWith(".mp4")) {
-      el = document.createElement("video");
-      el.src = url;
-      el.muted = true;
-      el.playsInline = true;
-      el.loop = true;
-      el.autoplay = true;
-    } else {
-      el = document.createElement("img");
-      el.src = url;
-    }
+        if (url.endsWith(".webm") || url.endsWith(".mp4")) {
+          el = document.createElement("video");
+          el.src = url;
+          el.muted = true;
+          el.playsInline = true;
+          el.loop = true;
+          el.autoplay = true;
+        } else {
+          el = document.createElement("img");
+          el.src = url;
+        }
 
-    if (i === 0) el.classList.add("active");
-    carousel.appendChild(el);
-    slides.push(el);
-  });
-
+        if (i === 0) el.classList.add("active");
+        carousel.appendChild(el);
+        slides.push(el);
+      });
       carousel.style.aspectRatio =
   post?.aspect === "9:16" ? "9 / 16" : "4 / 5";
 
