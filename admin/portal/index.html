@@ -73,6 +73,13 @@
   gap: 32px;
   align-items: start;
 }
+.preview {
+  height: auto;
+}
+
+.carousel {
+  height: auto;
+}
 
 
   </style>
@@ -267,6 +274,12 @@ async function render(client) {
         carousel.appendChild(el);
         slides.push(el);
       });
+      carousel.style.aspectRatio =
+  post?.aspect === "9:16" ? "9 / 16" : "4 / 5";
+
+carousel.style.maxHeight =
+  post?.aspect === "9:16" ? "720px" : "630px";
+
 
       captionInput.value = post?.caption || "";
       aspectSelect.value = post?.aspect || "5:4";
