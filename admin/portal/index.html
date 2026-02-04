@@ -221,9 +221,16 @@ async function uploadFile(path, file) {
 
 function showSlide(index) {
   slides.forEach((el, i) => {
-    el.classList.toggle("active", i === index);
+    const active = i === index;
+    el.classList.toggle("active", active);
+
+    if (el.tagName === "VIDEO") {
+      active ? el.play() : el.pause();
+      if (!active) el.currentTime = 0;
+    }
   });
 }
+
 
 /* ---------- GRID RENDER ---------- */
 async function render(client) {
@@ -241,9 +248,7 @@ async function render(client) {
     img.src = post?.thumbnail_url || "/assets/empty.png";
 
     img.onclick = () => {
-      carousel.innerHTML = "";
-slides = [];
-currentSlideIndex = 0;
+  
 
       currentPost = {
         id: post?.id || null,
