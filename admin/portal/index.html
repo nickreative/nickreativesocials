@@ -268,12 +268,14 @@ async function render(client) {
         let el;
 
         if (url.endsWith(".webm") || url.endsWith(".mp4")) {
-          el = document.createElement("video");
-          el.src = url;
-          el.muted = true;
-          el.playsInline = true;
-          el.loop = true;
-          el.autoplay = true;
+         el = document.createElement("video");
+el.src = url;
+el.muted = true;        // REQUIRED
+el.playsInline = true; // REQUIRED (iOS)
+el.autoplay = true;    // REQUIRED for programmatic play
+el.loop = true;
+el.preload = "auto";
+
         } else {
           el = document.createElement("img");
           el.src = url;
