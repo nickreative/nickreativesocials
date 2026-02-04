@@ -241,6 +241,10 @@ async function render(client) {
     img.src = post?.thumbnail_url || "/assets/empty.png";
 
     img.onclick = () => {
+      carousel.innerHTML = "";
+slides = [];
+currentSlideIndex = 0;
+
       currentPost = {
         id: post?.id || null,
         client: currentClient,
@@ -312,12 +316,14 @@ saveBtn.onclick = async () => {
   let thumbnailUrl = null;
   let mediaUrls = null;
 
-  if (thumbInput.files[0]) {
-    thumbnailUrl = await uploadFile(
+if (thumbInput.files[0]) {
+  thumbnailUrl =
+    (await uploadFile(
       `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
       thumbInput.files[0]
-    );
-  }
+    )) + `?v=${Date.now()}`;
+}
+
 
   if (mediaInput.files.length) {
     mediaUrls = [];
@@ -332,14 +338,15 @@ saveBtn.onclick = async () => {
     }
   }
 
-  const payload = {
-    client: currentPost.client,
-    slot: currentPost.slot,
-    caption: captionInput.value,
-    aspect: aspectSelect.value,
-    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
-    ...(mediaUrls && { media_urls: mediaUrls })
-  };
+const payload = {
+  client: currentPost.client,
+  slot: currentPost.slot,
+  caption: captionInput.value,
+  aspect: aspectSelect.value,
+  ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
+  ...(mediaUrls !== null && { media_urls: mediaUrls }) // IMPORTANT
+};
+
 
   let result;
 
