@@ -221,16 +221,9 @@ async function uploadFile(path, file) {
 
 function showSlide(index) {
   slides.forEach((el, i) => {
-    const active = i === index;
-    el.classList.toggle("active", active);
-
-    if (el.tagName === "VIDEO") {
-      active ? el.play() : el.pause();
-      if (!active) el.currentTime = 0;
-    }
+    el.classList.toggle("active", i === index);
   });
 }
-
 
 /* ---------- GRID RENDER ---------- */
 async function render(client) {
@@ -248,7 +241,9 @@ async function render(client) {
     img.src = post?.thumbnail_url || "/assets/empty.png";
 
     img.onclick = () => {
-  
+      carousel.innerHTML = "";
+slides = [];
+currentSlideIndex = 0;
 
       currentPost = {
         id: post?.id || null,
@@ -268,14 +263,12 @@ async function render(client) {
         let el;
 
         if (url.endsWith(".webm") || url.endsWith(".mp4")) {
-         el = document.createElement("video");
-el.src = url;
-el.muted = true;        // REQUIRED
-el.playsInline = true; // REQUIRED (iOS)
-el.autoplay = true;    // REQUIRED for programmatic play
-el.loop = true;
-el.preload = "auto";
-
+          el = document.createElement("video");
+          el.src = url;
+          el.muted = true;
+          el.playsInline = true;
+          el.loop = true;
+          el.autoplay = true;
         } else {
           el = document.createElement("img");
           el.src = url;
@@ -332,21 +325,18 @@ if (thumbInput.files[0]) {
 }
 
 
-if (mediaInput.files.length) {
-  mediaUrls = [];
-
-  for (let i = 0; i < mediaInput.files.length; i++) {
-    const file = mediaInput.files[i];
-    const ext = file.name.split(".").pop();
-
-    const url = await uploadFile(
-      `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-      file
-    );
-
-    mediaUrls.push(url + `?v=${Date.now()}`);
+  if (mediaInput.files.length) {
+    mediaUrls = [];
+    for (let i = 0; i < mediaInput.files.length; i++) {
+      const file = mediaInput.files[i];
+      const ext = file.name.split(".").pop();
+      const url = await uploadFile(
+        `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+        file
+      );
+      mediaUrls.push(url);
+    }
   }
-}
 
 const payload = {
   client: currentPost.client,
@@ -354,9 +344,8 @@ const payload = {
   caption: captionInput.value,
   aspect: aspectSelect.value,
   ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
-  ...(mediaUrls && { media_urls: mediaUrls })
+  ...(mediaUrls !== null && { media_urls: mediaUrls }) // IMPORTANT
 };
-
 
 
   let result;
