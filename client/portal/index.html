@@ -39,13 +39,14 @@ cursor: pointer;
 .preview {
 width: 520px;
 }
-
+    
 .carousel {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;   /* PORTRAIT */
   overflow: hidden;
   border: 1px solid #ccc;
+  /* Optional default, JS will override */
+  aspect-ratio: 4 / 5;
 }
 
 
@@ -185,9 +186,9 @@ function renderCarousel(post) {
   });
 
   carousel.style.aspectRatio =
-    post.aspect === "9:16" ? "9 / 16" : "5 / 4";
+    post.aspect === "9:16" ? "9 / 16" : "4 / 5";
   carousel.style.maxHeight =
-  post.aspect === "9:16" ? "720px" : "630px";
+  post.aspect === "9:16" ? "756px" : "1344px";
 
 }
 
