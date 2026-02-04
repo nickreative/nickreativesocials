@@ -41,12 +41,13 @@ width: 520px;
 }
 
 .carousel {
-position: relative;
-width: 100%;
-aspect-ratio: 5 / 4;
-overflow: hidden;
-border: 1px solid #ccc;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;   /* PORTRAIT */
+  overflow: hidden;
+  border: 1px solid #ccc;
 }
+
 
 .carousel img,
 .carousel video {
@@ -74,6 +75,15 @@ width: 100%;
 aspect-ratio: 4 / 5;
 object-fit: cover;
 }
+
+    .preview {
+  height: auto;
+}
+
+.carousel {
+  height: auto;
+}
+
 
 /* ---------- Actions ---------- */
 .actions {
@@ -175,6 +185,9 @@ function renderCarousel(post) {
 
   carousel.style.aspectRatio =
     post.aspect === "9:16" ? "9 / 16" : "5 / 4";
+  carousel.style.maxHeight =
+  post.aspect === "9:16" ? "720px" : "630px";
+
 }
 
 function showSlide(index) {
