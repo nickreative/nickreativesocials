@@ -170,10 +170,12 @@ function renderCarousel(post) {
     slides.push(el);
   });
 
-  carousel.style.aspectRatio =
-    post.aspect === "9:16" ? "9 / 16" : "4 / 5";
-  carousel.style.maxHeight =
-  post.aspect === "9:16" ? "756px" : "1344px";
+carousel.style.aspectRatio =
+  post.aspect === "9:16" ? "9 / 16" : "4 / 5";
+
+carousel.style.maxHeight =
+  post.aspect === "9:16" ? "924px" : "650px";
+
 
 }
 
