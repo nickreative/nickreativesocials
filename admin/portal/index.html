@@ -325,18 +325,21 @@ if (thumbInput.files[0]) {
 }
 
 
-  if (mediaInput.files.length) {
-    mediaUrls = [];
-    for (let i = 0; i < mediaInput.files.length; i++) {
-      const file = mediaInput.files[i];
-      const ext = file.name.split(".").pop();
-      const url = await uploadFile(
-        `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-        file
-      );
-      mediaUrls.push(url);
-    }
+if (mediaInput.files.length) {
+  mediaUrls = [];
+
+  for (let i = 0; i < mediaInput.files.length; i++) {
+    const file = mediaInput.files[i];
+    const ext = file.name.split(".").pop();
+
+    const url = await uploadFile(
+      `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+      file
+    );
+
+    mediaUrls.push(url + `?v=${Date.now()}`);
   }
+}
 
 const payload = {
   client: currentPost.client,
@@ -344,8 +347,9 @@ const payload = {
   caption: captionInput.value,
   aspect: aspectSelect.value,
   ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
-  ...(mediaUrls !== null && { media_urls: mediaUrls }) // IMPORTANT
+  ...(mediaUrls && { media_urls: mediaUrls })
 };
+
 
 
   let result;
