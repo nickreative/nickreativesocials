@@ -221,7 +221,9 @@ posts.forEach(post => {
   function openMail(subject) {
     if (!currentPost) return;
     const body = encodeURIComponent(
-      `Hi Nick,\n\n${subject}:\nPost ${currentPost.id}\n`
+      `Hi Nick,\n\n${subject}:\nSlot ${currentPost.slot}
+"${currentPost.caption.slice(0, 80)}…"
+\n`
     );
     window.location.href =
       `mailto:nick@nickreative.com?subject=Social feedback&body=${body}`;
