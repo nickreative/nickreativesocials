@@ -314,50 +314,44 @@ nextBtn.onclick = () => {
 saveBtn.onclick = async () => {
   if (!currentPost) return;
 
-    await supabase.storage
+  await supabase.storage
     .from("social-media")
-    .remove([
-      `${currentPost.client}/slot-${currentPost.slot}`
-    ]);
+    .remove([`${currentPost.client}/slot-${currentPost.slot}`]);
 
   let thumbnailUrl = null;
-  let mediaUrls = null;
+  let mediaUrls = [];
 
-if (thumbInput.files[0]) {
-  thumbnailUrl =
-    (await uploadFile(
-      `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
-      thumbInput.files[0]
-    )) + `?v=${Date.now()}`;
-}
-
-let mediaUrls = [];
-
-if (mediaInput.files.length) {
-  for (let i = 0; i < mediaInput.files.length; i++) {
-    const file = mediaInput.files[i];
-    const ext = file.name.split(".").pop();
-    const url = await uploadFile(
-      `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-      file
-    );
-    mediaUrls.push(url);
-  }
-} else {
-  // Explicitly clear if no files selected
-  mediaUrls = [];
-}
+  if (thumbInput.files[0]) {
+    thumbnailUrl =
+      (await uploadFile(
+        `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
+        thumbInput.files[0]
+      )) + `?v=${Date.now()}`;
   }
 
-const payload = {
-  client: currentPost.client,
-  slot: currentPost.slot,
-  caption: captionInput.value,
-  aspect: aspectSelect.value,
-  media_urls: mediaUrls,
-  ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
-};
+  if (mediaInput.files.length) {
+    mediaUrls = [];
+    for (let i = 0; i < mediaInput.files.length; i++) {
+      const file = mediaInput.files[i];
+      const ext = file.name.split(".").pop();
+      const url = await uploadFile(
+        `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+        file
+      );
+      mediaUrls.push(url);
+    }
+  } else {
+    mediaUrls = [];
+  }
 
+  const payload = {
+    client: currentPost.client,
+    slot: currentPost.slot,
+    caption: captionInput.value,
+    aspect: aspectSelect.value,
+    media_urls: mediaUrls,
+    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
+  };
 
   let result;
 
@@ -378,12 +372,6 @@ const payload = {
     return;
   }
 
-  render(currentClient);
-};
-
-/* ---------- INIT ---------- */
-clientSelect.onchange = () => {
-  currentClient = clientSelect.value;
   render(currentClient);
 };
 
@@ -423,6 +411,8 @@ clearBtn.onclick = async () => {
 
   render(currentClient);
 };
+  
+
 </script>
 
 
