@@ -411,7 +411,13 @@ clearBtn.onclick = async () => {
 
   render(currentClient);
 };
-  
+  /* ---------- INIT ---------- */
+clientSelect.onchange = () => {
+  currentClient = clientSelect.value;
+  render(currentClient);
+};
+
+render(currentClient);
 
 </script>
 
