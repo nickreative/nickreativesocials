@@ -151,8 +151,9 @@
 
 <br><br>
 
-  <button id="saveBtn">Save</button>
-  <button id="clearBtn">Clear</button>
+<button id="saveBtn">Save</button>
+<button id="clearBtn">Clear</button>
+<span id="uploadProgress" style="margin-left:12px;"></span>
 </div>
 
 <script type="module">
@@ -178,6 +179,7 @@ const aspectSelect = document.getElementById("aspectSelect");
 const captionInput = document.getElementById("captionInput");
 const saveBtn = document.getElementById("saveBtn");
 const editor = document.getElementById("editor");
+const uploadProgress = document.getElementById("uploadProgress");
 
 const thumbInput = document.getElementById("thumbInput");
 const mediaInput = document.getElementById("mediaInput");
@@ -313,6 +315,7 @@ nextBtn.onclick = () => {
 /* ---------- SAVE ---------- */
 saveBtn.onclick = async () => {
   if (!currentPost) return;
+  uploadProgress.textContent = "0%";
 
   await supabase.storage
     .from("social-media")
@@ -331,15 +334,22 @@ saveBtn.onclick = async () => {
 
   if (mediaInput.files.length) {
     mediaUrls = [];
-    for (let i = 0; i < mediaInput.files.length; i++) {
-      const file = mediaInput.files[i];
-      const ext = file.name.split(".").pop();
-      const url = await uploadFile(
-        `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-        file
-      );
-      mediaUrls.push(url);
-    }
+const totalFiles = mediaInput.files.length;
+
+for (let i = 0; i < totalFiles; i++) {
+  const file = mediaInput.files[i];
+  const ext = file.name.split(".").pop();
+
+  const url = await uploadFile(
+    `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+    file
+  );
+
+  mediaUrls.push(url);
+
+  const percent = Math.round(((i + 1) / totalFiles) * 100);
+  uploadProgress.textContent = `${percent}%`;
+}
   } else {
     mediaUrls = [];
   }
@@ -371,7 +381,7 @@ saveBtn.onclick = async () => {
     console.error(result.error);
     return;
   }
-
+uploadProgress.textContent = "";
   render(currentClient);
 };
 
