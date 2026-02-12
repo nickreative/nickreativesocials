@@ -320,43 +320,6 @@ saveBtn.onclick = async () => {
       `${currentPost.client}/slot-${currentPost.slot}`
     ]);
 
-/* --------- CLEAR ---------*/
-  clearBtn.onclick = async () => {
-  if (!currentPost) return;
-
-  // 1. Clear storage (thumb + media)
-  await supabase.storage
-    .from("social-media")
-    .remove([
-      `${currentPost.client}/slot-${currentPost.slot}`
-    ]);
-
-  // 2. Reset DB fields
-  await supabase
-    .from("posts")
-    .update({
-      thumbnail_url: null,
-      media_urls: [],
-      caption: "",
-      aspect: "5:4"
-    })
-    .eq("client", currentPost.client)
-    .eq("slot", currentPost.slot);
-
-  // 3. Reset UI
-  carousel.innerHTML = "";
-  slides = [];
-  preview.hidden = true;
-
-  captionInput.value = "";
-  aspectSelect.value = "5:4";
-  thumbInput.value = "";
-  mediaInput.value = "";
-
-  // 4. Re-render grid so placeholder shows
-  render(currentClient);
-};
-
   let thumbnailUrl = null;
   let mediaUrls = null;
 
@@ -424,6 +387,45 @@ clientSelect.onchange = () => {
   render(currentClient);
 };
 
+
+/* --------- CLEAR ---------- */
+  /* ---------- CLEAR ---------- */
+clearBtn.onclick = async () => {
+  if (!currentPost) return;
+
+  await supabase.storage
+    .from("social-media")
+    .remove([`${currentPost.client}/slot-${currentPost.slot}`]);
+
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      thumbnail_url: null,
+      media_urls: [],
+      caption: "",
+      aspect: "5:4"
+    })
+    .eq("client", currentPost.client)
+    .eq("slot", currentPost.slot);
+
+  if (error) {
+    alert("Clear failed");
+    console.error(error);
+    return;
+  }
+
+  carousel.innerHTML = "";
+  slides = [];
+  preview.hidden = true;
+
+  captionInput.value = "";
+  aspectSelect.value = "5:4";
+  thumbInput.value = "";
+  mediaInput.value = "";
+
+  render(currentClient);
+};
+  
 render(currentClient);
 </script>
 
