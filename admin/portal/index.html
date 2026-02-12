@@ -33,7 +33,6 @@
     }
     .preview img {
       width: 100%;
-      aspect-ratio: 5 / 4;
       object-fit: cover;
       border: 1px solid #ccc;
     }
@@ -313,6 +312,12 @@ nextBtn.onclick = () => {
 saveBtn.onclick = async () => {
   if (!currentPost) return;
 
+    await supabase.storage
+    .from("social-media")
+    .remove([
+      `${currentPost.client}/slot-${currentPost.slot}`
+    ]);
+
   let thumbnailUrl = null;
   let mediaUrls = null;
 
@@ -324,18 +329,22 @@ if (thumbInput.files[0]) {
     )) + `?v=${Date.now()}`;
 }
 
+let mediaUrls = [];
 
-  if (mediaInput.files.length) {
-    mediaUrls = [];
-    for (let i = 0; i < mediaInput.files.length; i++) {
-      const file = mediaInput.files[i];
-      const ext = file.name.split(".").pop();
-      const url = await uploadFile(
-        `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-        file
-      );
-      mediaUrls.push(url);
-    }
+if (mediaInput.files.length) {
+  for (let i = 0; i < mediaInput.files.length; i++) {
+    const file = mediaInput.files[i];
+    const ext = file.name.split(".").pop();
+    const url = await uploadFile(
+      `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+      file
+    );
+    mediaUrls.push(url);
+  }
+} else {
+  // Explicitly clear if no files selected
+  mediaUrls = [];
+}
   }
 
 const payload = {
@@ -343,8 +352,8 @@ const payload = {
   slot: currentPost.slot,
   caption: captionInput.value,
   aspect: aspectSelect.value,
-  ...(thumbnailUrl && { thumbnail_url: thumbnailUrl }),
-  ...(mediaUrls !== null && { media_urls: mediaUrls }) // IMPORTANT
+  media_urls: mediaUrls,
+  ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
 };
 
 
