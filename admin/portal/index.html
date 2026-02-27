@@ -383,16 +383,18 @@ if (currentPost.id) {
     mediaUrls = [];
 const totalFiles = mediaInput.files.length;
 
-for (let i = 0; i < totalFiles; i++) {
+    const cacheBust = Date.now(); 
+
+    for (let i = 0; i < totalFiles; i++) {
   const file = mediaInput.files[i];
   const ext = file.name.split(".").pop();
 
-  const url = await uploadFile(
-    `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-    file
-  );
+const url = await uploadFile(
+  `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
+  file
+);
 
-  mediaUrls.push(url);
+mediaUrls.push(`${url}?v=${cacheBust}`);
 
   const percent = Math.round(((i + 1) / totalFiles) * 100);
   uploadProgress.textContent = `${percent}%`;
