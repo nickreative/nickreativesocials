@@ -90,7 +90,7 @@
 <body>
 
 <h2>Admin — Social Previews</h2>
-
+<button id="addNewBtn" style="margin: 12px 0;">Add new post (shift grid)</button>
 <label>
   Select client:
   <select id="clientSelect">
@@ -191,6 +191,7 @@ const mediaInput = document.getElementById("mediaInput");
 const prevBtn = document.getElementById("prevSlide");
 const nextBtn = document.getElementById("nextSlide");
 const clearBtn = document.getElementById("clearBtn");
+  const addNewBtn = document.getElementById("addNewBtn");
 
 /* ---------- STATE ---------- */
 let currentClient = clientSelect.value;
@@ -199,7 +200,42 @@ let slides = [];
 let currentSlideIndex = 0;
 
 /* ---------- HELPERS ---------- */
-async function loadPosts(client) {
+function storagePathFromPublicUrl(publicUrl) {
+  // Converts: https://xyz.supabase.co/storage/v1/object/public/social-media/client/slot-1/01.jpg
+  // Into:      client/slot-1/01.jpg
+  try {
+    const u = new URL(publicUrl);
+    const marker = "/storage/v1/object/public/social-media/";
+    const idx = u.pathname.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(u.pathname.slice(idx + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+async function removeFilesForPost(post) {
+  const paths = [];
+
+  if (post?.thumbnail_url) {
+    const p = storagePathFromPublicUrl(post.thumbnail_url.split("?")[0]);
+    if (p) paths.push(p);
+  }
+
+  (post?.media_urls || []).forEach((url) => {
+    const p = storagePathFromPublicUrl(String(url).split("?")[0]);
+    if (p) paths.push(p);
+  });
+
+  if (!paths.length) return;
+
+  const { error } = await supabase.storage
+    .from("social-media")
+    .remove(paths);
+
+  if (error) console.error("Storage remove failed:", error);
+}
+  async function loadPosts(client) {
   const { data, error } = await supabase
     .from("posts")
     .select("*")
@@ -321,9 +357,16 @@ saveBtn.onclick = async () => {
   if (!currentPost) return;
   uploadProgress.textContent = "0%";
 
-  await supabase.storage
-    .from("social-media")
-    .remove([`${currentPost.client}/slot-${currentPost.slot}`]);
+// Delete whatever files are currently associated with this post (based on DB URLs)
+if (currentPost.id) {
+  const { data: existing } = await supabase
+    .from("posts")
+    .select("thumbnail_url,media_urls")
+    .eq("id", currentPost.id)
+    .single();
+
+  await removeFilesForPost(existing);
+}
 
   let thumbnailUrl = null;
   let mediaUrls = [];
@@ -393,9 +436,15 @@ uploadProgress.textContent = "";
 clearBtn.onclick = async () => {
   if (!currentPost) return;
 
-  await supabase.storage
-    .from("social-media")
-    .remove([`${currentPost.client}/slot-${currentPost.slot}`]);
+if (currentPost.id) {
+  const { data: existing } = await supabase
+    .from("posts")
+    .select("thumbnail_url,media_urls")
+    .eq("id", currentPost.id)
+    .single();
+
+  await removeFilesForPost(existing);
+}
 
   const { error } = await supabase
     .from("posts")
@@ -424,6 +473,60 @@ clearBtn.onclick = async () => {
   mediaInput.value = "";
 
   render(currentClient);
+};
+  /* ---------- SHIFT + NEW ---------- */
+addNewBtn.onclick = async () => {
+  // 1) Load current posts
+  const posts = await loadPosts(currentClient);
+
+  // 2) Delete Slot 12 (DB + Storage)
+  const slot12 = posts.find(p => p.slot === 12);
+  if (slot12) {
+    await removeFilesForPost(slot12);
+
+    await supabase
+      .from("posts")
+      .delete()
+      .eq("id", slot12.id);
+  }
+
+  // 3) Shift 11 -> 12, 10 -> 11 ... 1 -> 2 (descending avoids collisions)
+  for (let s = 11; s >= 1; s--) {
+    const p = posts.find(x => x.slot === s);
+    if (!p) continue;
+
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: s + 1 })
+      .eq("id", p.id);
+
+    if (error) {
+      alert("Shift failed. Check console.");
+      console.error(error);
+      return;
+    }
+  }
+
+  // 4) Refresh grid
+  await render(currentClient);
+
+  // 5) Set editor to “new post in Slot 1”
+  currentPost = { id: null, client: currentClient, slot: 1 };
+  preview.hidden = false;
+  editor.hidden = false;
+
+  carousel.innerHTML = "";
+  slides = [];
+  currentSlideIndex = 0;
+
+  captionInput.value = "";
+  captionEl.textContent = "";
+  aspectSelect.value = "5:4";
+  thumbInput.value = "";
+  mediaInput.value = "";
+
+  // Optional: set default aspect preview
+  carousel.style.aspectRatio = "4 / 5";
 };
   /* ---------- INIT ---------- */
 clientSelect.onchange = () => {
