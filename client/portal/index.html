@@ -53,22 +53,33 @@ width: 520px;
 }
 
 
+.carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  aspect-ratio: 4 / 5; /* fallback */
+}
+
 .carousel img,
 .carousel video {
-position: absolute;
-inset: 0;
-width: 100%;
-height: 100%;
-object-fit: cover;
-opacity: 0;
-transition: opacity 0.3s ease;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  transform: translateX(100%);
+  transition: transform 0.35s ease;
 }
 
 .carousel .active {
-opacity: 1;
-position: relative;
+  transform: translateX(0);
 }
 
+.carousel .prev {
+  transform: translateX(-100%);
+}
 .carousel-controls {
 margin: 8px 0;
 }
@@ -189,6 +200,8 @@ carousel.style.maxHeight =
 function showSlide(index) {
   slides.forEach((el, i) => {
     el.classList.toggle("active", i === index);
+    el.classList.toggle("prev", i < index);
+
     if (el.tagName === "VIDEO") {
       i === index ? el.play() : el.pause();
     }
