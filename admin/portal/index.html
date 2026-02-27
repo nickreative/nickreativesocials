@@ -368,44 +368,100 @@ nextBtn.onclick = () => {
 /* ---------- SAVE ---------- */
 saveBtn.onclick = async () => {
   if (!currentPost) return;
-  uploadProgress.textContent = "0%";
 
-// Delete whatever files are currently associated with this post (based on DB URLs)
-if (currentPost.id) {
-  const { data: existing } = await supabase
-    .from("posts")
-    .select("thumbnail_url,media_urls")
-    .eq("id", currentPost.id)
-    .single();
+  // 1) If this is a NEW post (id is null), create the DB row first to get an id
+  if (!currentPost.id) {
+    const { data: inserted, error: insertError } = await supabase
+      .from("posts")
+      .insert({
+        client: currentPost.client,
+        slot: currentPost.slot,
+        caption: captionInput.value,
+        aspect: aspectSelect.value,
+        thumbnail_url: null,
+        media_urls: []
+      })
+      .select("id")
+      .single();
 
-  await removeFilesForPost(existing);
-}
+    if (insertError) {
+      alert("Save failed (could not create post)");
+      console.error(insertError);
+      return;
+    }
+
+    currentPost.id = inserted.id;
+  } else {
+    // 2) Existing post: delete its currently linked files (safe because it uses URLs)
+    const { data: existing, error: existingError } = await supabase
+      .from("posts")
+      .select("thumbnail_url,media_urls")
+      .eq("id", currentPost.id)
+      .single();
+
+    if (existingError) {
+      alert("Save failed (could not load existing post)");
+      console.error(existingError);
+      return;
+    }
+
+    await removeFilesForPost(existing);
+  }
+
+  // 3) Upload into stable folder: client/post-<id>/
+  const folder = `${currentPost.client}/post-${currentPost.id}`;
 
   let thumbnailUrl = null;
   let mediaUrls = [];
+  const cacheBust = Date.now();
 
+  // Thumbnail (optional)
   if (thumbInput.files[0]) {
-    thumbnailUrl =
-      (await uploadFile(
-        `${currentPost.client}/slot-${currentPost.slot}/thumb.jpg`,
-        thumbInput.files[0]
-      )) + `?v=${Date.now()}`;
+    const thumbPublicUrl = await uploadFile(
+      `${folder}/thumb.jpg`,
+      thumbInput.files[0]
+    );
+    thumbnailUrl = `${thumbPublicUrl}?v=${cacheBust}`;
   }
 
+  // Media (if none selected, it becomes empty array)
   if (mediaInput.files.length) {
+    for (let i = 0; i < mediaInput.files.length; i++) {
+      const file = mediaInput.files[i];
+      const ext = file.name.split(".").pop();
+
+      const publicUrl = await uploadFile(
+        `${folder}/${String(i + 1).padStart(2, "0")}.${ext}`,
+        file
+      );
+
+      mediaUrls.push(`${publicUrl}?v=${cacheBust}`);
+    }
+  } else {
     mediaUrls = [];
-const totalFiles = mediaInput.files.length;
+  }
 
-    const cacheBust = Date.now(); 
+  // 4) Update the DB row with final URLs and latest fields
+  const payload = {
+    caption: captionInput.value,
+    aspect: aspectSelect.value,
+    media_urls: mediaUrls,
+    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
+  };
 
-    for (let i = 0; i < totalFiles; i++) {
-  const file = mediaInput.files[i];
-  const ext = file.name.split(".").pop();
+  const { error: updateError } = await supabase
+    .from("posts")
+    .update(payload)
+    .eq("id", currentPost.id);
 
-const url = await uploadFile(
-  `${currentPost.client}/slot-${currentPost.slot}/${String(i + 1).padStart(2, "0")}.${ext}`,
-  file
-);
+  if (updateError) {
+    alert("Save failed (could not update post)");
+    console.error(updateError);
+    return;
+  }
+
+  render(currentClient);
+};
 
 mediaUrls.push(`${url}?v=${cacheBust}`);
 
