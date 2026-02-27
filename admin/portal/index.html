@@ -509,7 +509,22 @@ addNewBtn.onclick = async () => {
 
   // 4) Refresh grid
   await render(currentClient);
+// Reset preview/editor state (prevents stale slot-1 preview)
+currentPost = null;
+carousel.innerHTML = "";
+slides = [];
+currentSlideIndex = 0;
 
+preview.hidden = true;
+editor.hidden = true;
+
+captionEl.textContent = "";
+captionInput.value = "";
+thumbInput.value = "";
+mediaInput.value = "";
+aspectSelect.value = "5:4";
+carousel.style.aspectRatio = "4 / 5";
+  
   // 5) Set editor to “new post in Slot 1”
   currentPost = { id: null, client: currentClient, slot: 1 };
   preview.hidden = false;
