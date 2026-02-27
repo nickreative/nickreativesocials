@@ -463,46 +463,6 @@ saveBtn.onclick = async () => {
   render(currentClient);
 };
 
-mediaUrls.push(`${url}?v=${cacheBust}`);
-
-  const percent = Math.round(((i + 1) / totalFiles) * 100);
-  uploadProgress.textContent = `${percent}%`;
-}
-  } else {
-    mediaUrls = [];
-  }
-
-  const payload = {
-    client: currentPost.client,
-    slot: currentPost.slot,
-    caption: captionInput.value,
-    aspect: aspectSelect.value,
-    media_urls: mediaUrls,
-    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
-  };
-
-  let result;
-
-  if (currentPost.id) {
-    result = await supabase
-      .from("posts")
-      .update(payload)
-      .eq("id", currentPost.id);
-  } else {
-    result = await supabase
-      .from("posts")
-      .insert(payload);
-  }
-
-  if (result.error) {
-    alert("Save failed");
-    console.error(result.error);
-    return;
-  }
-uploadProgress.textContent = "";
-  render(currentClient);
-};
-
   /* ---------- CLEAR ---------- */
 clearBtn.onclick = async () => {
   if (!currentPost) return;
