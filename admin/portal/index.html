@@ -318,18 +318,20 @@ currentSlideIndex = 0;
       (post?.media_urls || []).forEach((url, i) => {
         let el;
 
-        if (url.endsWith(".webm") || url.endsWith(".mp4")) {
-          el = document.createElement("video");
-          el.src = url;
-          el.muted = true;
-          el.playsInline = true;
-          el.loop = true;
-          el.autoplay = true;
-        } else {
-          el = document.createElement("img");
-          el.src = url;
-        }
+  const cleanUrl = url.split("?")[0].toLowerCase();
 
+if (cleanUrl.endsWith(".webm") || cleanUrl.endsWith(".mp4")) {
+  el = document.createElement("video");
+  el.src = url;
+  el.muted = true;
+  el.playsInline = true;
+  el.loop = true;
+  el.autoplay = true;
+  el.controls = false;
+} else {
+  el = document.createElement("img");
+  el.src = url;
+}
         if (i === 0) el.classList.add("active");
         carousel.appendChild(el);
         slides.push(el);
