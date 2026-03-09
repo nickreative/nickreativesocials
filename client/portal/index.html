@@ -170,17 +170,19 @@ function renderCarousel(post) {
   post.media_urls.forEach((url, index) => {
     let el;
 
-    if (url.endsWith(".mp4") || url.endsWith(".webm")) {
-      el = document.createElement("video");
-      el.src = url;
-      el.muted = true;
-      el.loop = true;
-      el.playsInline = true;
-      el.autoplay = true;
-    } else {
-      el = document.createElement("img");
-      el.src = url;
-    }
+const cleanUrl = url.split("?")[0].toLowerCase();
+
+if (cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm")) {
+  el = document.createElement("video");
+  el.src = url;
+  el.muted = true;
+  el.loop = true;
+  el.playsInline = true;
+  el.autoplay = true;
+} else {
+  el = document.createElement("img");
+  el.src = url;
+}
 
     if (index === 0) el.classList.add("active");
 
