@@ -1,152 +1,592 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Admin Portal</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <meta name="robots" content="noindex,nofollow" />
   <style>
-    body { font-family: sans-serif; background:#111; color:#fff; }
-    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-    .slot { background:#222; height:200px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-    .editor { margin-top:20px; }
-    .preview { margin-top:20px; }
-
-    /* LinkedIn */
-    .li-card { background:#fff; color:#000; border-radius:8px; overflow:hidden; max-width:500px; }
-    .li-header { padding:12px; font-weight:bold; }
-    .li-caption { padding:12px; white-space:pre-line; }
-    .li-grid { display:grid; gap:2px; }
-    .li-grid img { width:100%; height:100%; object-fit:cover; }
-
-    .overlay {
-      position:fixed; inset:0; background:#000; display:none;
-      align-items:center; justify-content:center;
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 24px;
     }
-    .overlay img { max-width:90%; max-height:90%; }
+    select {
+      margin-bottom: 16px;
+    }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 120px);
+  grid-template-rows: repeat(4, 150px); /* 5:4 vertical */
+  gap: 6px;
+}
+.grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* enforces crop */
+  aspect-ratio: 5 / 4;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+    .preview {
+      margin-top: 24px;
+      max-width: 630px;
+    }
+    #caption {
+  white-space: pre-line;
+}
+
+    .preview img {
+      width: 100%;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .carousel {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #ccc;
+}
+
+.carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  aspect-ratio: 4 / 5; /* fallback */
+}
+
+.carousel img,
+.carousel video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  transform: translateX(100%);
+  transition: transform 0.35s ease;
+}
+
+.carousel .active {
+  transform: translateX(0);
+}
+
+.carousel .prev {
+  transform: translateX(-100%);
+}
+    .carousel-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+    
+.layout {
+  display: grid;
+  grid-template-columns: auto 520px;
+  gap: 32px;
+  align-items: start;
+}
+.preview {
+  height: auto;
+}
+
+.carousel {
+  height: auto;
+}
+
+
   </style>
 </head>
 <body>
 
-<h2>Admin</h2>
-
-<select id="clientSelect"></select>
-
-<div class="grid" id="grid"></div>
-
-<div class="editor">
-  <h3>Editor</h3>
-
-  <select id="platform">
-    <option value="instagram">Instagram</option>
-    <option value="linkedin">LinkedIn</option>
+<h2>Admin — Social Previews</h2>
+<button id="addNewBtn" style="margin: 12px 0;">Add new post (shift grid)</button>
+<label>
+  Select client:
+  <select id="clientSelect">
+    <option value="suitecollection">Suite Collection</option>
+    <option value="pocky">Pocky</option>
+    <option value="vicalates">Vicalates</option>
+    <option value="livencommunities">Liven Communities</option>
   </select>
+</label>
 
-  <textarea id="caption" placeholder="Caption"></textarea>
+<div class="layout">
+  <div class="grid" id="grid"></div>
 
-  <input type="file" id="media" multiple>
+  <div class="preview" id="preview" hidden>
+    <div id="carousel" class="carousel"></div>
 
-  <div id="uploadProgress">0%</div>
+    <div class="carousel-controls">
+      <button id="prevSlide">←</button>
+      <button id="nextSlide">→</button>
+    </div>
 
-  <button onclick="save()">Save</button>
+    <p id="caption"></p>
+  </div>
 </div>
 
-<div class="preview" id="preview"></div>
 
-<div class="overlay" id="overlay" onclick="this.style.display='none'">
-  <img id="overlayImg">
+  <p id="caption"></p>
 </div>
 
-<script>
-const supabase = supabase.createClient("YOUR_URL","YOUR_KEY");
+<div id="editor" hidden>
+  <h3>Edit post</h3>
 
-let currentSlot = null;
-let mediaFiles = [];
 
-document.getElementById("media").onchange = e=>{
-  mediaFiles = Array.from(e.target.files);
-  renderPreview();
-};
+  <br><br>
 
-function renderPreview(){
-  const platform = document.getElementById("platform").value;
-  const caption = document.getElementById("caption").value;
+  <label>
+    Aspect:
+    <select id="aspectSelect">
+      <option value="5:4">5:4 (grid / carousel)</option>
+      <option value="9:16">9:16 (reel)</option>
+    </select>
+  </label>
 
-  if(platform==="linkedin"){
-    renderLinkedInPreview(caption);
-  } else {
-    document.getElementById("preview").innerHTML = "<p>Instagram preview placeholder</p>";
+  <br><br>
+
+  <textarea id="captionInput" rows="4" cols="40"></textarea>
+
+  <br><br>
+<hr>
+
+<label>
+  Thumbnail:
+  <input type="file" id="thumbInput" accept="image/*">
+</label>
+
+<br><br>
+
+<label>
+  Media (images / videos):
+  <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
+</label>
+
+<br><br>
+
+<button id="saveBtn">Save</button>
+<button id="clearBtn">Clear</button>
+<span id="uploadProgress" style="margin-left:12px;"></span>
+</div>
+
+<script type="module">
+import { supabase } from "/assets/js/supabase.js";
+
+/* ---------- AUTH ---------- */
+const { data: sessionData } = await supabase.auth.getSession();
+const user = sessionData?.session?.user;
+
+if (!user || user.user_metadata.role !== "admin") {
+  window.location.href = "/admin/login/";
+  throw new Error("Not authorised");
+}
+
+/* ---------- DOM ---------- */
+const grid = document.getElementById("grid");
+const preview = document.getElementById("preview");
+const carousel = document.getElementById("carousel");
+const captionEl = document.getElementById("caption");
+
+const clientSelect = document.getElementById("clientSelect");
+const aspectSelect = document.getElementById("aspectSelect");
+const captionInput = document.getElementById("captionInput");
+const saveBtn = document.getElementById("saveBtn");
+const editor = document.getElementById("editor");
+const uploadProgress = document.getElementById("uploadProgress");
+
+const thumbInput = document.getElementById("thumbInput");
+const mediaInput = document.getElementById("mediaInput");
+
+const prevBtn = document.getElementById("prevSlide");
+const nextBtn = document.getElementById("nextSlide");
+const clearBtn = document.getElementById("clearBtn");
+  const addNewBtn = document.getElementById("addNewBtn");
+
+/* ---------- STATE ---------- */
+let currentClient = clientSelect.value;
+let currentPost = null;
+let slides = [];
+let currentSlideIndex = 0;
+
+/* ---------- HELPERS ---------- */
+function storagePathFromPublicUrl(publicUrl) {
+  // Converts: https://xyz.supabase.co/storage/v1/object/public/social-media/client/slot-1/01.jpg
+  // Into:      client/slot-1/01.jpg
+  try {
+    const u = new URL(publicUrl);
+    const marker = "/storage/v1/object/public/social-media/";
+    const idx = u.pathname.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(u.pathname.slice(idx + marker.length));
+  } catch {
+    return null;
   }
 }
 
-function renderLinkedInPreview(caption){
-  const container = document.getElementById("preview");
+async function removeFilesForPost(post) {
+  const paths = [];
 
-  let grid = "";
-
-  if(mediaFiles.length===1){
-    grid = `<img src="${URL.createObjectURL(mediaFiles[0])}">`;
+  if (post?.thumbnail_url) {
+    const p = storagePathFromPublicUrl(post.thumbnail_url.split("?")[0]);
+    if (p) paths.push(p);
   }
-  else if(mediaFiles.length===2){
-    grid = `<div class="li-grid" style="grid-template-columns:1fr 1fr">
-      ${mediaFiles.map(f=>`<img src="${URL.createObjectURL(f)}">`).join("")}
-    </div>`;
+
+  (post?.media_urls || []).forEach((url) => {
+    const p = storagePathFromPublicUrl(String(url).split("?")[0]);
+    if (p) paths.push(p);
+  });
+
+  if (!paths.length) return;
+
+  const { error } = await supabase.storage
+    .from("social-media")
+    .remove(paths);
+
+  if (error) console.error("Storage remove failed:", error);
+}
+  async function loadPosts(client) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("client", client)
+    .order("slot");
+
+  if (error) {
+    console.error(error);
+    return [];
   }
-  else if(mediaFiles.length>=3){
-    const first = URL.createObjectURL(mediaFiles[0]);
-    const others = mediaFiles.slice(1,4);
 
-    grid = `
-      <div class="li-grid" style="grid-template-columns:2fr 1fr">
-        <img src="${first}">
-        <div class="li-grid">
-          ${others.map(f=>`<img src="${URL.createObjectURL(f)}">`).join("")}
-        </div>
-      </div>
-    `;
+  return data;
+}
 
-    if(mediaFiles.length>4){
-      grid += `<div>+${mediaFiles.length-4}</div>`;
+async function uploadFile(path, file) {
+  const { error } = await supabase.storage
+    .from("social-media")
+    .upload(path, file, { upsert: true });
+
+  if (error) throw error;
+
+  return supabase.storage
+    .from("social-media")
+    .getPublicUrl(path).data.publicUrl;
+}
+
+function showSlide(index) {
+  slides.forEach((el, i) => {
+    el.classList.toggle("active", i === index);
+    el.classList.toggle("prev", i < index);
+  });
+}
+
+/* ---------- GRID RENDER ---------- */
+async function render(client) {
+  grid.innerHTML = "";
+  preview.hidden = true;
+  editor.hidden = true;
+
+  const posts = await loadPosts(client);
+  const slots = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  slots.forEach(slot => {
+    const post = posts.find(p => p.slot === slot);
+
+    const img = document.createElement("img");
+    img.src = post?.thumbnail_url || "/assets/empty.png";
+
+    img.onclick = () => {
+      carousel.innerHTML = "";
+slides = [];
+currentSlideIndex = 0;
+
+      currentPost = {
+        id: post?.id || null,
+        client: currentClient,
+        slot: slot
+      };
+
+      preview.hidden = false;
+      editor.hidden = false;
+
+      /* Build carousel */
+      carousel.innerHTML = "";
+      slides = [];
+      currentSlideIndex = 0;
+
+      (post?.media_urls || []).forEach((url, i) => {
+        let el;
+
+  const cleanUrl = url.split("?")[0].toLowerCase();
+
+if (cleanUrl.endsWith(".webm") || cleanUrl.endsWith(".mp4")) {
+  el = document.createElement("video");
+  el.src = url;
+  el.muted = true;
+  el.playsInline = true;
+  el.loop = true;
+  el.autoplay = true;
+  el.controls = false;
+} else {
+  el = document.createElement("img");
+  el.src = url;
+}
+        if (i === 0) el.classList.add("active");
+        carousel.appendChild(el);
+        slides.push(el);
+      });
+      carousel.style.aspectRatio =
+  post?.aspect === "9:16" ? "9 / 16" : "4 / 5";
+
+carousel.style.maxHeight =
+  post?.aspect === "9:16" ? "1344px" : "630px";
+
+
+      captionInput.value = post?.caption || "";
+      aspectSelect.value = post?.aspect || "5:4";
+      captionEl.textContent = post?.caption || "";
+    };
+
+    grid.appendChild(img);
+  });
+}
+
+/* ---------- NAV ---------- */
+prevBtn.onclick = () => {
+  if (!slides.length) return;
+  currentSlideIndex =
+    (currentSlideIndex - 1 + slides.length) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+nextBtn.onclick = () => {
+  if (!slides.length) return;
+  currentSlideIndex =
+    (currentSlideIndex + 1) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+/* ---------- SAVE ---------- */
+saveBtn.onclick = async () => {
+  if (!currentPost) return;
+
+  // 1) If this is a NEW post (id is null), create the DB row first to get an id
+  if (!currentPost.id) {
+    const { data: inserted, error: insertError } = await supabase
+      .from("posts")
+      .insert({
+        client: currentPost.client,
+        slot: currentPost.slot,
+        caption: captionInput.value,
+        aspect: aspectSelect.value,
+        thumbnail_url: null,
+        media_urls: []
+      })
+      .select("id")
+      .single();
+
+    if (insertError) {
+      alert("Save failed (could not create post)");
+      console.error(insertError);
+      return;
+    }
+
+    currentPost.id = inserted.id;
+  } else {
+    // 2) Existing post: delete its currently linked files (safe because it uses URLs)
+    const { data: existing, error: existingError } = await supabase
+      .from("posts")
+      .select("thumbnail_url,media_urls")
+      .eq("id", currentPost.id)
+      .single();
+
+    if (existingError) {
+      alert("Save failed (could not load existing post)");
+      console.error(existingError);
+      return;
+    }
+
+    await removeFilesForPost(existing);
+  }
+
+  // 3) Upload into stable folder: client/post-<id>/
+  const folder = `${currentPost.client}/post-${currentPost.id}`;
+
+  let thumbnailUrl = null;
+  let mediaUrls = [];
+  const cacheBust = Date.now();
+
+  // Thumbnail (optional)
+  if (thumbInput.files[0]) {
+    const thumbPublicUrl = await uploadFile(
+      `${folder}/thumb.jpg`,
+      thumbInput.files[0]
+    );
+    thumbnailUrl = `${thumbPublicUrl}?v=${cacheBust}`;
+  }
+
+  // Media (if none selected, it becomes empty array)
+  if (mediaInput.files.length) {
+    for (let i = 0; i < mediaInput.files.length; i++) {
+      const file = mediaInput.files[i];
+      const ext = file.name.split(".").pop();
+
+      const publicUrl = await uploadFile(
+        `${folder}/${String(i + 1).padStart(2, "0")}.${ext}`,
+        file
+      );
+
+      mediaUrls.push(`${publicUrl}?v=${cacheBust}`);
+    }
+  } else {
+    mediaUrls = [];
+  }
+
+  // 4) Update the DB row with final URLs and latest fields
+  const payload = {
+    caption: captionInput.value,
+    aspect: aspectSelect.value,
+    media_urls: mediaUrls,
+    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
+  };
+
+  const { error: updateError } = await supabase
+    .from("posts")
+    .update(payload)
+    .eq("id", currentPost.id);
+
+  if (updateError) {
+    alert("Save failed (could not update post)");
+    console.error(updateError);
+    return;
+  }
+
+  render(currentClient);
+};
+
+  /* ---------- CLEAR ---------- */
+clearBtn.onclick = async () => {
+  if (!currentPost) return;
+
+if (currentPost.id) {
+  const { data: existing } = await supabase
+    .from("posts")
+    .select("thumbnail_url,media_urls")
+    .eq("id", currentPost.id)
+    .single();
+
+  await removeFilesForPost(existing);
+}
+
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      thumbnail_url: null,
+      media_urls: [],
+      caption: "",
+      aspect: "5:4"
+    })
+    .eq("client", currentPost.client)
+    .eq("slot", currentPost.slot);
+
+  if (error) {
+    alert("Clear failed");
+    console.error(error);
+    return;
+  }
+
+  carousel.innerHTML = "";
+  slides = [];
+  preview.hidden = true;
+
+  captionInput.value = "";
+  aspectSelect.value = "5:4";
+  thumbInput.value = "";
+  mediaInput.value = "";
+
+  render(currentClient);
+};
+  /* ---------- SHIFT + NEW ---------- */
+addNewBtn.onclick = async () => {
+  // 1) Load current posts
+  const posts = await loadPosts(currentClient);
+
+  // 2) Delete Slot 12 (DB + Storage)
+  const slot12 = posts.find(p => p.slot === 12);
+  if (slot12) {
+    await removeFilesForPost(slot12);
+
+    await supabase
+      .from("posts")
+      .delete()
+      .eq("id", slot12.id);
+  }
+
+  // 3) Shift 11 -> 12, 10 -> 11 ... 1 -> 2 (descending avoids collisions)
+  for (let s = 11; s >= 1; s--) {
+    const p = posts.find(x => x.slot === s);
+    if (!p) continue;
+
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: s + 1 })
+      .eq("id", p.id);
+
+    if (error) {
+      alert("Shift failed. Check console.");
+      console.error(error);
+      return;
     }
   }
 
-  container.innerHTML = `
-    <div class="li-card">
-      <div class="li-header">Belmo Group</div>
-      <div class="li-caption">${caption}</div>
-      ${grid}
-    </div>
-  `;
-}
+  // 4) Refresh grid
+  await render(currentClient);
+// Reset preview/editor state (prevents stale slot-1 preview)
+currentPost = null;
+carousel.innerHTML = "";
+slides = [];
+currentSlideIndex = 0;
 
-async function save(){
-  const progress = document.getElementById("uploadProgress");
+preview.hidden = true;
+editor.hidden = true;
 
-  let uploaded = [];
+captionEl.textContent = "";
+captionInput.value = "";
+thumbInput.value = "";
+mediaInput.value = "";
+aspectSelect.value = "5:4";
+carousel.style.aspectRatio = "4 / 5";
+  
+  // 5) Set editor to “new post in Slot 1”
+  currentPost = { id: null, client: currentClient, slot: 1 };
+  preview.hidden = false;
+  editor.hidden = false;
 
-  for(let i=0;i<mediaFiles.length;i++){
-    const file = mediaFiles[i];
+  carousel.innerHTML = "";
+  slides = [];
+  currentSlideIndex = 0;
 
-    const path = `client/post-${Date.now()}/${file.name}`;
+  captionInput.value = "";
+  captionEl.textContent = "";
+  aspectSelect.value = "5:4";
+  thumbInput.value = "";
+  mediaInput.value = "";
 
-    await supabase.storage.from("social-media").upload(path,file,{upsert:true});
+  // Optional: set default aspect preview
+  carousel.style.aspectRatio = "4 / 5";
+};
+  /* ---------- INIT ---------- */
+clientSelect.onchange = () => {
+  currentClient = clientSelect.value;
+  render(currentClient);
+};
 
-    const { data } = supabase.storage.from("social-media").getPublicUrl(path);
+render(currentClient);
 
-    uploaded.push(data.publicUrl);
-
-    progress.innerText = Math.round(((i+1)/mediaFiles.length)*100)+"%";
-  }
-
-  await supabase.from("posts").insert({
-    slot: currentSlot,
-    caption: document.getElementById("caption").value,
-    media_urls: uploaded,
-    platform: document.getElementById("platform").value
-  });
-
-  alert("Saved");
-}
 </script>
+
+
 
 </body>
 </html>
