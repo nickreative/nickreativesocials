@@ -231,81 +231,82 @@
 <div class="layout">
   <div class="left-column">
     <div class="grid" id="grid"></div>
+
     <div id="editor" hidden>
-  <h3>Edit post</h3>
-<label>
-  Platform:
-  <select id="platformSelect">
-    <option value="instagram">Instagram</option>
-    <option value="linkedin">LinkedIn</option>
-  </select>
-</label>
+      <h3>Edit post</h3>
 
-<br><br>
+      <label>
+        Platform:
+        <select id="platformSelect">
+          <option value="instagram">Instagram</option>
+          <option value="linkedin">LinkedIn</option>
+        </select>
+      </label>
 
-  <br><br>
+      <br><br>
 
-  <label>
-    Aspect:
-    <select id="aspectSelect">
-      <option value="5:4">5:4 (grid / carousel)</option>
-      <option value="9:16">9:16 (reel)</option>
-    </select>
-  </label>
+      <label>
+        Aspect:
+        <select id="aspectSelect">
+          <option value="5:4">5:4 (grid / carousel)</option>
+          <option value="9:16">9:16 (reel)</option>
+        </select>
+      </label>
 
-  <br><br>
+      <br><br>
 
-  <textarea id="captionInput" rows="4" cols="40"></textarea>
+      <textarea id="captionInput" rows="4" cols="40"></textarea>
 
-  <br><br>
-<hr>
+      <br><br>
+      <hr>
 
-<label>
-  Thumbnail:
-  <input type="file" id="thumbInput" accept="image/*">
-</label>
+      <label>
+        Thumbnail:
+        <input type="file" id="thumbInput" accept="image/*">
+      </label>
 
-<br><br>
+      <br><br>
 
-<label>
-  Media (images / videos):
-  <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
-</label>
+      <label>
+        Media (images / videos):
+        <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
+      </label>
 
-<br><br>
+      <br><br>
 
-<button id="saveBtn">Save</button>
-<button id="clearBtn">Clear</button>
-<span id="uploadProgress" style="margin-left:12px;"></span>
-</div>
-
-  <div id="instagramPreview">
-    <div id="carousel" class="carousel"></div>
-
-    <div class="carousel-controls">
-      <button id="prevSlide">←</button>
-      <button id="nextSlide">→</button>
+      <button id="saveBtn">Save</button>
+      <button id="clearBtn">Clear</button>
+      <span id="uploadProgress" style="margin-left:12px;"></span>
     </div>
-
-    <p id="caption"></p>
   </div>
 
-  <div id="linkedinPreview" hidden>
-    <div class="linkedin-card">
-      <div class="linkedin-header">
-        <div class="linkedin-avatar">SB</div>
-        <div class="linkedin-meta">
-          <strong id="linkedinBrand">Client Preview</strong><br>
-          <span>Preview only</span>
-        </div>
+  <div class="preview" id="preview" hidden>
+    <div id="instagramPreview">
+      <div id="carousel" class="carousel"></div>
+
+      <div class="carousel-controls">
+        <button id="prevSlide">←</button>
+        <button id="nextSlide">→</button>
       </div>
 
-      <div id="linkedinCaption" class="linkedin-caption"></div>
-      <div id="linkedinMedia" class="linkedin-media"></div>
+      <p id="caption"></p>
+    </div>
+
+    <div id="linkedinPreview" hidden>
+      <div class="linkedin-card">
+        <div class="linkedin-header">
+          <div class="linkedin-avatar">SB</div>
+          <div class="linkedin-meta">
+            <strong id="linkedinBrand">Client Preview</strong><br>
+            <span>Preview only</span>
+          </div>
+        </div>
+
+        <div id="linkedinCaption" class="linkedin-caption"></div>
+        <div id="linkedinMedia" class="linkedin-media"></div>
+      </div>
     </div>
   </div>
-
-</div>
 </div>
 
 
