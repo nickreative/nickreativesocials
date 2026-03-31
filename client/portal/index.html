@@ -296,7 +296,7 @@ function createMediaElement(url) {
   if (cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm")) {
     el = document.createElement("video");
     el.src = url;
-    el.muted = true;
+    el.muted = false;
     el.loop = true;
     el.playsInline = true;
     el.autoplay = true;
