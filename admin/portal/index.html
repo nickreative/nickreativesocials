@@ -339,6 +339,7 @@ let currentClient = clientSelect.value;
 let currentPost = null;
 let slides = [];
 let currentSlideIndex = 0;
+let dragSourceSlot = null;
 
 /* ---------- HELPERS ---------- */
 function storagePathFromPublicUrl(publicUrl) {
@@ -503,9 +504,10 @@ function renderPostPreview(post) {
 }
 
 /* ---------- DRAG & DROP SWAP ---------- */
-async function swapSlots(slotA, slotB, posts) {
+async function swapSlots(slotA, slotB) {
   if (slotA === slotB) return;
 
+  const posts = await loadPosts(currentClient);
   const postA = posts.find(p => p.slot === slotA) || null;
   const postB = posts.find(p => p.slot === slotB) || null;
 
@@ -548,8 +550,6 @@ async function render(client) {
 
   const posts = await loadPosts(client);
   const slots = Array.from({ length: 12 }, (_, i) => i + 1);
-
-  let dragSourceSlot = null;
 
   slots.forEach(slot => {
     const post = posts.find(p => p.slot === slot);
@@ -603,7 +603,7 @@ async function render(client) {
 
     cell.addEventListener("dragend", () => {
       cell.classList.remove("dragging");
-      dragSourceSlot = null;
+      setTimeout(() => { dragSourceSlot = null; }, 50);
     });
 
     cell.addEventListener("dragover", (e) => {
@@ -623,7 +623,7 @@ async function render(client) {
       const targetSlot = parseInt(cell.dataset.slot, 10);
       if (!dragSourceSlot || dragSourceSlot === targetSlot) return;
 
-      await swapSlots(dragSourceSlot, targetSlot, posts);
+      await swapSlots(dragSourceSlot, targetSlot);
       await render(currentClient);
 
       // Close editor/preview — slot references are now stale
