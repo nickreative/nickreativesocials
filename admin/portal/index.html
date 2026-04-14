@@ -12,206 +12,188 @@
     select {
       margin-bottom: 16px;
     }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 120px);
-  grid-template-rows: repeat(4, 150px); /* 5:4 vertical */
-  gap: 6px;
-}
-.grid img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;   /* enforces crop */
-  aspect-ratio: 5 / 4;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-template-rows: repeat(4, 150px);
+      gap: 6px;
+    }
+    .grid-cell {
+      position: relative;
+      width: 120px;
+      height: 150px;
+      cursor: grab;
+    }
+    .grid-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      aspect-ratio: 5 / 4;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      display: block;
+      pointer-events: none; /* let the cell handle drag/click */
+      user-select: none;
+    }
+    /* Drag states */
+    .grid-cell.dragging {
+      opacity: 0.4;
+      cursor: grabbing;
+    }
+    .grid-cell.drag-over {
+      outline: 2px dashed #555;
+      outline-offset: -2px;
+    }
+    /* Slot label */
+    .slot-label {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      pointer-events: none;
+      user-select: none;
+    }
 
     .preview {
       margin-top: 24px;
       max-width: 630px;
     }
     #caption {
-  white-space: pre-line;
-}
-
+      white-space: pre-line;
+    }
     .preview img {
       width: 100%;
       object-fit: cover;
       border: 1px solid #ccc;
     }
     .carousel {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #ccc;
-}
-
-.carousel {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border: 1px solid #ccc;
-  aspect-ratio: 4 / 5; /* fallback */
-}
-
-.carousel img,
-.carousel video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-
-  transform: translateX(100%);
-  transition: transform 0.35s ease;
-}
-
-.carousel .active {
-  transform: translateX(0);
-}
-
-.carousel .prev {
-  transform: translateX(-100%);
-}
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid #ccc;
+      aspect-ratio: 4 / 5;
+    }
+    .carousel img,
+    .carousel video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateX(100%);
+      transition: transform 0.35s ease;
+    }
+    .carousel .active {
+      transform: translateX(0);
+    }
+    .carousel .prev {
+      transform: translateX(-100%);
+    }
     .carousel-controls {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-}
-
-    
-.layout {
-  display: grid;
-  grid-template-columns: 380px 520px;
-  gap: 32px;
-  align-items: start;
-}
-.preview {
-  height: auto;
-}
-
-.carousel {
-  height: auto;
-}
-
-#linkedinCaption,
-#caption {
-  white-space: pre-line;
-}
-
-.linkedin-card {
-  width: 100%;
-  border: 1px solid #d9d9d9;
-  background: #fff;
-}
-
-.linkedin-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 16px 12px;
-}
-
-.linkedin-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #eee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.linkedin-meta {
-  font-size: 14px;
-  line-height: 1.3;
-}
-
-.linkedin-meta span {
-  color: #666;
-  font-size: 12px;
-}
-
-.linkedin-caption {
-  padding: 0 16px 16px;
-  font-size: 15px;
-  line-height: 1.45;
-}
-
-.linkedin-media {
-  display: grid;
-  gap: 2px;
-  background: #fff;
-}
-
-.linkedin-media.one {
-  grid-template-columns: 1fr;
-}
-
-.linkedin-media.two {
-  grid-template-columns: 1fr 1fr;
-}
-
-.linkedin-media.three {
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: repeat(2, 1fr);
-}
-
-.linkedin-media.four-plus {
-  grid-template-columns: 2fr 1fr;
-  grid-template-rows: repeat(3, 1fr);
-}
-
-.linkedin-tile {
-  position: relative;
-  overflow: hidden;
-  background: #f3f3f3;
-  min-height: 160px;
-}
-
-.linkedin-tile img,
-.linkedin-tile video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.linkedin-media.three .linkedin-tile:first-child {
-  grid-row: 1 / 3;
-}
-
-.linkedin-media.four-plus .linkedin-tile:first-child {
-  grid-row: 1 / 4;
-}
-
-.linkedin-more {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.38);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  font-weight: 600;
-}
-
-#uploadProgress {
-  font-size: 14px;
-  color: #555;
-}
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 520px;
+      gap: 32px;
+      align-items: start;
+    }
+    .preview {
+      height: auto;
+    }
+    .carousel {
+      height: auto;
+    }
+    #linkedinCaption,
+    #caption {
+      white-space: pre-line;
+    }
+    .linkedin-card {
+      width: 100%;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+    }
+    .linkedin-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px 12px;
+    }
+    .linkedin-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .linkedin-meta {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .linkedin-meta span {
+      color: #666;
+      font-size: 12px;
+    }
+    .linkedin-caption {
+      padding: 0 16px 16px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .linkedin-media {
+      display: grid;
+      gap: 2px;
+      background: #fff;
+    }
+    .linkedin-media.one   { grid-template-columns: 1fr; }
+    .linkedin-media.two   { grid-template-columns: 1fr 1fr; }
+    .linkedin-media.three { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr); }
+    .linkedin-media.four-plus { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(3, 1fr); }
+    .linkedin-tile {
+      position: relative;
+      overflow: hidden;
+      background: #f3f3f3;
+      min-height: 160px;
+    }
+    .linkedin-tile img,
+    .linkedin-tile video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .linkedin-media.three .linkedin-tile:first-child   { grid-row: 1 / 3; }
+    .linkedin-media.four-plus .linkedin-tile:first-child { grid-row: 1 / 4; }
+    .linkedin-more {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.38);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 600;
+    }
+    #uploadProgress {
+      font-size: 14px;
+      color: #555;
+    }
     .left-column {
-  width: 380px;
-}
-
-#editor {
-  margin-top: 24px;
-}
+      width: 380px;
+    }
+    #editor {
+      margin-top: 24px;
+    }
   </style>
 </head>
 <body>
@@ -350,7 +332,7 @@ const mediaInput = document.getElementById("mediaInput");
 const prevBtn = document.getElementById("prevSlide");
 const nextBtn = document.getElementById("nextSlide");
 const clearBtn = document.getElementById("clearBtn");
-  const addNewBtn = document.getElementById("addNewBtn");
+const addNewBtn = document.getElementById("addNewBtn");
 
 /* ---------- STATE ---------- */
 let currentClient = clientSelect.value;
@@ -360,8 +342,6 @@ let currentSlideIndex = 0;
 
 /* ---------- HELPERS ---------- */
 function storagePathFromPublicUrl(publicUrl) {
-  // Converts: https://xyz.supabase.co/storage/v1/object/public/social-media/client/slot-1/01.jpg
-  // Into:      client/slot-1/01.jpg
   try {
     const u = new URL(publicUrl);
     const marker = "/storage/v1/object/public/social-media/";
@@ -394,7 +374,8 @@ async function removeFilesForPost(post) {
 
   if (error) console.error("Storage remove failed:", error);
 }
-  async function loadPosts(client) {
+
+async function loadPosts(client) {
   const { data, error } = await supabase
     .from("posts")
     .select("*")
@@ -462,7 +443,6 @@ function renderLinkedInMedia(urls) {
   linkedinMedia.innerHTML = "";
 
   const count = urls.length;
-
   if (!count) return;
 
   if (count === 1) linkedinMedia.className = "linkedin-media one";
@@ -508,7 +488,6 @@ function renderPostPreview(post) {
 
   (post?.media_urls || []).forEach((url, i) => {
     const el = createMediaElement(url);
-
     if (i === 0) el.classList.add("active");
     carousel.appendChild(el);
     slides.push(el);
@@ -523,6 +502,44 @@ function renderPostPreview(post) {
   captionEl.textContent = post?.caption || "";
 }
 
+/* ---------- DRAG & DROP SWAP ---------- */
+async function swapSlots(slotA, slotB, posts) {
+  if (slotA === slotB) return;
+
+  const postA = posts.find(p => p.slot === slotA) || null;
+  const postB = posts.find(p => p.slot === slotB) || null;
+
+  // Use a temporary slot to avoid unique-constraint collisions during swap
+  const tempSlot = 999;
+
+  // Step 1: Move A to temp (if A exists)
+  if (postA) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: tempSlot })
+      .eq("id", postA.id);
+    if (error) { console.error("Swap step 1 failed", error); return; }
+  }
+
+  // Step 2: Move B into A's slot (if B exists)
+  if (postB) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: slotA })
+      .eq("id", postB.id);
+    if (error) { console.error("Swap step 2 failed", error); return; }
+  }
+
+  // Step 3: Move A (from temp) into B's slot (if A exists)
+  if (postA) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: slotB })
+      .eq("id", postA.id);
+    if (error) { console.error("Swap step 3 failed", error); return; }
+  }
+}
+
 /* ---------- GRID RENDER ---------- */
 async function render(client) {
   grid.innerHTML = "";
@@ -532,17 +549,29 @@ async function render(client) {
   const posts = await loadPosts(client);
   const slots = Array.from({ length: 12 }, (_, i) => i + 1);
 
+  let dragSourceSlot = null;
+
   slots.forEach(slot => {
     const post = posts.find(p => p.slot === slot);
 
+    // Wrapper cell — this is the draggable unit
+    const cell = document.createElement("div");
+    cell.className = "grid-cell";
+    cell.draggable = true;
+    cell.dataset.slot = slot;
+
     const img = document.createElement("img");
     img.src = post?.thumbnail_url || "/assets/empty.png";
+    cell.appendChild(img);
 
-    img.onclick = () => {
-      carousel.innerHTML = "";
-slides = [];
-currentSlideIndex = 0;
+    // Slot number label
+    const label = document.createElement("span");
+    label.className = "slot-label";
+    label.textContent = slot;
+    cell.appendChild(label);
 
+    /* -- Click to open editor -- */
+    cell.addEventListener("click", () => {
       currentPost = {
         id: post?.id || null,
         client: currentClient,
@@ -552,20 +581,58 @@ currentSlideIndex = 0;
       preview.hidden = false;
       editor.hidden = false;
 
-      /* Build carousel */
-  platformSelect.value = post?.platform || "instagram";
-captionInput.value = post?.caption || "";
-aspectSelect.value = post?.aspect || "5:4";
+      platformSelect.value = post?.platform || "instagram";
+      captionInput.value = post?.caption || "";
+      aspectSelect.value = post?.aspect || "5:4";
 
-renderPostPreview(post || {
-  platform: "instagram",
-  caption: "",
-  aspect: "5:4",
-  media_urls: []
-});
-    };
+      renderPostPreview(post || {
+        platform: "instagram",
+        caption: "",
+        aspect: "5:4",
+        media_urls: []
+      });
+    });
 
-    grid.appendChild(img);
+    /* -- Drag events -- */
+    cell.addEventListener("dragstart", (e) => {
+      dragSourceSlot = slot;
+      e.dataTransfer.effectAllowed = "move";
+      // Small delay so the drag image captures before opacity change
+      setTimeout(() => cell.classList.add("dragging"), 0);
+    });
+
+    cell.addEventListener("dragend", () => {
+      cell.classList.remove("dragging");
+      dragSourceSlot = null;
+    });
+
+    cell.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      cell.classList.add("drag-over");
+    });
+
+    cell.addEventListener("dragleave", () => {
+      cell.classList.remove("drag-over");
+    });
+
+    cell.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      cell.classList.remove("drag-over");
+
+      const targetSlot = parseInt(cell.dataset.slot, 10);
+      if (!dragSourceSlot || dragSourceSlot === targetSlot) return;
+
+      await swapSlots(dragSourceSlot, targetSlot, posts);
+      await render(currentClient);
+
+      // Close editor/preview — slot references are now stale
+      currentPost = null;
+      preview.hidden = true;
+      editor.hidden = true;
+    });
+
+    grid.appendChild(cell);
   });
 }
 
@@ -589,19 +656,18 @@ saveBtn.onclick = async () => {
   if (!currentPost) return;
   uploadProgress.textContent = "0%";
 
-  // 1) If this is a NEW post (id is null), create the DB row first to get an id
   if (!currentPost.id) {
     const { data: inserted, error: insertError } = await supabase
       .from("posts")
-     .insert({
-  client: currentPost.client,
-  slot: currentPost.slot,
-  platform: platformSelect.value,
-  caption: captionInput.value,
-  aspect: aspectSelect.value,
-  thumbnail_url: null,
-  media_urls: []
-})
+      .insert({
+        client: currentPost.client,
+        slot: currentPost.slot,
+        platform: platformSelect.value,
+        caption: captionInput.value,
+        aspect: aspectSelect.value,
+        thumbnail_url: null,
+        media_urls: []
+      })
       .select("id")
       .single();
 
@@ -613,7 +679,6 @@ saveBtn.onclick = async () => {
 
     currentPost.id = inserted.id;
   } else {
-    // 2) Existing post: delete its currently linked files (safe because it uses URLs)
     const { data: existing, error: existingError } = await supabase
       .from("posts")
       .select("thumbnail_url,media_urls")
@@ -629,26 +694,19 @@ saveBtn.onclick = async () => {
     await removeFilesForPost(existing);
   }
 
-  // 3) Upload into stable folder: client/post-<id>/
   const folder = `${currentPost.client}/post-${currentPost.id}`;
-
   let thumbnailUrl = null;
   let mediaUrls = [];
   const cacheBust = Date.now();
   const totalUploads = (thumbInput.files[0] ? 1 : 0) + mediaInput.files.length;
-let uploadedCount = 0;
+  let uploadedCount = 0;
 
-function updateProgress() {
-  if (!totalUploads) {
-    uploadProgress.textContent = "";
-    return;
+  function updateProgress() {
+    if (!totalUploads) { uploadProgress.textContent = ""; return; }
+    const percent = Math.round((uploadedCount / totalUploads) * 100);
+    uploadProgress.textContent = `${percent}%`;
   }
 
-  const percent = Math.round((uploadedCount / totalUploads) * 100);
-  uploadProgress.textContent = `${percent}%`;
-}
-
-  // Thumbnail (optional)
   if (thumbInput.files[0]) {
     const thumbPublicUrl = await uploadFile(
       `${folder}/thumb.jpg`,
@@ -656,36 +714,32 @@ function updateProgress() {
     );
     thumbnailUrl = `${thumbPublicUrl}?v=${cacheBust}`;
     uploadedCount++;
-updateProgress();
+    updateProgress();
   }
 
-  // Media (if none selected, it becomes empty array)
   if (mediaInput.files.length) {
     for (let i = 0; i < mediaInput.files.length; i++) {
       const file = mediaInput.files[i];
       const ext = file.name.split(".").pop();
-
       const publicUrl = await uploadFile(
         `${folder}/${String(i + 1).padStart(2, "0")}.${ext}`,
         file
       );
-
       mediaUrls.push(`${publicUrl}?v=${cacheBust}`);
       uploadedCount++;
-updateProgress();
+      updateProgress();
     }
   } else {
     mediaUrls = [];
   }
 
-  // 4) Update the DB row with final URLs and latest fields
-const payload = {
-  platform: platformSelect.value,
-  caption: captionInput.value,
-  aspect: aspectSelect.value,
-  media_urls: mediaUrls,
-  ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
-};
+  const payload = {
+    platform: platformSelect.value,
+    caption: captionInput.value,
+    aspect: aspectSelect.value,
+    media_urls: mediaUrls,
+    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
+  };
 
   const { error: updateError } = await supabase
     .from("posts")
@@ -697,33 +751,34 @@ const payload = {
     console.error(updateError);
     return;
   }
-uploadProgress.textContent = "";
+
+  uploadProgress.textContent = "";
   render(currentClient);
 };
 
-  /* ---------- CLEAR ---------- */
+/* ---------- CLEAR ---------- */
 clearBtn.onclick = async () => {
   if (!currentPost) return;
 
-if (currentPost.id) {
-  const { data: existing } = await supabase
-    .from("posts")
-    .select("thumbnail_url,media_urls")
-    .eq("id", currentPost.id)
-    .single();
+  if (currentPost.id) {
+    const { data: existing } = await supabase
+      .from("posts")
+      .select("thumbnail_url,media_urls")
+      .eq("id", currentPost.id)
+      .single();
 
-  await removeFilesForPost(existing);
-}
+    await removeFilesForPost(existing);
+  }
 
   const { error } = await supabase
     .from("posts")
-  .update({
-  thumbnail_url: null,
-  media_urls: [],
-  platform: "instagram",
-  caption: "",
-  aspect: "5:4"
-})
+    .update({
+      thumbnail_url: null,
+      media_urls: [],
+      platform: "instagram",
+      caption: "",
+      aspect: "5:4"
+    })
     .eq("client", currentPost.client)
     .eq("slot", currentPost.slot);
 
@@ -737,31 +792,25 @@ if (currentPost.id) {
   slides = [];
   preview.hidden = true;
 
-captionInput.value = "";
-platformSelect.value = "instagram";
-aspectSelect.value = "5:4";
-thumbInput.value = "";
-mediaInput.value = "";
+  captionInput.value = "";
+  platformSelect.value = "instagram";
+  aspectSelect.value = "5:4";
+  thumbInput.value = "";
+  mediaInput.value = "";
 
   render(currentClient);
 };
-  /* ---------- SHIFT + NEW ---------- */
+
+/* ---------- SHIFT + NEW ---------- */
 addNewBtn.onclick = async () => {
-  // 1) Load current posts
   const posts = await loadPosts(currentClient);
 
-  // 2) Delete Slot 12 (DB + Storage)
   const slot12 = posts.find(p => p.slot === 12);
   if (slot12) {
     await removeFilesForPost(slot12);
-
-    await supabase
-      .from("posts")
-      .delete()
-      .eq("id", slot12.id);
+    await supabase.from("posts").delete().eq("id", slot12.id);
   }
 
-  // 3) Shift 11 -> 12, 10 -> 11 ... 1 -> 2 (descending avoids collisions)
   for (let s = 11; s >= 1; s--) {
     const p = posts.find(x => x.slot === s);
     if (!p) continue;
@@ -778,44 +827,32 @@ addNewBtn.onclick = async () => {
     }
   }
 
-  // 4) Refresh grid
   await render(currentClient);
-// Reset preview/editor state (prevents stale slot-1 preview)
-currentPost = null;
-carousel.innerHTML = "";
-slides = [];
-currentSlideIndex = 0;
 
-preview.hidden = true;
-editor.hidden = true;
-
-captionEl.textContent = "";
-captionInput.value = "";
-platformSelect.value = "instagram";
-thumbInput.value = "";
-mediaInput.value = "";
-aspectSelect.value = "5:4";
-carousel.style.aspectRatio = "4 / 5";
-  
-  // 5) Set editor to “new post in Slot 1”
-  currentPost = { id: null, client: currentClient, slot: 1 };
-  preview.hidden = false;
-  editor.hidden = false;
-
+  currentPost = null;
   carousel.innerHTML = "";
   slides = [];
   currentSlideIndex = 0;
 
-captionInput.value = "";
-captionEl.textContent = "";
-platformSelect.value = "instagram";
-aspectSelect.value = "5:4";
-thumbInput.value = "";
-mediaInput.value = "";
+  preview.hidden = true;
+  editor.hidden = true;
 
-  // Optional: set default aspect preview
+  captionEl.textContent = "";
+  captionInput.value = "";
+  platformSelect.value = "instagram";
+  thumbInput.value = "";
+  mediaInput.value = "";
+  aspectSelect.value = "5:4";
+  carousel.style.aspectRatio = "4 / 5";
+
+  currentPost = { id: null, client: currentClient, slot: 1 };
+  preview.hidden = false;
+  editor.hidden = false;
+
   carousel.style.aspectRatio = "4 / 5";
 };
+
+/* ---------- PLATFORM CHANGE ---------- */
 platformSelect.onchange = async () => {
   if (currentPost?.id) {
     const { data: freshPost } = await supabase
@@ -839,8 +876,8 @@ platformSelect.onchange = async () => {
     });
   }
 };
-  
-  /* ---------- INIT ---------- */
+
+/* ---------- INIT ---------- */
 clientSelect.onchange = () => {
   currentClient = clientSelect.value;
   render(currentClient);
@@ -849,8 +886,6 @@ clientSelect.onchange = () => {
 render(currentClient);
 
 </script>
-
-
 
 </body>
 </html>
