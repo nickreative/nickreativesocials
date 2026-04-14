@@ -32,10 +32,9 @@
       border: 1px solid #ccc;
       cursor: pointer;
       display: block;
-      pointer-events: none; /* let the cell handle drag/click */
+      pointer-events: none;
       user-select: none;
     }
-    /* Drag states */
     .grid-cell.dragging {
       opacity: 0.4;
       cursor: grabbing;
@@ -44,7 +43,6 @@
       outline: 2px dashed #555;
       outline-offset: -2px;
     }
-    /* Slot label */
     .slot-label {
       position: absolute;
       bottom: 4px;
@@ -154,8 +152,8 @@
       gap: 2px;
       background: #fff;
     }
-    .linkedin-media.one   { grid-template-columns: 1fr; }
-    .linkedin-media.two   { grid-template-columns: 1fr 1fr; }
+    .linkedin-media.one { grid-template-columns: 1fr; }
+    .linkedin-media.two { grid-template-columns: 1fr 1fr; }
     .linkedin-media.three { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr); }
     .linkedin-media.four-plus { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(3, 1fr); }
     .linkedin-tile {
@@ -171,7 +169,7 @@
       object-fit: cover;
       display: block;
     }
-    .linkedin-media.three .linkedin-tile:first-child   { grid-row: 1 / 3; }
+    .linkedin-media.three .linkedin-tile:first-child { grid-row: 1 / 3; }
     .linkedin-media.four-plus .linkedin-tile:first-child { grid-row: 1 / 4; }
     .linkedin-more {
       position: absolute;
@@ -200,6 +198,7 @@
 
 <h2>Admin — Social Previews</h2>
 <button id="addNewBtn" style="margin: 12px 0;">Add new post (shift grid)</button>
+
 <label>
   Select client:
   <select id="clientSelect">
@@ -292,8 +291,6 @@
   </div>
 </div>
 
-
-
 <script type="module">
 import { supabase } from "/assets/js/supabase.js";
 
@@ -381,14 +378,14 @@ async function loadPosts(client) {
     .from("posts")
     .select("*")
     .eq("client", client)
-    .order("slot");
+    .order("slot", { ascending: true });
 
   if (error) {
-    console.error(error);
+    console.error("Load posts failed:", error);
     return [];
   }
 
-  return data;
+  return data || [];
 }
 
 async function uploadFile(path, file) {
@@ -505,41 +502,58 @@ function renderPostPreview(post) {
 
 /* ---------- DRAG & DROP SWAP ---------- */
 async function swapSlots(slotA, slotB) {
-  if (slotA === slotB) return;
+  if (slotA === slotB) return true;
 
   const posts = await loadPosts(currentClient);
-  const postA = posts.find(p => p.slot === slotA) || null;
-  const postB = posts.find(p => p.slot === slotB) || null;
+  const postA = posts.find((p) => Number(p.slot) === Number(slotA)) || null;
+  const postB = posts.find((p) => Number(p.slot) === Number(slotB)) || null;
 
-  // Use a temporary slot to avoid unique-constraint collisions during swap
-  const tempSlot = 999;
+  console.log("Swapping", { slotA, slotB, postA, postB });
 
-  // Step 1: Move A to temp (if A exists)
+  if (!postA && !postB) return true;
+
+  const tempSlot = 0;
+
   if (postA) {
     const { error } = await supabase
       .from("posts")
       .update({ slot: tempSlot })
       .eq("id", postA.id);
-    if (error) { console.error("Swap step 1 failed", error); return; }
+
+    if (error) {
+      console.error("Swap step 1 failed", error);
+      alert("Swap failed at step 1. Your database may not allow temporary slot 0.");
+      return false;
+    }
   }
 
-  // Step 2: Move B into A's slot (if B exists)
   if (postB) {
     const { error } = await supabase
       .from("posts")
-      .update({ slot: slotA })
+      .update({ slot: Number(slotA) })
       .eq("id", postB.id);
-    if (error) { console.error("Swap step 2 failed", error); return; }
+
+    if (error) {
+      console.error("Swap step 2 failed", error);
+      alert("Swap failed at step 2.");
+      return false;
+    }
   }
 
-  // Step 3: Move A (from temp) into B's slot (if A exists)
   if (postA) {
     const { error } = await supabase
       .from("posts")
-      .update({ slot: slotB })
+      .update({ slot: Number(slotB) })
       .eq("id", postA.id);
-    if (error) { console.error("Swap step 3 failed", error); return; }
+
+    if (error) {
+      console.error("Swap step 3 failed", error);
+      alert("Swap failed at step 3.");
+      return false;
+    }
   }
+
+  return true;
 }
 
 /* ---------- GRID RENDER ---------- */
@@ -551,10 +565,9 @@ async function render(client) {
   const posts = await loadPosts(client);
   const slots = Array.from({ length: 12 }, (_, i) => i + 1);
 
-  slots.forEach(slot => {
-    const post = posts.find(p => p.slot === slot);
+  slots.forEach((slot) => {
+    const post = posts.find((p) => Number(p.slot) === Number(slot));
 
-    // Wrapper cell — this is the draggable unit
     const cell = document.createElement("div");
     cell.className = "grid-cell";
     cell.draggable = true;
@@ -564,13 +577,11 @@ async function render(client) {
     img.src = post?.thumbnail_url || "/assets/empty.png";
     cell.appendChild(img);
 
-    // Slot number label
     const label = document.createElement("span");
     label.className = "slot-label";
     label.textContent = slot;
     cell.appendChild(label);
 
-    /* -- Click to open editor -- */
     cell.addEventListener("click", () => {
       currentPost = {
         id: post?.id || null,
@@ -593,17 +604,17 @@ async function render(client) {
       });
     });
 
-    /* -- Drag events -- */
     cell.addEventListener("dragstart", (e) => {
-      dragSourceSlot = slot;
+      dragSourceSlot = Number(slot);
       e.dataTransfer.effectAllowed = "move";
-      // Small delay so the drag image captures before opacity change
+      e.dataTransfer.setData("text/plain", String(slot));
       setTimeout(() => cell.classList.add("dragging"), 0);
     });
 
     cell.addEventListener("dragend", () => {
       cell.classList.remove("dragging");
-      setTimeout(() => { dragSourceSlot = null; }, 50);
+      cell.classList.remove("drag-over");
+      dragSourceSlot = null;
     });
 
     cell.addEventListener("dragover", (e) => {
@@ -620,13 +631,20 @@ async function render(client) {
       e.preventDefault();
       cell.classList.remove("drag-over");
 
-      const targetSlot = parseInt(cell.dataset.slot, 10);
-      if (!dragSourceSlot || dragSourceSlot === targetSlot) return;
+      const sourceFromData = Number(e.dataTransfer.getData("text/plain"));
+      const sourceSlot = sourceFromData || dragSourceSlot;
+      const targetSlot = Number(cell.dataset.slot);
 
-      await swapSlots(dragSourceSlot, targetSlot);
+      console.log("Dropped", { sourceSlot, targetSlot });
+
+      if (!sourceSlot || sourceSlot === targetSlot) return;
+
+      const success = await swapSlots(sourceSlot, targetSlot);
+
+      if (!success) return;
+
       await render(currentClient);
 
-      // Close editor/preview — slot references are now stale
       currentPost = null;
       preview.hidden = true;
       editor.hidden = true;
@@ -639,15 +657,13 @@ async function render(client) {
 /* ---------- NAV ---------- */
 prevBtn.onclick = () => {
   if (!slides.length) return;
-  currentSlideIndex =
-    (currentSlideIndex - 1 + slides.length) % slides.length;
+  currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length;
   showSlide(currentSlideIndex);
 };
 
 nextBtn.onclick = () => {
   if (!slides.length) return;
-  currentSlideIndex =
-    (currentSlideIndex + 1) % slides.length;
+  currentSlideIndex = (currentSlideIndex + 1) % slides.length;
   showSlide(currentSlideIndex);
 };
 
@@ -702,7 +718,10 @@ saveBtn.onclick = async () => {
   let uploadedCount = 0;
 
   function updateProgress() {
-    if (!totalUploads) { uploadProgress.textContent = ""; return; }
+    if (!totalUploads) {
+      uploadProgress.textContent = "";
+      return;
+    }
     const percent = Math.round((uploadedCount / totalUploads) * 100);
     uploadProgress.textContent = `${percent}%`;
   }
@@ -805,14 +824,14 @@ clearBtn.onclick = async () => {
 addNewBtn.onclick = async () => {
   const posts = await loadPosts(currentClient);
 
-  const slot12 = posts.find(p => p.slot === 12);
+  const slot12 = posts.find((p) => Number(p.slot) === 12);
   if (slot12) {
     await removeFilesForPost(slot12);
     await supabase.from("posts").delete().eq("id", slot12.id);
   }
 
   for (let s = 11; s >= 1; s--) {
-    const p = posts.find(x => x.slot === s);
+    const p = posts.find((x) => Number(x.slot) === s);
     if (!p) continue;
 
     const { error } = await supabase
@@ -848,8 +867,6 @@ addNewBtn.onclick = async () => {
   currentPost = { id: null, client: currentClient, slot: 1 };
   preview.hidden = false;
   editor.hidden = false;
-
-  carousel.style.aspectRatio = "4 / 5";
 };
 
 /* ---------- PLATFORM CHANGE ---------- */
@@ -877,14 +894,15 @@ platformSelect.onchange = async () => {
   }
 };
 
-/* ---------- INIT ---------- */
+/* ---------- CLIENT CHANGE ---------- */
 clientSelect.onchange = () => {
   currentClient = clientSelect.value;
+  currentPost = null;
   render(currentClient);
 };
 
+/* ---------- INIT ---------- */
 render(currentClient);
-
 </script>
 
 </body>
