@@ -697,11 +697,11 @@ saveBtn.onclick = async () => {
       .select("id")
       .single();
 
-    if (insertError) {
-      alert("Save failed (could not create post)");
-      console.error(insertError);
-      return;
-    }
+if (insertError) {
+  alert(insertError.message);
+  console.error(insertError);
+  return;
+}
 
     currentPost.id = inserted.id;
   } else {
