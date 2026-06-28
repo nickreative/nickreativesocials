@@ -376,11 +376,20 @@ function renderCarousel(post) {
     slides.push(el);
   });
 
-  carousel.style.aspectRatio =
-    post.aspect === "9:16" ? "9 / 16" : "4 / 5";
+const aspectRatioMap = {
+  "9:16": "9 / 16",
+  "16:9": "16 / 9",
+  "5:4": "4 / 5"
+};
 
-  carousel.style.maxHeight =
-    post.aspect === "9:16" ? "924px" : "650px";
+const maxHeightMap = {
+  "9:16": "1344px",
+  "16:9": "354px",
+  "5:4": "630px"
+};
+
+carousel.style.aspectRatio = aspectRatioMap[post?.aspect] || "4 / 5";
+carousel.style.maxHeight = maxHeightMap[post?.aspect] || "630px";
 }
 
 function showSlide(index) {
