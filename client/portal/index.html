@@ -432,28 +432,85 @@ posts.forEach(post => {
   }
 
   currentPost = post;
+   const approveBtn = document.getElementById("approveBtn");
+const changesBtn = document.getElementById("changesBtn");
+
+approveBtn.textContent =
+  post.review_status === "approved" ? "✓ Approved" : "Approve";
+
+approveBtn.disabled =
+  post.review_status === "approved";
+
+changesBtn.textContent =
+  post.review_status === "changes_requested"
+    ? "✓ Changes requested"
+    : "Request changes";
+
+changesBtn.disabled = false;
 });
   grid.appendChild(img);
 });
 
 
 
-  function openMail(subject) {
-    if (!currentPost) return;
-    const body = encodeURIComponent(
-      `Hi Nick,\n\n${subject}:\nSlot ${currentPost.slot}
-"${currentPost.caption.slice(0, 80)}…"
-\n`
-    );
-    window.location.href =
-      `mailto:nicholasgoodridge@hotmail.com?subject=Social feedback&body=${body}`;
+ async function submitReview(status, feedback = null) {
+  if (!currentPost) return;
+
+  const approveBtn = document.getElementById("approveBtn");
+  const changesBtn = document.getElementById("changesBtn");
+
+  approveBtn.disabled = true;
+  changesBtn.disabled = true;
+
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      review_status: status,
+      review_feedback: feedback,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: user.id
+    })
+    .eq("id", currentPost.id);
+
+  if (error) {
+    console.error("Review failed:", error);
+    alert("Something went wrong. Please try again.");
+    approveBtn.disabled = false;
+    changesBtn.disabled = false;
+    return;
   }
 
-  document.getElementById("approveBtn").onclick =
-    () => openMail("I approve the following posts:");
+  currentPost.review_status = status;
+  currentPost.review_feedback = feedback;
 
-  document.getElementById("changesBtn").onclick =
-    () => openMail("Could you make changes to the following posts?");
+  if (status === "approved") {
+    approveBtn.textContent = "✓ Approved";
+    approveBtn.disabled = true;
+    changesBtn.disabled = false;
+  } else {
+    approveBtn.textContent = "Approve";
+    approveBtn.disabled = false;
+    changesBtn.textContent = "✓ Changes requested";
+    changesBtn.disabled = false;
+  }
+}
+
+document.getElementById("approveBtn").onclick = () => {
+  submitReview("approved");
+};
+
+document.getElementById("changesBtn").onclick = () => {
+  const feedback = prompt("What changes would you like Nick to make?");
+
+  if (feedback === null) return;
+
+  if (!feedback.trim()) {
+    alert("Please describe the changes you'd like.");
+    return;
+  }
+
+  submitReview("changes_requested", feedback.trim());
+};
 </script>
   </div>
 </body>
