@@ -23,6 +23,8 @@
 
     * { box-sizing: border-box; }
 
+    [hidden] { display: none !important; }
+
     html { background: var(--canvas); }
 
     body {
@@ -48,7 +50,6 @@
       margin: 16px auto;
       background: var(--paper);
       border: 1px solid var(--line-dark);
-      min-height: calc(100vh - 32px);
     }
 
     .topbar {
@@ -842,7 +843,7 @@
             <span id="previewStatus" class="preview-status">Select a post from the grid</span>
           </div>
           <div class="preview-tools">
-            <button id="soundBtn" class="tool-button" type="button" disabled>Sound off</button>
+            <button id="soundBtn" class="tool-button" type="button" disabled>Sound on</button>
           </div>
         </div>
 
