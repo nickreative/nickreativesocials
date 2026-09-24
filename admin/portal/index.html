@@ -182,6 +182,79 @@
       font-size: 40px;
       font-weight: 600;
     }
+    .media-order-wrap {
+      margin-top: 12px;
+    }
+
+    .media-order-help {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .media-order {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .media-order-item {
+      position: relative;
+      width: 88px;
+      height: 110px;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      cursor: grab;
+      overflow: hidden;
+    }
+
+    .media-order-item.dragging {
+      opacity: 0.4;
+      cursor: grabbing;
+    }
+
+    .media-order-item.drag-over {
+      outline: 2px dashed #555;
+      outline-offset: -2px;
+    }
+
+    .media-order-item img,
+    .media-order-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .media-order-number {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      border-radius: 9px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .media-order-type {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      padding: 2px 5px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 9px;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
     #uploadProgress {
       font-size: 14px;
       color: #555;
@@ -255,6 +328,11 @@
         <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
       </label>
 
+      <div class="media-order-wrap" id="mediaOrderWrap" hidden>
+        <p class="media-order-help">Drag media into the order it should appear in the published carousel.</p>
+        <div class="media-order" id="mediaOrder"></div>
+      </div>
+
       <br><br>
 
       <button id="saveBtn">Save</button>
@@ -326,6 +404,8 @@ const linkedinBrand = document.getElementById("linkedinBrand");
 
 const thumbInput = document.getElementById("thumbInput");
 const mediaInput = document.getElementById("mediaInput");
+const mediaOrderWrap = document.getElementById("mediaOrderWrap");
+const mediaOrder = document.getElementById("mediaOrder");
 
 const prevBtn = document.getElementById("prevSlide");
 const nextBtn = document.getElementById("nextSlide");
@@ -338,6 +418,8 @@ let currentPost = null;
 let slides = [];
 let currentSlideIndex = 0;
 let dragSourceSlot = null;
+let mediaItems = [];
+let mediaDragIndex = null;
 
 /* ---------- HELPERS ---------- */
 function storagePathFromPublicUrl(publicUrl) {
@@ -437,6 +519,109 @@ function setPreviewMode(platform) {
     linkedinPreview.hidden = true;
   }
 }
+
+function clearMediaItemPreviews() {
+  mediaItems.forEach((item) => {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+}
+
+function mediaItemSource(item) {
+  return item.kind === "file" ? item.previewUrl : item.url;
+}
+
+function isVideoItem(item) {
+  if (item.kind === "file") return item.file.type.startsWith("video/");
+  const cleanUrl = String(item.url || "").split("?")[0].toLowerCase();
+  return cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm");
+}
+
+function renderMediaOrder() {
+  mediaOrder.innerHTML = "";
+  mediaOrderWrap.hidden = mediaItems.length === 0;
+
+  mediaItems.forEach((item, index) => {
+    const tile = document.createElement("div");
+    tile.className = "media-order-item";
+    tile.draggable = true;
+    tile.dataset.index = index;
+
+    const source = mediaItemSource(item);
+    const mediaEl = document.createElement(isVideoItem(item) ? "video" : "img");
+    mediaEl.src = source;
+    if (mediaEl.tagName === "VIDEO") {
+      mediaEl.muted = true;
+      mediaEl.playsInline = true;
+      mediaEl.preload = "metadata";
+    }
+    tile.appendChild(mediaEl);
+
+    const number = document.createElement("span");
+    number.className = "media-order-number";
+    number.textContent = index + 1;
+    tile.appendChild(number);
+
+    const type = document.createElement("span");
+    type.className = "media-order-type";
+    type.textContent = isVideoItem(item) ? "Video" : "Photo";
+    tile.appendChild(type);
+
+    tile.addEventListener("dragstart", (e) => {
+      mediaDragIndex = index;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(index));
+      setTimeout(() => tile.classList.add("dragging"), 0);
+    });
+
+    tile.addEventListener("dragend", () => {
+      mediaDragIndex = null;
+      tile.classList.remove("dragging");
+      mediaOrder.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    });
+
+    tile.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      tile.classList.add("drag-over");
+    });
+
+    tile.addEventListener("dragleave", () => tile.classList.remove("drag-over"));
+
+    tile.addEventListener("drop", (e) => {
+      e.preventDefault();
+      tile.classList.remove("drag-over");
+
+      const sourceFromData = Number(e.dataTransfer.getData("text/plain"));
+      const sourceIndex = Number.isInteger(sourceFromData) ? sourceFromData : mediaDragIndex;
+      const targetIndex = index;
+
+      if (sourceIndex === null || sourceIndex === targetIndex) return;
+      if (sourceIndex < 0 || sourceIndex >= mediaItems.length) return;
+
+      const [moved] = mediaItems.splice(sourceIndex, 1);
+      mediaItems.splice(targetIndex, 0, moved);
+      renderMediaOrder();
+    });
+
+    mediaOrder.appendChild(tile);
+  });
+}
+
+function setExistingMediaItems(urls = []) {
+  clearMediaItemPreviews();
+  mediaItems = urls.map((url) => ({ kind: "existing", url }));
+  renderMediaOrder();
+}
+
+mediaInput.addEventListener("change", () => {
+  clearMediaItemPreviews();
+  mediaItems = Array.from(mediaInput.files).map((file) => ({
+    kind: "file",
+    file,
+    previewUrl: URL.createObjectURL(file)
+  }));
+  renderMediaOrder();
+});
 
 function renderLinkedInMedia(urls) {
   linkedinMedia.innerHTML = "";
@@ -605,6 +790,8 @@ async function render(client) {
       platformSelect.value = post?.platform || "instagram";
       captionInput.value = post?.caption || "";
       aspectSelect.value = post?.aspect || "5:4";
+      mediaInput.value = "";
+      setExistingMediaItems(post?.media_urls || []);
 
       renderPostPreview(post || {
         platform: "instagram",
@@ -682,6 +869,8 @@ saveBtn.onclick = async () => {
   if (!currentPost) return;
   uploadProgress.textContent = "0%";
 
+  let existing = { thumbnail_url: null, media_urls: [] };
+
   if (!currentPost.id) {
     const { data: inserted, error: insertError } = await supabase
       .from("posts")
@@ -697,15 +886,15 @@ saveBtn.onclick = async () => {
       .select("id")
       .single();
 
-if (insertError) {
-  alert(insertError.message);
-  console.error(insertError);
-  return;
-}
+    if (insertError) {
+      alert(insertError.message);
+      console.error(insertError);
+      return;
+    }
 
     currentPost.id = inserted.id;
   } else {
-    const { data: existing, error: existingError } = await supabase
+    const { data, error: existingError } = await supabase
       .from("posts")
       .select("thumbnail_url,media_urls")
       .eq("id", currentPost.id)
@@ -717,14 +906,16 @@ if (insertError) {
       return;
     }
 
-    await removeFilesForPost(existing);
+    existing = data || existing;
   }
 
   const folder = `${currentPost.client}/post-${currentPost.id}`;
-  let thumbnailUrl = null;
+  let thumbnailUrl = existing.thumbnail_url || null;
   let mediaUrls = [];
   const cacheBust = Date.now();
-  const totalUploads = (thumbInput.files[0] ? 1 : 0) + mediaInput.files.length;
+  const newMediaItems = mediaItems.filter((item) => item.kind === "file");
+  const replacingMedia = newMediaItems.length > 0;
+  const totalUploads = (thumbInput.files[0] ? 1 : 0) + newMediaItems.length;
   let uploadedCount = 0;
 
   function updateProgress() {
@@ -746,9 +937,13 @@ if (insertError) {
     updateProgress();
   }
 
-  if (mediaInput.files.length) {
-    for (let i = 0; i < mediaInput.files.length; i++) {
-      const file = mediaInput.files[i];
+  if (replacingMedia) {
+    // A newly selected batch replaces the old carousel, but uses the drag/drop order.
+    for (let i = 0; i < mediaItems.length; i++) {
+      const item = mediaItems[i];
+      if (item.kind !== "file") continue;
+
+      const file = item.file;
       const ext = file.name.split(".").pop();
       const publicUrl = await uploadFile(
         `${folder}/${String(i + 1).padStart(2, "0")}.${ext}`,
@@ -758,16 +953,30 @@ if (insertError) {
       uploadedCount++;
       updateProgress();
     }
+
+    // Remove old media files that are no longer referenced. Keep the thumbnail.
+    const oldMediaPaths = (existing.media_urls || [])
+      .map((url) => storagePathFromPublicUrl(String(url).split("?")[0]))
+      .filter(Boolean)
+      .filter((path) => !mediaUrls.some((url) => storagePathFromPublicUrl(String(url).split("?")[0]) === path));
+
+    if (oldMediaPaths.length) {
+      const { error: removeError } = await supabase.storage
+        .from("social-media")
+        .remove(oldMediaPaths);
+      if (removeError) console.error("Old media cleanup failed:", removeError);
+    }
   } else {
-    mediaUrls = [];
+    // No replacement files selected: preserve existing files and only save their new order.
+    mediaUrls = mediaItems.map((item) => item.url).filter(Boolean);
   }
 
   const payload = {
     platform: platformSelect.value,
     caption: captionInput.value,
     aspect: aspectSelect.value,
-    media_urls: mediaUrls,
-    ...(thumbnailUrl && { thumbnail_url: thumbnailUrl })
+    thumbnail_url: thumbnailUrl,
+    media_urls: mediaUrls
   };
 
   const { error: updateError } = await supabase
@@ -781,8 +990,11 @@ if (insertError) {
     return;
   }
 
+  clearMediaItemPreviews();
+  mediaInput.value = "";
+  thumbInput.value = "";
   uploadProgress.textContent = "";
-  render(currentClient);
+  await render(currentClient);
 };
 
 /* ---------- CLEAR ---------- */
@@ -826,6 +1038,9 @@ clearBtn.onclick = async () => {
   aspectSelect.value = "5:4";
   thumbInput.value = "";
   mediaInput.value = "";
+  clearMediaItemPreviews();
+  mediaItems = [];
+  renderMediaOrder();
 
   render(currentClient);
 };
@@ -871,6 +1086,9 @@ addNewBtn.onclick = async () => {
   platformSelect.value = "instagram";
   thumbInput.value = "";
   mediaInput.value = "";
+  clearMediaItemPreviews();
+  mediaItems = [];
+  renderMediaOrder();
   aspectSelect.value = "5:4";
   carousel.style.aspectRatio = "4 / 5";
 
@@ -908,6 +1126,10 @@ platformSelect.onchange = async () => {
 clientSelect.onchange = () => {
   currentClient = clientSelect.value;
   currentPost = null;
+  clearMediaItemPreviews();
+  mediaItems = [];
+  mediaInput.value = "";
+  renderMediaOrder();
   render(currentClient);
 };
 
