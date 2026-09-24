@@ -2,429 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nickreative — Client Portal</title>
+  <title>Admin Portal</title>
   <meta name="robots" content="noindex,nofollow" />
   <style>
-    :root {
-      --canvas: #e7d2ba;
-      --paper: #f8f3ec;
-      --paper-2: #f1e9df;
-      --ink: #27211f;
-      --muted: #746b64;
-      --line: #d2c2b2;
-      --line-dark: #bfae9e;
-      --burgundy: #703a45;
-      --burgundy-dark: #542832;
-      --white: #fffdf9;
-      --danger: #8a3d49;
-      --panel-gap: 12px;
-    }
-
-    * { box-sizing: border-box; }
-
-    html { background: var(--canvas); }
-
     body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--canvas);
-      color: var(--ink);
-      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-      -webkit-font-smoothing: antialiased;
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 24px;
     }
-
-    button,
-    textarea {
-      font: inherit;
+    select {
+      margin-bottom: 16px;
     }
-
-    button {
-      color: inherit;
-    }
-
-    .page {
-      width: min(1560px, calc(100% - 32px));
-      margin: 16px auto;
-      background: var(--paper);
-      border: 1px solid var(--line-dark);
-      min-height: calc(100vh - 32px);
-    }
-
-    .topbar {
-      min-height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      padding: 14px 22px;
-      border-bottom: 1px solid var(--line);
-      background: var(--paper);
-    }
-
-    .brand-block {
-      display: flex;
-      align-items: baseline;
-      gap: 16px;
-      min-width: 0;
-    }
-
-    .brand {
-      margin: 0;
-      font-family: "Bodoni 72", "Bodoni MT", Didot, "Times New Roman", serif;
-      font-size: 31px;
-      line-height: 1;
-      font-weight: 400;
-      letter-spacing: -0.025em;
-      color: var(--burgundy-dark);
-      white-space: nowrap;
-    }
-
-    .product-name {
-      font-size: 11px;
-      line-height: 1;
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .account-block {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 14px;
-      min-width: 0;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .account-copy {
-      text-align: right;
-      line-height: 1.4;
-      min-width: 0;
-    }
-
-    #clientHeading {
-      color: var(--ink);
-      font-weight: 600;
-    }
-
-    #userLabel {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 240px;
-    }
-
-    .text-button {
-      border: 0;
-      border-left: 1px solid var(--line);
-      background: transparent;
-      padding: 8px 0 8px 14px;
-      cursor: pointer;
-      font-size: 12px;
-      color: var(--burgundy);
-    }
-
-    .text-button:hover { color: var(--burgundy-dark); }
-
-    .workspace {
-      display: grid;
-      grid-template-columns: minmax(268px, 330px) minmax(520px, 1fr) minmax(292px, 350px);
-      gap: var(--panel-gap);
-      padding: var(--panel-gap);
-      background: var(--canvas);
-      align-items: start;
-    }
-
-    .panel {
-      background: var(--paper);
-      border: 1px solid var(--line-dark);
-      min-width: 0;
-    }
-
-    .panel-heading {
-      min-height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .panel-heading h2,
-    .panel-heading h3 {
-      margin: 0;
-      font-size: 12px;
-      line-height: 1.2;
-      text-transform: uppercase;
-      letter-spacing: 0.105em;
-      font-weight: 700;
-    }
-
-    .panel-meta {
-      font-size: 11px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    /* ---------- Grid ---------- */
-    .queue-panel {
-      position: sticky;
-      top: 12px;
-    }
-
-    .grid-wrap {
-      padding: 10px;
-    }
-
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 7px;
+      grid-template-columns: repeat(3, 120px);
+      grid-template-rows: repeat(4, 150px);
+      gap: 6px;
     }
-
-    .grid-item {
+    .grid-cell {
       position: relative;
-      aspect-ratio: 4 / 5;
-      overflow: hidden;
-      background: var(--paper-2);
-      border: 1px solid transparent;
-      cursor: pointer;
-      isolation: isolate;
+      width: 120px;
+      height: 150px;
+      cursor: grab;
     }
-
-    .grid-item::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border: 1px solid rgba(39, 33, 31, 0.08);
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .grid-item.selected {
-      border-color: var(--burgundy);
-    }
-
-    .grid-item.selected::after {
-      border-color: var(--burgundy);
-    }
-
-    .grid-item img {
+    .grid-cell img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      aspect-ratio: 5 / 4;
+      border: 1px solid #ccc;
+      cursor: pointer;
       display: block;
-      transition: transform 220ms ease;
-      transform-origin: center;
+      pointer-events: none;
       user-select: none;
-      -webkit-user-drag: none;
     }
-
-    @media (hover: hover) and (pointer: fine) {
-      .grid-item:hover img {
-        transform: scale(1.045);
-      }
+    .grid-cell.dragging {
+      opacity: 0.4;
+      cursor: grabbing;
     }
-
-    .grid-number {
+    .grid-cell.drag-over {
+      outline: 2px dashed #555;
+      outline-offset: -2px;
+    }
+    .slot-label {
       position: absolute;
-      top: 6px;
-      left: 6px;
-      z-index: 3;
-      min-width: 23px;
-      height: 23px;
-      padding: 0 6px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(248, 243, 236, 0.92);
-      border: 1px solid rgba(39, 33, 31, 0.16);
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.03em;
+      bottom: 4px;
+      left: 4px;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      pointer-events: none;
+      user-select: none;
     }
 
-    .status-badge {
+    .review-badge {
       position: absolute;
       right: 6px;
       bottom: 6px;
-      z-index: 3;
-      width: 29px;
-      height: 29px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--paper);
-      border: 1px solid var(--burgundy);
-      color: var(--burgundy);
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(0,0,0,0.28);
+      color: #222;
       font-size: 13px;
       font-weight: 700;
       line-height: 1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
       pointer-events: none;
+      user-select: none;
     }
 
-    .status-badge.approved {
-      color: var(--white);
-      background: var(--burgundy);
-    }
-
-    .status-badge.new {
-      font-size: 7px;
-      line-height: 1;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .queue-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 14px;
-      padding: 11px 12px 12px;
-      border-top: 1px solid var(--line);
-      font-size: 10px;
-      color: var(--muted);
-    }
-
-    .legend-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .legend-dot {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 1px solid var(--burgundy);
-      color: var(--burgundy);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .review-badge.new {
       font-size: 8px;
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .legend-dot.approved {
-      color: var(--white);
-      background: var(--burgundy);
-    }
-
-    .legend-dot.new { font-size: 5px; }
-
-    /* ---------- Preview ---------- */
-    .preview-panel {
-      min-width: 0;
-    }
-
-    .preview-heading-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .preview-title {
-      margin: 0;
-      font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 0.105em;
-      font-weight: 700;
-      white-space: nowrap;
+      letter-spacing: 0.02em;
     }
 
-    .preview-status {
-      min-width: 0;
-      font-size: 11px;
-      color: var(--muted);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    .preview {
+      margin-top: 24px;
+      max-width: 630px;
     }
-
-    .preview-tools {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    #caption {
+      white-space: pre-line;
     }
-
-    .tool-button,
-    .arrow-button {
-      height: 30px;
-      border: 1px solid var(--line-dark);
-      background: var(--paper);
-      cursor: pointer;
-      font-size: 11px;
-      transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
-    }
-
-    .tool-button {
-      padding: 0 10px;
-      min-width: 82px;
-    }
-
-    .arrow-button {
-      width: 34px;
-      padding: 0;
-      font-size: 16px;
-    }
-
-    .tool-button:hover,
-    .arrow-button:hover {
-      border-color: var(--burgundy);
-      color: var(--burgundy);
-    }
-
-    .preview-body {
-      min-height: 610px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: var(--paper-2);
-    }
-
-    .empty-preview {
+    .preview img {
       width: 100%;
-      min-height: 500px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      border: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-      padding: 30px;
-      background: var(--paper);
+      object-fit: cover;
+      border: 1px solid #ccc;
     }
-
-    .preview-content {
-      width: 100%;
-    }
-
-    .carousel-stage {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
     .carousel {
       position: relative;
-      width: min(100%, 600px);
+      width: 100%;
       overflow: hidden;
-      background: #ddd4ca;
-      border: 1px solid var(--line-dark);
+      border: 1px solid #ccc;
       aspect-ratio: 4 / 5;
     }
-
     .carousel img,
     .carousel video {
       position: absolute;
@@ -434,93 +111,84 @@
       object-fit: cover;
       transform: translateX(100%);
       transition: transform 0.35s ease;
-      background: #000;
     }
-
-    .carousel .active { transform: translateX(0); }
-    .carousel .prev { transform: translateX(-100%); }
-
+    .carousel .active {
+      transform: translateX(0);
+    }
+    .carousel .prev {
+      transform: translateX(-100%);
+    }
     .carousel-controls {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 12px;
+      margin-top: 8px;
     }
-
-    .slide-count {
-      min-width: 58px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 11px;
-      font-variant-numeric: tabular-nums;
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 520px;
+      gap: 32px;
+      align-items: start;
     }
-
-    /* ---------- LinkedIn ---------- */
+    .preview {
+      height: auto;
+    }
+    .carousel {
+      height: auto;
+    }
+    #linkedinCaption,
+    #caption {
+      white-space: pre-line;
+    }
     .linkedin-card {
-      width: min(100%, 720px);
-      margin: 0 auto;
-      border: 1px solid var(--line-dark);
-      background: var(--white);
+      width: 100%;
+      border: 1px solid #d9d9d9;
+      background: #fff;
     }
-
     .linkedin-header {
       display: flex;
       align-items: center;
       gap: 12px;
       padding: 16px 16px 12px;
-      border-bottom: 1px solid #ebe6e0;
     }
-
     .linkedin-avatar {
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: var(--burgundy);
-      color: var(--white);
+      background: #eee;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: "Bodoni 72", "Bodoni MT", Didot, serif;
-      font-size: 18px;
-    }
-
-    .linkedin-meta {
-      font-size: 13px;
-      line-height: 1.35;
-    }
-
-    .linkedin-meta span {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .linkedin-caption {
-      padding: 16px;
+      font-weight: bold;
       font-size: 14px;
-      line-height: 1.5;
-      white-space: pre-line;
     }
-
+    .linkedin-meta {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .linkedin-meta span {
+      color: #666;
+      font-size: 12px;
+    }
+    .linkedin-caption {
+      padding: 0 16px 16px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
     .linkedin-media {
       display: grid;
       gap: 2px;
-      background: var(--white);
-      border-top: 1px solid #ebe6e0;
+      background: #fff;
     }
-
     .linkedin-media.one { grid-template-columns: 1fr; }
     .linkedin-media.two { grid-template-columns: 1fr 1fr; }
     .linkedin-media.three { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr); }
     .linkedin-media.four-plus { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(3, 1fr); }
-
     .linkedin-tile {
       position: relative;
       overflow: hidden;
-      background: #e8e2da;
-      min-height: 170px;
+      background: #f3f3f3;
+      min-height: 160px;
     }
-
     .linkedin-tile img,
     .linkedin-tile video {
       width: 100%;
@@ -528,836 +196,992 @@
       object-fit: cover;
       display: block;
     }
-
     .linkedin-media.three .linkedin-tile:first-child { grid-row: 1 / 3; }
     .linkedin-media.four-plus .linkedin-tile:first-child { grid-row: 1 / 4; }
-
     .linkedin-more {
       position: absolute;
       inset: 0;
-      background: rgba(39, 33, 31, 0.54);
-      color: var(--white);
+      background: rgba(0,0,0,0.38);
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 34px;
-      font-weight: 500;
-    }
-
-    /* ---------- Review ---------- */
-    .review-panel {
-      position: sticky;
-      top: 12px;
-    }
-
-    .review-section {
-      padding: 15px 15px 16px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .review-section:last-child { border-bottom: 0; }
-
-    .eyebrow {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 9px;
-      line-height: 1;
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    .post-status-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
+      font-size: 40px;
       font-weight: 600;
     }
-
-    .status-mark {
-      width: 23px;
-      height: 23px;
-      border-radius: 50%;
-      border: 1px solid var(--burgundy);
-      color: var(--burgundy);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      flex: 0 0 auto;
+    .media-order-wrap {
+      margin-top: 12px;
     }
 
-    .status-mark.approved {
-      color: var(--white);
-      background: var(--burgundy);
+    .media-order-help {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: #666;
     }
 
-    .status-mark.new { font-size: 6px; }
-
-    .caption-copy {
-      max-height: 300px;
-      overflow: auto;
-      padding-right: 6px;
-      white-space: pre-line;
-      font-size: 13px;
-      line-height: 1.55;
-      color: #37302d;
-    }
-
-    .caption-copy:empty::before {
-      content: "No caption supplied.";
-      color: var(--muted);
-    }
-
-    .feedback-label {
+    .media-order {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .feedback-label span:first-child {
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .feedback-label span:last-child {
-      font-size: 10px;
-      color: var(--muted);
-    }
-
-    #feedbackInput {
-      width: 100%;
-      min-height: 132px;
-      resize: vertical;
-      border: 1px solid var(--line-dark);
-      background: var(--white);
-      color: var(--ink);
-      padding: 10px 11px;
-      font-size: 13px;
-      line-height: 1.5;
-      outline: none;
-    }
-
-    #feedbackInput:focus {
-      border-color: var(--burgundy);
-    }
-
-    #feedbackInput:disabled {
-      background: var(--paper-2);
-      color: var(--muted);
-      cursor: not-allowed;
-    }
-
-    .feedback-message {
-      min-height: 17px;
-      margin-top: 7px;
-      font-size: 10px;
-      line-height: 1.4;
-      color: var(--muted);
-    }
-
-    .feedback-message.error { color: var(--danger); }
-
-    .review-actions {
-      display: grid;
-      grid-template-columns: 1fr;
+      flex-wrap: wrap;
       gap: 8px;
-      margin-top: 10px;
     }
 
-    .action-button {
-      min-height: 42px;
-      padding: 10px 12px;
-      border: 1px solid var(--burgundy);
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      transition: background 150ms ease, color 150ms ease, opacity 150ms ease;
+    .media-order-item {
+      position: relative;
+      width: 88px;
+      height: 110px;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      cursor: grab;
+      overflow: hidden;
     }
 
-    .action-button.primary {
-      background: var(--burgundy);
-      color: var(--white);
+    .media-order-item.dragging {
+      opacity: 0.4;
+      cursor: grabbing;
     }
 
-    .action-button.secondary {
-      background: transparent;
-      color: var(--burgundy);
+    .media-order-item.drag-over {
+      outline: 2px dashed #555;
+      outline-offset: -2px;
     }
 
-    .action-button.primary:hover:not(:disabled) { background: var(--burgundy-dark); }
-    .action-button.secondary:hover:not(:disabled) { background: #efe1de; }
-
-    .action-button:disabled {
-      cursor: default;
-      opacity: 0.48;
+    .media-order-item img,
+    .media-order-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
     }
 
-    .review-help {
-      margin: 0;
-      font-size: 10px;
-      line-height: 1.5;
-      color: var(--muted);
+    .media-order-number {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      border-radius: 9px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      pointer-events: none;
     }
 
-    /* ---------- Responsive ---------- */
-    @media (max-width: 1180px) {
-      .workspace {
-        grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
-      }
-
-      .review-panel {
-        grid-column: 2;
-        position: static;
-      }
-
-      .queue-panel { grid-row: 1 / span 2; }
-      .preview-body { min-height: 540px; }
+    .media-order-type {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      padding: 2px 5px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 9px;
+      text-transform: uppercase;
+      pointer-events: none;
     }
 
-    @media (max-width: 760px) {
-      .page {
-        width: 100%;
-        margin: 0;
-        border-left: 0;
-        border-right: 0;
-        min-height: 100vh;
-      }
-
-      .topbar {
-        align-items: flex-start;
-        padding: 15px 14px;
-      }
-
-      .brand-block {
-        display: block;
-      }
-
-      .brand {
-        font-size: 27px;
-        margin-bottom: 6px;
-      }
-
-      .product-name { font-size: 9px; }
-      .account-copy { display: none; }
-
-      .workspace {
-        display: block;
-        padding: 8px;
-      }
-
-      .panel {
-        margin-bottom: 8px;
-      }
-
-      .queue-panel,
-      .review-panel {
-        position: static;
-      }
-
-      .grid-wrap { padding: 7px; }
-      .grid { gap: 5px; }
-      .grid-number { display: none; }
-
-      .preview-body {
-        min-height: 0;
-        padding: 10px;
-      }
-
-      .empty-preview { min-height: 300px; }
-
-      .carousel {
-        width: 100% !important;
-      }
-
-      .preview-heading-left {
-        display: block;
-      }
-
-      .preview-status {
-        margin-top: 3px;
-      }
-
-      .tool-button {
-        min-width: 74px;
-        padding: 0 8px;
-      }
-
-      .caption-copy { max-height: none; }
-      #feedbackInput { min-height: 120px; }
+    #uploadProgress {
+      font-size: 14px;
+      color: #555;
     }
-
-    @media (max-width: 430px) {
-      .topbar { gap: 8px; }
-      .product-name { display: none; }
-      .text-button { padding-left: 10px; }
-      .panel-heading { padding: 11px 10px; }
-      .preview-tools { gap: 5px; }
-      .tool-button { min-width: 66px; font-size: 10px; }
+    .left-column {
+      width: 380px;
+    }
+    #editor {
+      margin-top: 24px;
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <header class="topbar">
-      <div class="brand-block">
-        <h1 class="brand">Nickreative</h1>
-        <span class="product-name">Social Content Approval</span>
+
+<h2>Admin — Social Previews</h2>
+<button id="addNewBtn" style="margin: 12px 0;">Add new post (shift grid)</button>
+
+<label>
+  Select client:
+  <select id="clientSelect">
+    <option value="suitecollection">Suite Collection</option>
+    <option value="pocky">Pocky</option>
+    <option value="vicalates">Vicalates</option>
+    <option value="livencommunities">Liven Communities</option>
+    <option value="belmogroup">Belmo Group</option>
+  </select>
+</label>
+
+<div class="layout">
+  <div class="left-column">
+    <div class="grid" id="grid"></div>
+
+    <div id="editor" hidden>
+      <h3>Edit post</h3>
+
+      <label>
+        Platform:
+        <select id="platformSelect">
+          <option value="instagram">Instagram</option>
+          <option value="linkedin">LinkedIn</option>
+        </select>
+      </label>
+
+      <br><br>
+
+      <label>
+        Aspect:
+        <select id="aspectSelect">
+          <option value="5:4">5:4 (grid / carousel)</option>
+          <option value="9:16">9:16 (reel)</option>
+          <option value="16:9">16:9 (landscape carousel)</option>
+        </select>
+      </label>
+
+      <br><br>
+
+      <textarea id="captionInput" rows="4" cols="40"></textarea>
+
+      <br><br>
+      <hr>
+
+      <label>
+        Thumbnail:
+        <input type="file" id="thumbInput" accept="image/*">
+      </label>
+
+      <br><br>
+
+      <label>
+        Media (images / videos):
+        <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
+      </label>
+
+      <div class="media-order-wrap" id="mediaOrderWrap" hidden>
+        <p class="media-order-help">Drag media into the order it should appear in the published carousel.</p>
+        <div class="media-order" id="mediaOrder"></div>
       </div>
 
-      <div class="account-block">
-        <div class="account-copy">
-          <strong id="clientHeading">Client</strong>
-          <span id="userLabel"></span>
-        </div>
-        <button id="signOutBtn" class="text-button" type="button">Sign out</button>
-      </div>
-    </header>
+      <br><br>
 
-    <main class="workspace">
-      <section class="panel queue-panel" aria-label="Content queue">
-        <div class="panel-heading">
-          <h2>Content queue</h2>
-          <span id="postCount" class="panel-meta"></span>
-        </div>
-        <div class="grid-wrap">
-          <div class="grid" id="grid"></div>
-        </div>
-        <div class="queue-legend" aria-label="Review status legend">
-          <span class="legend-item"><span class="legend-dot approved">✓</span> Approved</span>
-          <span class="legend-item"><span class="legend-dot">?</span> Changes</span>
-          <span class="legend-item"><span class="legend-dot new">NEW</span> New</span>
-        </div>
-      </section>
-
-      <section class="panel preview-panel" id="previewPanel" aria-label="Post preview">
-        <div class="panel-heading">
-          <div class="preview-heading-left">
-            <h2 class="preview-title">Preview</h2>
-            <span id="previewStatus" class="preview-status">Select a post from the grid</span>
-          </div>
-          <div class="preview-tools">
-            <button id="soundBtn" class="tool-button" type="button" disabled>Sound off</button>
-          </div>
-        </div>
-
-        <div class="preview-body">
-          <div id="emptyPreview" class="empty-preview">
-            Select a post from the content queue to preview the media and review the caption.
-          </div>
-
-          <div id="preview" class="preview-content" hidden>
-            <div id="instagramPreview">
-              <div class="carousel-stage">
-                <div id="carousel" class="carousel"></div>
-              </div>
-              <div class="carousel-controls">
-                <button id="prevBtn" class="arrow-button" type="button" aria-label="Previous slide">←</button>
-                <span id="slideCount" class="slide-count">1 / 1</span>
-                <button id="nextBtn" class="arrow-button" type="button" aria-label="Next slide">→</button>
-              </div>
-            </div>
-
-            <div id="linkedinPreview" hidden>
-              <div class="linkedin-card">
-                <div class="linkedin-header">
-                  <div class="linkedin-avatar">N</div>
-                  <div class="linkedin-meta">
-                    <strong id="linkedinBrand">Client Preview</strong><br>
-                    <span>Preview only</span>
-                  </div>
-                </div>
-                <div id="linkedinCaption" class="linkedin-caption"></div>
-                <div id="linkedinMedia" class="linkedin-media"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <aside class="panel review-panel" aria-label="Review post">
-        <div class="panel-heading">
-          <h2>Review</h2>
-          <span id="platformLabel" class="panel-meta">—</span>
-        </div>
-
-        <div class="review-section">
-          <span class="eyebrow">Status</span>
-          <div class="post-status-line">
-            <span id="statusMark" class="status-mark new">NEW</span>
-            <span id="statusText">Select a post</span>
-          </div>
-        </div>
-
-        <div class="review-section">
-          <span class="eyebrow">Caption</span>
-          <div id="caption" class="caption-copy"></div>
-        </div>
-
-        <div class="review-section">
-          <div class="feedback-label">
-            <span>Feedback</span>
-            <span>For change requests</span>
-          </div>
-          <textarea id="feedbackInput" placeholder="Add clear notes for Nick…" disabled></textarea>
-          <div id="feedbackMessage" class="feedback-message"></div>
-
-          <div class="review-actions">
-            <button id="approveBtn" class="action-button primary" type="button" disabled>Approve post</button>
-            <button id="changesBtn" class="action-button secondary" type="button" disabled>Request changes</button>
-          </div>
-        </div>
-
-        <div class="review-section">
-          <p class="review-help">Approval status is shared across the team. Select each post individually and approve it or leave feedback for revisions.</p>
-        </div>
-      </aside>
-    </main>
+      <button id="saveBtn">Save</button>
+      <button id="clearBtn">Clear</button>
+      <span id="uploadProgress" style="margin-left:12px;"></span>
+    </div>
   </div>
 
-  <script type="module">
-    import { supabase } from "/assets/js/supabase.js";
+  <div class="preview" id="preview" hidden>
+    <div id="instagramPreview">
+      <div id="carousel" class="carousel"></div>
 
-    const { data: sessionData } = await supabase.auth.getSession();
-    const user = sessionData?.session?.user;
+      <div class="carousel-controls">
+        <button id="prevSlide">←</button>
+        <button id="nextSlide">→</button>
+      </div>
 
-    if (!user || user.user_metadata.role !== "client") {
-      window.location.href = "/login/";
-      throw new Error("Not authorised");
+      <p id="caption"></p>
+    </div>
+
+    <div id="linkedinPreview" hidden>
+      <div class="linkedin-card">
+        <div class="linkedin-header">
+          <div class="linkedin-avatar">SB</div>
+          <div class="linkedin-meta">
+            <strong id="linkedinBrand">Client Preview</strong><br>
+            <span>Preview only</span>
+          </div>
+        </div>
+
+        <div id="linkedinCaption" class="linkedin-caption"></div>
+        <div id="linkedinMedia" class="linkedin-media"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { supabase } from "/assets/js/supabase.js";
+
+/* ---------- AUTH ---------- */
+const { data: sessionData } = await supabase.auth.getSession();
+const user = sessionData?.session?.user;
+
+if (!user || user.user_metadata.role !== "admin") {
+  window.location.href = "/admin/login/";
+  throw new Error("Not authorised");
+}
+
+/* ---------- DOM ---------- */
+const grid = document.getElementById("grid");
+const preview = document.getElementById("preview");
+const carousel = document.getElementById("carousel");
+const captionEl = document.getElementById("caption");
+
+const clientSelect = document.getElementById("clientSelect");
+const platformSelect = document.getElementById("platformSelect");
+const aspectSelect = document.getElementById("aspectSelect");
+const captionInput = document.getElementById("captionInput");
+const saveBtn = document.getElementById("saveBtn");
+const editor = document.getElementById("editor");
+const uploadProgress = document.getElementById("uploadProgress");
+
+const instagramPreview = document.getElementById("instagramPreview");
+const linkedinPreview = document.getElementById("linkedinPreview");
+const linkedinCaption = document.getElementById("linkedinCaption");
+const linkedinMedia = document.getElementById("linkedinMedia");
+const linkedinBrand = document.getElementById("linkedinBrand");
+
+const thumbInput = document.getElementById("thumbInput");
+const mediaInput = document.getElementById("mediaInput");
+const mediaOrderWrap = document.getElementById("mediaOrderWrap");
+const mediaOrder = document.getElementById("mediaOrder");
+
+const prevBtn = document.getElementById("prevSlide");
+const nextBtn = document.getElementById("nextSlide");
+const clearBtn = document.getElementById("clearBtn");
+const addNewBtn = document.getElementById("addNewBtn");
+
+/* ---------- STATE ---------- */
+let currentClient = clientSelect.value;
+let currentPost = null;
+let slides = [];
+let currentSlideIndex = 0;
+let dragSourceSlot = null;
+let mediaItems = [];
+let mediaDragIndex = null;
+
+/* ---------- HELPERS ---------- */
+function storagePathFromPublicUrl(publicUrl) {
+  try {
+    const u = new URL(publicUrl);
+    const marker = "/storage/v1/object/public/social-media/";
+    const idx = u.pathname.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(u.pathname.slice(idx + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+async function removeFilesForPost(post) {
+  const paths = [];
+
+  if (post?.thumbnail_url) {
+    const p = storagePathFromPublicUrl(post.thumbnail_url.split("?")[0]);
+    if (p) paths.push(p);
+  }
+
+  (post?.media_urls || []).forEach((url) => {
+    const p = storagePathFromPublicUrl(String(url).split("?")[0]);
+    if (p) paths.push(p);
+  });
+
+  if (!paths.length) return;
+
+  const { error } = await supabase.storage
+    .from("social-media")
+    .remove(paths);
+
+  if (error) console.error("Storage remove failed:", error);
+}
+
+async function loadPosts(client) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("client", client)
+    .order("slot", { ascending: true });
+
+  if (error) {
+    console.error("Load posts failed:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function uploadFile(path, file) {
+  const { error } = await supabase.storage
+    .from("social-media")
+    .upload(path, file, { upsert: true });
+
+  if (error) throw error;
+
+  return supabase.storage
+    .from("social-media")
+    .getPublicUrl(path).data.publicUrl;
+}
+
+function showSlide(index) {
+  slides.forEach((el, i) => {
+    el.classList.toggle("active", i === index);
+    el.classList.toggle("prev", i < index);
+  });
+}
+
+function createMediaElement(url) {
+  const cleanUrl = url.split("?")[0].toLowerCase();
+  let el;
+
+  if (cleanUrl.endsWith(".webm") || cleanUrl.endsWith(".mp4")) {
+    el = document.createElement("video");
+    el.src = url;
+    el.muted = false;
+    el.playsInline = true;
+    el.loop = true;
+    el.autoplay = true;
+    el.controls = false;
+  } else {
+    el = document.createElement("img");
+    el.src = url;
+  }
+
+  return el;
+}
+
+function setPreviewMode(platform) {
+  if (platform === "linkedin") {
+    instagramPreview.hidden = true;
+    linkedinPreview.hidden = false;
+  } else {
+    instagramPreview.hidden = false;
+    linkedinPreview.hidden = true;
+  }
+}
+
+function clearMediaItemPreviews() {
+  mediaItems.forEach((item) => {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+}
+
+function mediaItemSource(item) {
+  return item.kind === "file" ? item.previewUrl : item.url;
+}
+
+function isVideoItem(item) {
+  if (item.kind === "file") return item.file.type.startsWith("video/");
+  const cleanUrl = String(item.url || "").split("?")[0].toLowerCase();
+  return cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm");
+}
+
+function renderMediaOrder() {
+  mediaOrder.innerHTML = "";
+  mediaOrderWrap.hidden = mediaItems.length === 0;
+
+  mediaItems.forEach((item, index) => {
+    const tile = document.createElement("div");
+    tile.className = "media-order-item";
+    tile.draggable = true;
+    tile.dataset.index = index;
+
+    const source = mediaItemSource(item);
+    const mediaEl = document.createElement(isVideoItem(item) ? "video" : "img");
+    mediaEl.src = source;
+    if (mediaEl.tagName === "VIDEO") {
+      mediaEl.muted = true;
+      mediaEl.playsInline = true;
+      mediaEl.preload = "metadata";
+    }
+    tile.appendChild(mediaEl);
+
+    const number = document.createElement("span");
+    number.className = "media-order-number";
+    number.textContent = index + 1;
+    tile.appendChild(number);
+
+    const type = document.createElement("span");
+    type.className = "media-order-type";
+    type.textContent = isVideoItem(item) ? "Video" : "Photo";
+    tile.appendChild(type);
+
+    tile.addEventListener("dragstart", (e) => {
+      mediaDragIndex = index;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(index));
+      setTimeout(() => tile.classList.add("dragging"), 0);
+    });
+
+    tile.addEventListener("dragend", () => {
+      mediaDragIndex = null;
+      tile.classList.remove("dragging");
+      mediaOrder.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    });
+
+    tile.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      tile.classList.add("drag-over");
+    });
+
+    tile.addEventListener("dragleave", () => tile.classList.remove("drag-over"));
+
+    tile.addEventListener("drop", (e) => {
+      e.preventDefault();
+      tile.classList.remove("drag-over");
+
+      const sourceFromData = Number(e.dataTransfer.getData("text/plain"));
+      const sourceIndex = Number.isInteger(sourceFromData) ? sourceFromData : mediaDragIndex;
+      const targetIndex = index;
+
+      if (sourceIndex === null || sourceIndex === targetIndex) return;
+      if (sourceIndex < 0 || sourceIndex >= mediaItems.length) return;
+
+      const [moved] = mediaItems.splice(sourceIndex, 1);
+      mediaItems.splice(targetIndex, 0, moved);
+      renderMediaOrder();
+    });
+
+    mediaOrder.appendChild(tile);
+  });
+}
+
+function setExistingMediaItems(urls = []) {
+  clearMediaItemPreviews();
+  mediaItems = urls.map((url) => ({ kind: "existing", url }));
+  renderMediaOrder();
+}
+
+mediaInput.addEventListener("change", () => {
+  clearMediaItemPreviews();
+  mediaItems = Array.from(mediaInput.files).map((file) => ({
+    kind: "file",
+    file,
+    previewUrl: URL.createObjectURL(file)
+  }));
+  renderMediaOrder();
+});
+
+function renderLinkedInMedia(urls) {
+  linkedinMedia.innerHTML = "";
+
+  const count = urls.length;
+  if (!count) return;
+
+  if (count === 1) linkedinMedia.className = "linkedin-media one";
+  else if (count === 2) linkedinMedia.className = "linkedin-media two";
+  else if (count === 3) linkedinMedia.className = "linkedin-media three";
+  else linkedinMedia.className = "linkedin-media four-plus";
+
+  const visibleUrls = urls.slice(0, 4);
+
+  visibleUrls.forEach((url, index) => {
+    const tile = document.createElement("div");
+    tile.className = "linkedin-tile";
+
+    const mediaEl = createMediaElement(url);
+    tile.appendChild(mediaEl);
+
+    if (count > 4 && index === 3) {
+      const more = document.createElement("div");
+      more.className = "linkedin-more";
+      more.textContent = `+${count - 4}`;
+      tile.appendChild(more);
     }
 
-    const client = user.user_metadata.client;
+    linkedinMedia.appendChild(tile);
+  });
+}
 
-    const clientNames = {
-      suitecollection: "Suite Collection",
-      pocky: "Pocky",
-      vicalates: "Vicalates",
-      livencommunities: "Liven Communities",
-      belmogroup: "Belmo Group"
-    };
+function renderPostPreview(post) {
+  const platform = post?.platform || "instagram";
 
-    const clientLabel = clientNames[client] || String(client || "Client")
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .replace(/[_-]+/g, " ")
-      .replace(/\b\w/g, letter => letter.toUpperCase());
+  setPreviewMode(platform);
 
-    document.getElementById("clientHeading").textContent = clientLabel;
-    document.getElementById("userLabel").textContent =
-      user.user_metadata?.name || user.email || "Client access";
+  if (platform === "linkedin") {
+    linkedinBrand.textContent = currentClient;
+    linkedinCaption.textContent = post?.caption || "";
+    renderLinkedInMedia(post?.media_urls || []);
+    return;
+  }
 
-    const { data: posts, error } = await supabase
+  carousel.innerHTML = "";
+  slides = [];
+  currentSlideIndex = 0;
+
+  (post?.media_urls || []).forEach((url, i) => {
+    const el = createMediaElement(url);
+    if (i === 0) el.classList.add("active");
+    carousel.appendChild(el);
+    slides.push(el);
+  });
+
+const aspectRatioMap = {
+  "9:16": "9 / 16",
+  "16:9": "16 / 9",
+  "5:4": "4 / 5"
+};
+
+const maxHeightMap = {
+  "9:16": "1344px",
+  "16:9": "1200px",
+  "5:4": "630px"
+};
+
+carousel.style.aspectRatio = aspectRatioMap[post?.aspect] || "4 / 5";
+carousel.style.maxHeight = maxHeightMap[post?.aspect] || "630px";
+
+  captionEl.textContent = post?.caption || "";
+}
+
+/* ---------- DRAG & DROP SWAP ---------- */
+async function swapSlots(slotA, slotB) {
+  if (slotA === slotB) return true;
+
+  const posts = await loadPosts(currentClient);
+  const postA = posts.find((p) => Number(p.slot) === Number(slotA)) || null;
+  const postB = posts.find((p) => Number(p.slot) === Number(slotB)) || null;
+
+  console.log("Swapping", { slotA, slotB, postA, postB });
+
+  if (!postA && !postB) return true;
+
+  const tempSlot = 0;
+
+  if (postA) {
+    const { error } = await supabase
       .from("posts")
-      .select("*")
-      .eq("client", client)
-      .order("slot");
+      .update({ slot: tempSlot })
+      .eq("id", postA.id);
 
     if (error) {
-      console.error("Failed to load posts", error);
+      console.error("Swap step 1 failed", error);
+      alert("Swap failed at step 1. Your database may not allow temporary slot 0.");
+      return false;
     }
+  }
 
-    const postList = posts || [];
+  if (postB) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: Number(slotA) })
+      .eq("id", postB.id);
 
-    const grid = document.getElementById("grid");
-    const preview = document.getElementById("preview");
-    const emptyPreview = document.getElementById("emptyPreview");
-    const previewPanel = document.getElementById("previewPanel");
-    const carousel = document.getElementById("carousel");
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    const slideCount = document.getElementById("slideCount");
-    const soundBtn = document.getElementById("soundBtn");
-
-    const captionEl = document.getElementById("caption");
-    const previewStatus = document.getElementById("previewStatus");
-    const platformLabel = document.getElementById("platformLabel");
-    const statusMark = document.getElementById("statusMark");
-    const statusText = document.getElementById("statusText");
-    const feedbackInput = document.getElementById("feedbackInput");
-    const feedbackMessage = document.getElementById("feedbackMessage");
-
-    const approveBtn = document.getElementById("approveBtn");
-    const changesBtn = document.getElementById("changesBtn");
-
-    const instagramPreview = document.getElementById("instagramPreview");
-    const linkedinPreview = document.getElementById("linkedinPreview");
-    const linkedinCaption = document.getElementById("linkedinCaption");
-    const linkedinMedia = document.getElementById("linkedinMedia");
-    const linkedinBrand = document.getElementById("linkedinBrand");
-
-    document.getElementById("postCount").textContent =
-      `${postList.length} post${postList.length === 1 ? "" : "s"}`;
-
-    let slides = [];
-    let currentSlide = 0;
-    let currentPost = null;
-    let audioMuted = true;
-
-    function pauseAllVideos() {
-      document.querySelectorAll("video").forEach(video => {
-        video.pause();
-      });
+    if (error) {
+      console.error("Swap step 2 failed", error);
+      alert("Swap failed at step 2.");
+      return false;
     }
+  }
 
-    function syncSoundState() {
-      document.querySelectorAll("video").forEach(video => {
-        video.muted = audioMuted;
-      });
+  if (postA) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: Number(slotB) })
+      .eq("id", postA.id);
 
-      soundBtn.textContent = audioMuted ? "Sound off" : "Sound on";
-      soundBtn.setAttribute("aria-pressed", String(!audioMuted));
+    if (error) {
+      console.error("Swap step 3 failed", error);
+      alert("Swap failed at step 3.");
+      return false;
     }
+  }
 
-    function createMediaElement(url, options = {}) {
-      const cleanUrl = String(url).split("?")[0].toLowerCase();
-      const isVideo = cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm");
+  return true;
+}
 
-      if (isVideo) {
-        const video = document.createElement("video");
-        video.src = url;
-        video.muted = audioMuted;
-        video.loop = options.loop !== false;
-        video.playsInline = true;
-        video.autoplay = options.autoplay !== false;
-        video.controls = Boolean(options.controls);
-        video.preload = "metadata";
-        return video;
+/* ---------- GRID RENDER ---------- */
+async function render(client) {
+  grid.innerHTML = "";
+  preview.hidden = true;
+  editor.hidden = true;
+
+  const posts = await loadPosts(client);
+  const slots = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  slots.forEach((slot) => {
+    const post = posts.find((p) => Number(p.slot) === Number(slot));
+
+    const cell = document.createElement("div");
+    cell.className = "grid-cell";
+    cell.draggable = true;
+    cell.dataset.slot = slot;
+
+    const img = document.createElement("img");
+    img.src = post?.thumbnail_url || "/assets/empty.png";
+    cell.appendChild(img);
+
+    const label = document.createElement("span");
+    label.className = "slot-label";
+    label.textContent = slot;
+    cell.appendChild(label);
+
+    if (post) {
+      const reviewBadge = document.createElement("span");
+      reviewBadge.className = "review-badge";
+
+      if (post.review_status === "approved") {
+        reviewBadge.textContent = "✓";
+        reviewBadge.title = "Approved";
+      } else if (post.review_status === "changes_requested") {
+        reviewBadge.textContent = "?";
+        reviewBadge.title = "Changes requested";
+      } else {
+        reviewBadge.textContent = "New";
+        reviewBadge.classList.add("new");
+        reviewBadge.title = "Not yet reviewed";
       }
 
-      const img = document.createElement("img");
-      img.src = url;
-      img.alt = "Post media";
-      return img;
+      cell.appendChild(reviewBadge);
     }
 
-    function setPreviewMode(platform) {
-      const linkedin = platform === "linkedin";
-      instagramPreview.hidden = linkedin;
-      linkedinPreview.hidden = !linkedin;
-    }
-
-    function renderLinkedInMedia(urls) {
-      linkedinMedia.innerHTML = "";
-
-      const count = urls.length;
-      if (!count) return;
-
-      if (count === 1) linkedinMedia.className = "linkedin-media one";
-      else if (count === 2) linkedinMedia.className = "linkedin-media two";
-      else if (count === 3) linkedinMedia.className = "linkedin-media three";
-      else linkedinMedia.className = "linkedin-media four-plus";
-
-      const visibleUrls = urls.slice(0, 4);
-
-      visibleUrls.forEach((url, index) => {
-        const tile = document.createElement("div");
-        tile.className = "linkedin-tile";
-
-        const mediaEl = createMediaElement(url, {
-          autoplay: false,
-          controls: String(url).split("?")[0].toLowerCase().match(/\.(mp4|webm)$/)
-        });
-        tile.appendChild(mediaEl);
-
-        if (count > 4 && index === 3) {
-          const more = document.createElement("div");
-          more.className = "linkedin-more";
-          more.textContent = `+${count - 4}`;
-          tile.appendChild(more);
-        }
-
-        linkedinMedia.appendChild(tile);
-      });
-    }
-
-    function applyCarouselAspect(aspect) {
-      const config = {
-        "9:16": { ratio: "9 / 16", width: "min(100%, 420px)" },
-        "16:9": { ratio: "16 / 9", width: "min(100%, 760px)" },
-        "5:4": { ratio: "4 / 5", width: "min(100%, 600px)" }
+    cell.addEventListener("click", () => {
+      currentPost = {
+        id: post?.id || null,
+        client: currentClient,
+        slot: slot
       };
 
-      const selected = config[aspect] || config["5:4"];
-      carousel.style.aspectRatio = selected.ratio;
-      carousel.style.width = selected.width;
-    }
-
-    function showSlide(index) {
-      if (!slides.length) {
-        slideCount.textContent = "0 / 0";
-        return;
-      }
-
-      currentSlide = index;
-
-      slides.forEach((el, i) => {
-        el.classList.toggle("active", i === index);
-        el.classList.toggle("prev", i < index);
-
-        if (el.tagName === "VIDEO") {
-          el.muted = audioMuted;
-          if (i === index) {
-            el.play().catch(() => {});
-          } else {
-            el.pause();
-          }
-        }
-      });
-
-      slideCount.textContent = `${index + 1} / ${slides.length}`;
-      prevBtn.disabled = slides.length <= 1;
-      nextBtn.disabled = slides.length <= 1;
-    }
-
-    function renderCarousel(post) {
-      pauseAllVideos();
-
-      const platform = post?.platform || "instagram";
-      setPreviewMode(platform);
-
-      if (platform === "linkedin") {
-        linkedinBrand.textContent = clientLabel;
-        linkedinCaption.textContent = post.caption || "";
-        renderLinkedInMedia(post.media_urls || []);
-        slides = [];
-        soundBtn.disabled = !(post.media_urls || []).some(url => /\.(mp4|webm)(\?|$)/i.test(url));
-        syncSoundState();
-        return;
-      }
-
-      carousel.innerHTML = "";
-      slides = [];
-      currentSlide = 0;
-
-      const urls = post.media_urls || [];
-      applyCarouselAspect(post?.aspect || "5:4");
-
-      urls.forEach((url, index) => {
-        const el = createMediaElement(url);
-        if (index === 0) el.classList.add("active");
-        carousel.appendChild(el);
-        slides.push(el);
-      });
-
-      soundBtn.disabled = !slides.some(el => el.tagName === "VIDEO");
-      syncSoundState();
-      showSlide(0);
-    }
-
-    function getStatusInfo(post) {
-      if (post?.review_status === "approved") {
-        return { label: "Approved", symbol: "✓", className: "approved" };
-      }
-
-      if (post?.review_status === "changes_requested") {
-        return { label: "Changes requested", symbol: "?", className: "changes" };
-      }
-
-      return { label: "Awaiting review", symbol: "NEW", className: "new" };
-    }
-
-    function makeStatusBadge(post) {
-      const info = getStatusInfo(post);
-      const badge = document.createElement("span");
-      badge.className = `status-badge ${info.className}`;
-      badge.textContent = info.symbol;
-      badge.title = info.label;
-      return badge;
-    }
-
-    function updateGridBadge(post) {
-      const item = grid.querySelector(`[data-post-id="${post.id}"]`);
-      if (!item) return;
-      item.querySelector(".status-badge")?.remove();
-      item.appendChild(makeStatusBadge(post));
-    }
-
-    function updateReviewPanel(post) {
-      const info = getStatusInfo(post);
-      const platform = post?.platform || "instagram";
-
-      platformLabel.textContent = platform === "linkedin" ? "LinkedIn" : "Instagram";
-      previewStatus.textContent = `Post ${post.slot || "—"} · ${platformLabel.textContent}`;
-
-      statusMark.className = `status-mark ${info.className}`;
-      statusMark.textContent = info.symbol;
-      statusText.textContent = info.label;
-
-      captionEl.textContent = post.caption || "";
-      feedbackInput.disabled = false;
-      feedbackInput.value = post.review_feedback || "";
-      feedbackMessage.textContent = "";
-      feedbackMessage.className = "feedback-message";
-
-      approveBtn.disabled = post.review_status === "approved";
-      approveBtn.textContent = post.review_status === "approved" ? "Approved" : "Approve post";
-
-      changesBtn.disabled = false;
-      changesBtn.textContent = post.review_status === "changes_requested"
-        ? "Update change request"
-        : "Request changes";
-    }
-
-    function selectPost(post, item, shouldScroll = false) {
-      currentPost = post;
-
-      grid.querySelectorAll(".grid-item").forEach(el => {
-        el.classList.toggle("selected", el === item);
-      });
-
-      emptyPreview.hidden = true;
       preview.hidden = false;
-      renderCarousel(post);
-      updateReviewPanel(post);
+      editor.hidden = false;
 
-      if (shouldScroll && window.matchMedia("(max-width: 760px)").matches) {
-        previewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }
+      platformSelect.value = post?.platform || "instagram";
+      captionInput.value = post?.caption || "";
+      aspectSelect.value = post?.aspect || "5:4";
+      mediaInput.value = "";
+      setExistingMediaItems(post?.media_urls || []);
 
-    postList.forEach((post, index) => {
-      if (!post) return;
-
-      const item = document.createElement("div");
-      item.className = "grid-item";
-      item.dataset.postId = post.id;
-      item.tabIndex = 0;
-      item.setAttribute("role", "button");
-      item.setAttribute("aria-label", `Open post ${post.slot || index + 1}`);
-
-      const img = document.createElement("img");
-      img.src = post.thumbnail_url || "/assets/empty.png";
-      img.alt = `Post ${post.slot || index + 1} thumbnail`;
-
-      const number = document.createElement("span");
-      number.className = "grid-number";
-      number.textContent = String(post.slot || index + 1).padStart(2, "0");
-
-      const activate = () => selectPost(post, item, true);
-      item.addEventListener("click", activate);
-      item.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          activate();
-        }
+      renderPostPreview(post || {
+        platform: "instagram",
+        caption: "",
+        aspect: "5:4",
+        media_urls: []
       });
-
-      item.appendChild(img);
-      item.appendChild(number);
-      item.appendChild(makeStatusBadge(post));
-      grid.appendChild(item);
     });
 
-    prevBtn.addEventListener("click", () => {
-      if (!slides.length) return;
-      showSlide((currentSlide - 1 + slides.length) % slides.length);
+    cell.addEventListener("dragstart", (e) => {
+      dragSourceSlot = Number(slot);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(slot));
+      setTimeout(() => cell.classList.add("dragging"), 0);
     });
 
-    nextBtn.addEventListener("click", () => {
-      if (!slides.length) return;
-      showSlide((currentSlide + 1) % slides.length);
+    cell.addEventListener("dragend", () => {
+      cell.classList.remove("dragging");
+      cell.classList.remove("drag-over");
+      dragSourceSlot = null;
     });
 
-    soundBtn.addEventListener("click", () => {
-      audioMuted = !audioMuted;
-      syncSoundState();
-
-      const activeVideo = slides[currentSlide];
-      if (activeVideo?.tagName === "VIDEO") {
-        activeVideo.play().catch(() => {});
-      }
+    cell.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      cell.classList.add("drag-over");
     });
 
-    async function submitReview(status, feedback = null) {
-      if (!currentPost) return;
+    cell.addEventListener("dragleave", () => {
+      cell.classList.remove("drag-over");
+    });
 
-      approveBtn.disabled = true;
-      changesBtn.disabled = true;
-      feedbackInput.disabled = true;
-      feedbackMessage.textContent = "Saving…";
-      feedbackMessage.className = "feedback-message";
+    cell.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      cell.classList.remove("drag-over");
 
-      const { error: reviewError } = await supabase
-        .from("posts")
-        .update({
-          review_status: status,
-          review_feedback: feedback,
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id
-        })
-        .eq("id", currentPost.id);
+      const sourceFromData = Number(e.dataTransfer.getData("text/plain"));
+      const sourceSlot = sourceFromData || dragSourceSlot;
+      const targetSlot = Number(cell.dataset.slot);
 
-      if (reviewError) {
-        console.error("Review failed:", reviewError);
-        feedbackMessage.textContent = "Could not save the review. Please try again.";
-        feedbackMessage.className = "feedback-message error";
-        feedbackInput.disabled = false;
-        approveBtn.disabled = currentPost.review_status === "approved";
-        changesBtn.disabled = false;
-        return;
-      }
+      console.log("Dropped", { sourceSlot, targetSlot });
 
-      currentPost.review_status = status;
-      currentPost.review_feedback = feedback;
-      currentPost.reviewed_at = new Date().toISOString();
-      currentPost.reviewed_by = user.id;
+      if (!sourceSlot || sourceSlot === targetSlot) return;
 
-      updateGridBadge(currentPost);
-      updateReviewPanel(currentPost);
-      feedbackMessage.textContent = status === "approved"
-        ? "Approval saved."
-        : "Feedback saved and changes requested.";
-      feedbackInput.disabled = false;
+      const success = await swapSlots(sourceSlot, targetSlot);
+
+      if (!success) return;
+
+      await render(currentClient);
+
+      currentPost = null;
+      preview.hidden = true;
+      editor.hidden = true;
+    });
+
+    grid.appendChild(cell);
+  });
+}
+
+/* ---------- NAV ---------- */
+prevBtn.onclick = () => {
+  if (!slides.length) return;
+  currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+nextBtn.onclick = () => {
+  if (!slides.length) return;
+  currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+/* ---------- SAVE ---------- */
+saveBtn.onclick = async () => {
+  if (!currentPost) return;
+  uploadProgress.textContent = "0%";
+
+  let existing = { thumbnail_url: null, media_urls: [] };
+
+  if (!currentPost.id) {
+    const { data: inserted, error: insertError } = await supabase
+      .from("posts")
+      .insert({
+        client: currentPost.client,
+        slot: currentPost.slot,
+        platform: platformSelect.value,
+        caption: captionInput.value,
+        aspect: aspectSelect.value,
+        thumbnail_url: null,
+        media_urls: []
+      })
+      .select("id")
+      .single();
+
+    if (insertError) {
+      alert(insertError.message);
+      console.error(insertError);
+      return;
     }
 
-    approveBtn.addEventListener("click", () => {
-      submitReview("approved", null);
-    });
+    currentPost.id = inserted.id;
+  } else {
+    const { data, error: existingError } = await supabase
+      .from("posts")
+      .select("thumbnail_url,media_urls")
+      .eq("id", currentPost.id)
+      .single();
 
-    changesBtn.addEventListener("click", () => {
-      if (!currentPost) return;
-
-      const feedback = feedbackInput.value.trim();
-      if (!feedback) {
-        feedbackMessage.textContent = "Add your feedback before requesting changes.";
-        feedbackMessage.className = "feedback-message error";
-        feedbackInput.focus();
-        return;
-      }
-
-      submitReview("changes_requested", feedback);
-    });
-
-    document.addEventListener("keydown", event => {
-      if (!currentPost || document.activeElement === feedbackInput) return;
-      if ((currentPost.platform || "instagram") !== "instagram") return;
-
-      if (event.key === "ArrowLeft" && slides.length > 1) {
-        showSlide((currentSlide - 1 + slides.length) % slides.length);
-      }
-
-      if (event.key === "ArrowRight" && slides.length > 1) {
-        showSlide((currentSlide + 1) % slides.length);
-      }
-    });
-
-    document.getElementById("signOutBtn").addEventListener("click", async () => {
-      pauseAllVideos();
-      await supabase.auth.signOut();
-      window.location.href = "/login/";
-    });
-
-    if (postList.length) {
-      const firstItem = grid.querySelector(".grid-item");
-      selectPost(postList[0], firstItem, false);
-    } else {
-      document.getElementById("postCount").textContent = "No posts";
-      emptyPreview.textContent = "There are currently no posts awaiting review.";
+    if (existingError) {
+      alert("Save failed (could not load existing post)");
+      console.error(existingError);
+      return;
     }
-  </script>
+
+    existing = data || existing;
+  }
+
+  const folder = `${currentPost.client}/post-${currentPost.id}`;
+  let thumbnailUrl = existing.thumbnail_url || null;
+  let mediaUrls = [];
+  const cacheBust = Date.now();
+  const newMediaItems = mediaItems.filter((item) => item.kind === "file");
+  const replacingMedia = newMediaItems.length > 0;
+  const totalUploads = (thumbInput.files[0] ? 1 : 0) + newMediaItems.length;
+  let uploadedCount = 0;
+
+  function updateProgress() {
+    if (!totalUploads) {
+      uploadProgress.textContent = "";
+      return;
+    }
+    const percent = Math.round((uploadedCount / totalUploads) * 100);
+    uploadProgress.textContent = `${percent}%`;
+  }
+
+  if (thumbInput.files[0]) {
+    const thumbPublicUrl = await uploadFile(
+      `${folder}/thumb.jpg`,
+      thumbInput.files[0]
+    );
+    thumbnailUrl = `${thumbPublicUrl}?v=${cacheBust}`;
+    uploadedCount++;
+    updateProgress();
+  }
+
+  if (replacingMedia) {
+    // A newly selected batch replaces the old carousel, but uses the drag/drop order.
+    for (let i = 0; i < mediaItems.length; i++) {
+      const item = mediaItems[i];
+      if (item.kind !== "file") continue;
+
+      const file = item.file;
+      const ext = file.name.split(".").pop();
+      const publicUrl = await uploadFile(
+        `${folder}/${String(i + 1).padStart(2, "0")}.${ext}`,
+        file
+      );
+      mediaUrls.push(`${publicUrl}?v=${cacheBust}`);
+      uploadedCount++;
+      updateProgress();
+    }
+
+    // Remove old media files that are no longer referenced. Keep the thumbnail.
+    const oldMediaPaths = (existing.media_urls || [])
+      .map((url) => storagePathFromPublicUrl(String(url).split("?")[0]))
+      .filter(Boolean)
+      .filter((path) => !mediaUrls.some((url) => storagePathFromPublicUrl(String(url).split("?")[0]) === path));
+
+    if (oldMediaPaths.length) {
+      const { error: removeError } = await supabase.storage
+        .from("social-media")
+        .remove(oldMediaPaths);
+      if (removeError) console.error("Old media cleanup failed:", removeError);
+    }
+  } else {
+    // No replacement files selected: preserve existing files and only save their new order.
+    mediaUrls = mediaItems.map((item) => item.url).filter(Boolean);
+  }
+
+  const payload = {
+    platform: platformSelect.value,
+    caption: captionInput.value,
+    aspect: aspectSelect.value,
+    thumbnail_url: thumbnailUrl,
+    media_urls: mediaUrls
+  };
+
+  const { error: updateError } = await supabase
+    .from("posts")
+    .update(payload)
+    .eq("id", currentPost.id);
+
+  if (updateError) {
+    alert("Save failed (could not update post)");
+    console.error(updateError);
+    return;
+  }
+
+  clearMediaItemPreviews();
+  mediaInput.value = "";
+  thumbInput.value = "";
+  uploadProgress.textContent = "";
+  await render(currentClient);
+};
+
+/* ---------- CLEAR ---------- */
+clearBtn.onclick = async () => {
+  if (!currentPost) return;
+
+  if (currentPost.id) {
+    const { data: existing } = await supabase
+      .from("posts")
+      .select("thumbnail_url,media_urls")
+      .eq("id", currentPost.id)
+      .single();
+
+    await removeFilesForPost(existing);
+  }
+
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      thumbnail_url: null,
+      media_urls: [],
+      platform: "instagram",
+      caption: "",
+      aspect: "5:4"
+    })
+    .eq("client", currentPost.client)
+    .eq("slot", currentPost.slot);
+
+  if (error) {
+    alert("Clear failed");
+    console.error(error);
+    return;
+  }
+
+  carousel.innerHTML = "";
+  slides = [];
+  preview.hidden = true;
+
+  captionInput.value = "";
+  platformSelect.value = "instagram";
+  aspectSelect.value = "5:4";
+  thumbInput.value = "";
+  mediaInput.value = "";
+  clearMediaItemPreviews();
+  mediaItems = [];
+  renderMediaOrder();
+
+  render(currentClient);
+};
+
+/* ---------- SHIFT + NEW ---------- */
+addNewBtn.onclick = async () => {
+  const posts = await loadPosts(currentClient);
+
+  const slot12 = posts.find((p) => Number(p.slot) === 12);
+  if (slot12) {
+    await removeFilesForPost(slot12);
+    await supabase.from("posts").delete().eq("id", slot12.id);
+  }
+
+  for (let s = 11; s >= 1; s--) {
+    const p = posts.find((x) => Number(x.slot) === s);
+    if (!p) continue;
+
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: s + 1 })
+      .eq("id", p.id);
+
+    if (error) {
+      alert("Shift failed. Check console.");
+      console.error(error);
+      return;
+    }
+  }
+
+  await render(currentClient);
+
+  currentPost = null;
+  carousel.innerHTML = "";
+  slides = [];
+  currentSlideIndex = 0;
+
+  preview.hidden = true;
+  editor.hidden = true;
+
+  captionEl.textContent = "";
+  captionInput.value = "";
+  platformSelect.value = "instagram";
+  thumbInput.value = "";
+  mediaInput.value = "";
+  clearMediaItemPreviews();
+  mediaItems = [];
+  renderMediaOrder();
+  aspectSelect.value = "5:4";
+  carousel.style.aspectRatio = "4 / 5";
+
+  currentPost = { id: null, client: currentClient, slot: 1 };
+  preview.hidden = false;
+  editor.hidden = false;
+};
+
+/* ---------- PLATFORM CHANGE ---------- */
+platformSelect.onchange = async () => {
+  if (currentPost?.id) {
+    const { data: freshPost } = await supabase
+      .from("posts")
+      .select("*")
+      .eq("id", currentPost.id)
+      .single();
+
+    renderPostPreview({
+      ...freshPost,
+      platform: platformSelect.value,
+      caption: captionInput.value,
+      aspect: aspectSelect.value
+    });
+  } else {
+    renderPostPreview({
+      platform: platformSelect.value,
+      caption: captionInput.value,
+      aspect: aspectSelect.value,
+      media_urls: []
+    });
+  }
+};
+
+/* ---------- CLIENT CHANGE ---------- */
+clientSelect.onchange = () => {
+  currentClient = clientSelect.value;
+  currentPost = null;
+  clearMediaItemPreviews();
+  mediaItems = [];
+  mediaInput.value = "";
+  renderMediaOrder();
+  render(currentClient);
+};
+
+/* ---------- INIT ---------- */
+render(currentClient);
+</script>
+
 </body>
 </html>
