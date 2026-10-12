@@ -802,6 +802,7 @@
       .tool-button { min-width: 66px; font-size: 10px; }
     }
   </style>
+  <link rel="stylesheet" href="/assets/css/facebook-preview.css">
 </head>
 <body>
   <div class="page">
@@ -847,11 +848,17 @@
           </div>
         </div>
 
+        <div id="previewVersions" class="preview-versions" hidden aria-label="Post versions">
+          <button id="primaryVersionBtn" class="version-button" type="button" aria-pressed="true">Instagram</button>
+          <button id="facebookVersionBtn" class="version-button is-new" type="button" aria-pressed="false">Facebook · New</button>
+          <p class="fb-version-note">One post, one approval. Facebook shows the stills version.</p>
+        </div>
         <div class="preview-body">
           <div id="emptyPreview" class="empty-preview">
             Select a post from the content queue to preview the media and review the caption.
           </div>
 
+          <div id="facebookPreview" hidden></div>
           <div id="preview" class="preview-content" hidden>
             <div id="instagramPreview">
               <div class="carousel-stage">
@@ -922,6 +929,7 @@
   </div>
 
   <script type="module">
+    import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-preview.js";
     import { supabase } from "/assets/js/supabase.js";
 
     const { data: sessionData } = await supabase.auth.getSession();
@@ -997,6 +1005,35 @@
     let currentSlide = 0;
     let currentPost = null;
     let audioMuted = false;
+    let viewingFacebook = false;
+    const facebookView = createFacebookPreview(document.getElementById("facebookPreview"));
+    const primaryVersionBtn = document.getElementById("primaryVersionBtn");
+    const facebookVersionBtn = document.getElementById("facebookVersionBtn");
+    try { if (localStorage.getItem("nickreative-facebook-discovered")) { facebookVersionBtn.classList.remove("is-new"); facebookVersionBtn.textContent = "Facebook"; } } catch {}
+
+    function setVersion(facebook) {
+      if (!currentPost) return;
+      viewingFacebook = facebook;
+      pauseAllVideos();
+      facebookView.close();
+      primaryVersionBtn.setAttribute("aria-pressed", String(!facebook));
+      facebookVersionBtn.setAttribute("aria-pressed", String(facebook));
+      document.getElementById("facebookPreview").hidden = !facebook;
+      preview.hidden = facebook;
+      if (facebook) {
+        facebookView.render({brand:clientLabel, caption:currentPost.caption, urls:facebookMedia(currentPost)});
+        soundBtn.disabled = true;
+        facebookVersionBtn.classList.remove("is-new");
+        facebookVersionBtn.textContent = "Facebook";
+        try { localStorage.setItem("nickreative-facebook-discovered", "1"); } catch {}
+      } else {
+        renderCarousel(currentPost);
+      }
+      platformLabel.textContent = facebook ? "Facebook" : (currentPost.platform === "linkedin" ? "LinkedIn" : "Instagram");
+      previewStatus.textContent = `Post ${currentPost.slot || "—"} · ${platformLabel.textContent}`;
+    }
+    primaryVersionBtn.onclick = () => setVersion(false);
+    facebookVersionBtn.onclick = () => setVersion(true);
 
     function pauseAllVideos() {
       document.querySelectorAll("video").forEach(video => {
@@ -1179,9 +1216,9 @@
 
     function updateReviewPanel(post) {
       const info = getStatusInfo(post);
-      const platform = post?.platform || "instagram";
+      const platform = viewingFacebook ? "facebook" : (post?.platform || "instagram");
 
-      platformLabel.textContent = platform === "linkedin" ? "LinkedIn" : "Instagram";
+      platformLabel.textContent = platform === "facebook" ? "Facebook" : platform === "linkedin" ? "LinkedIn" : "Instagram";
       previewStatus.textContent = `Post ${post.slot || "—"} · ${platformLabel.textContent}`;
 
       statusMark.className = `status-mark ${info.className}`;
@@ -1212,8 +1249,11 @@
 
       emptyPreview.hidden = true;
       preview.hidden = false;
-      renderCarousel(post);
+      viewingFacebook = false;
+      document.getElementById("previewVersions").hidden = false;
+      primaryVersionBtn.textContent = post.platform === "linkedin" ? "LinkedIn" : "Instagram";
       updateReviewPanel(post);
+      setVersion(false);
 
       if (shouldScroll && window.matchMedia("(max-width: 760px)").matches) {
         previewPanel.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1334,7 +1374,7 @@
     });
 
     document.addEventListener("keydown", event => {
-      if (!currentPost || document.activeElement === feedbackInput) return;
+      if (!currentPost || viewingFacebook || document.activeElement === feedbackInput) return;
       if ((currentPost.platform || "instagram") !== "instagram") return;
 
       if (event.key === "ArrowLeft" && slides.length > 1) {

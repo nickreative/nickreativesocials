@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const module = await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync(new URL('../assets/js/facebook-preview.js', import.meta.url),'utf8')).toString('base64'));
+const mixed={media_urls:['a.jpg','b.mp4?v=1','c.PNG','d.webm','e.mov#t=2']};
+assert.deepEqual(module.facebookMedia(mixed),['a.jpg','c.PNG']);
+assert.deepEqual(module.facebookMedia({...mixed,facebook_media_urls:['f.jpg','g.mp4']}),['f.jpg']);
+assert.deepEqual(module.facebookMedia({...mixed,facebook_media_urls:[]}),[]);
+assert.deepEqual(module.facebookMedia({...mixed,facebook_media_urls:null}),['a.jpg','c.PNG']);
+assert.deepEqual(module.facebookMedia({media_urls:['video.mp4']}),[]);
+console.log('PASS: fallback excludes videos, explicit variants take priority, empty/legacy/video-only posts are handled.');
