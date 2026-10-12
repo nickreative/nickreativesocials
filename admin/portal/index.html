@@ -309,10 +309,10 @@ import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-previe
 import { supabase } from "/assets/js/supabase.js";
 
 /* ---------- AUTH ---------- */
-const { data: sessionData } = await supabase.auth.getSession();
+const { data: sessionData } = await supabase.auth.refreshSession();
 const user = sessionData?.session?.user;
 
-if (!user || user.user_metadata.role !== "admin") {
+if (!user || user.app_metadata?.role !== "admin") {
   window.location.href = "/admin/login/";
   throw new Error("Not authorised");
 }

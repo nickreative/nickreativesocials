@@ -932,15 +932,15 @@
     import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-preview.js";
     import { supabase } from "/assets/js/supabase.js";
 
-    const { data: sessionData } = await supabase.auth.getSession();
+    const { data: sessionData } = await supabase.auth.refreshSession();
     const user = sessionData?.session?.user;
 
-    if (!user || user.user_metadata.role !== "client") {
+    if (!user || user.app_metadata?.role !== "client") {
       window.location.href = "/login/";
       throw new Error("Not authorised");
     }
 
-    const client = user.user_metadata.client;
+    const client = user.app_metadata?.client;
 
     const clientNames = {
       suitecollection: "Suite Collection",
