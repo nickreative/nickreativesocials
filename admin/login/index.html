@@ -1,23 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Admin Login</title>
-</head>
-<body>
-
-<h2>Admin Login</h2>
-
-<form id="adminLoginForm">
-  <input type="email" id="email" placeholder="Email" required />
-  <br><br>
-  <input type="password" id="password" placeholder="Password" required />
-  <br><br>
-  <button type="submit">Unlock</button>
-</form>
-
-<p id="error"></p>
-
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Nickreative — Admin Sign In</title><link rel="stylesheet" href="/assets/css/editorial.css"></head>
+<body><div class="page auth-page"><header class="topbar"><div class="brand-block"><p class="brand">Nickreative</p><span class="product-name">Socials · Admin access</span></div></header>
+<main class="auth-layout"><section class="auth-intro"><span class="eyebrow">The content studio</span><h1>Plan the work.<br>Shape the story.</h1><p>Manage client content, refine every post and keep approvals moving.</p></section><section class="auth-form" aria-labelledby="loginHeading"><span class="eyebrow">Admin portal</span><h2 id="loginHeading">Welcome back</h2><form id="adminLoginForm"><label for="email">Email address<input type="email" id="email" autocomplete="username" required></label><label for="password">Password</label><div class="password-field"><input aria-label="Password" type="password" id="password" autocomplete="current-password" required><button type="button" id="showPassword" aria-pressed="false" aria-controls="password">Show</button></div><p id="error" class="notice" role="status" aria-live="polite"></p><button class="primary" type="submit">Sign in</button></form><p class="auth-switch"><a href="/login/">Switch to client access →</a></p></section></main></div>
 <script type="module">
   import { supabase } from "/assets/js/supabase.js";
 
@@ -30,6 +14,11 @@
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
+    const submit = form.querySelector("button[type=submit]");
+    submit.disabled = true;
+    submit.textContent = "Signing in…";
+    errorEl.textContent = "";
+    try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -47,8 +36,19 @@
     } else {
       errorEl.textContent = "Not an admin account.";
     }
+    } catch {
+      errorEl.textContent = "Could not connect. Please try again.";
+    } finally {
+      submit.disabled = false;
+      submit.textContent = "Sign in";
+    }
   });
-</script>
 
-</body>
-</html>
+  document.getElementById("showPassword").onclick = (event) => {
+    const input = document.getElementById("password");
+    const visible = input.type === "password";
+    input.type = visible ? "text" : "password";
+    event.currentTarget.textContent = visible ? "Hide" : "Show";
+    event.currentTarget.setAttribute("aria-pressed", String(visible));
+  };
+</script></body></html>

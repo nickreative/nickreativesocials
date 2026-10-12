@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"><title>Nickreative — Admin Portal</title>
   <meta name="robots" content="noindex,nofollow" />
   <style>
     body {
@@ -293,110 +293,16 @@
       margin-top: 24px;
     }
   </style>
+<link rel="stylesheet" href="/assets/css/editorial.css">
 </head>
 <body>
 
-<h2>Admin — Social Previews</h2>
-<button id="addNewBtn" style="margin: 12px 0;">Add new post (shift grid)</button>
-
-<label>
-  Select client:
-  <select id="clientSelect">
-    <option value="suitecollection">Suite Collection</option>
-    <option value="pocky">Pocky</option>
-    <option value="vicalates">Vicalates</option>
-    <option value="livencommunities">Liven Communities</option>
-    <option value="belmogroup">Belmo Group</option>
-  </select>
-</label>
-
-<div class="layout">
-  <div class="left-column">
-    <div class="grid" id="grid"></div>
-
-    <div id="editor" hidden>
-      <h3>Edit post</h3>
-
-      <label>
-        Platform:
-        <select id="platformSelect">
-          <option value="instagram">Instagram</option>
-          <option value="linkedin">LinkedIn</option>
-        </select>
-      </label>
-
-      <br><br>
-
-      <label>
-        Aspect:
-        <select id="aspectSelect">
-          <option value="5:4">5:4 (grid / carousel)</option>
-          <option value="9:16">9:16 (reel)</option>
-          <option value="16:9">16:9 (landscape carousel)</option>
-        </select>
-      </label>
-
-      <br><br>
-
-      <textarea id="captionInput" rows="4" cols="40"></textarea>
-
-      <br><br>
-      <hr>
-
-      <label>
-        Thumbnail:
-        <input type="file" id="thumbInput" accept="image/*">
-      </label>
-
-      <br><br>
-
-      <label>
-        Media (images / videos):
-        <input type="file" id="mediaInput" accept="image/*,video/*" multiple>
-      </label>
-
-      <div class="media-order-wrap" id="mediaOrderWrap" hidden>
-        <p class="media-order-help">Drag media into the order it should appear in the published carousel.</p>
-        <div class="media-order" id="mediaOrder"></div>
-      </div>
-
-      <br><br>
-
-      <button id="saveBtn">Save</button>
-      <button id="clearBtn">Clear</button>
-      <span id="uploadProgress" style="margin-left:12px;"></span>
-    </div>
-  </div>
-
-  <div class="preview" id="preview" hidden>
-    <div id="instagramPreview">
-      <div id="carousel" class="carousel"></div>
-
-      <div class="carousel-controls">
-        <button id="prevSlide">←</button>
-        <button id="nextSlide">→</button>
-      </div>
-
-      <p id="caption"></p>
-    </div>
-
-    <div id="linkedinPreview" hidden>
-      <div class="linkedin-card">
-        <div class="linkedin-header">
-          <div class="linkedin-avatar">SB</div>
-          <div class="linkedin-meta">
-            <strong id="linkedinBrand">Client Preview</strong><br>
-            <span>Preview only</span>
-          </div>
-        </div>
-
-        <div id="linkedinCaption" class="linkedin-caption"></div>
-        <div id="linkedinMedia" class="linkedin-media"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
+<div class="page"><header class="topbar"><div class="brand-block"><h1 class="brand">Nickreative</h1><span class="product-name">Socials · Admin studio</span></div><div class="account-block"><span id="userLabel"></span><button id="signOutBtn" type="button" class="text-button">Sign out</button></div></header>
+<main class="admin-workspace">
+<section class="panel queue-panel" aria-label="Content queue"><div class="panel-heading"><h2>Content queue</h2><span class="panel-meta">12 slots</span></div><div class="queue-controls"><label>Client<select id="clientSelect"><option value="suitecollection">Suite Collection</option><option value="pocky">Pocky</option><option value="vicalates">Vicalates</option><option value="livencommunities">Liven Communities</option><option value="belmogroup">Belmo Group</option></select></label><button id="addNewBtn" class="primary" type="button">Add post at the top</button><p class="help">Shifts the queue down one slot. If slot 12 is occupied, that post is removed.</p></div><div id="queueSummary" class="summary" aria-live="polite"></div><p id="workspaceMessage" class="notice" role="status"></p><div class="grid" id="grid"></div><p class="help legend">✓ Approved · ? Changes · NEW Awaiting review<br>Select a slot to edit. Drag slots to swap their order.</p></section>
+<section class="panel preview-panel" aria-label="Post preview"><div class="panel-heading"><h2>Preview</h2><span id="previewLabel" class="panel-meta">No post selected</span></div><div id="emptyPreview">Select a post from the queue to preview its media and caption.</div><div class="preview" id="preview" hidden><div id="instagramPreview"><div id="carousel" class="carousel"></div><div class="carousel-controls"><button id="prevSlide" aria-label="Previous slide">←</button><span id="slideCount" class="panel-meta"></span><button id="nextSlide" aria-label="Next slide">→</button></div><p id="caption"></p></div><div id="linkedinPreview" hidden><div class="linkedin-card"><div class="linkedin-header"><div class="linkedin-avatar">N</div><div class="linkedin-meta"><strong id="linkedinBrand">Client Preview</strong><br><span>Preview only</span></div></div><div id="linkedinCaption" class="linkedin-caption"></div><div id="linkedinMedia" class="linkedin-media"></div></div></div></div></section>
+<section class="panel editor-panel" aria-label="Content editor"><div class="panel-heading"><h2>Post details</h2><span id="editorSlot" class="panel-meta">—</span></div><div id="emptyEditor">Select an existing post or an empty slot to start editing.</div><div id="editor" class="panel-body" hidden><div class="review-details"><span class="eyebrow">Client review</span><strong id="reviewStatus"></strong><p id="reviewFeedback"></p></div><label>Platform<select id="platformSelect"><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option></select></label><label>Format<select id="aspectSelect"><option value="5:4">Portrait · 4:5</option><option value="9:16">Reel · 9:16</option><option value="16:9">Landscape · 16:9</option></select></label><label>Caption<textarea id="captionInput" rows="6" placeholder="Write the post caption…"></textarea></label><label>Queue thumbnail<input type="file" id="thumbInput" accept="image/*"></label><label>Media · images or videos<input type="file" id="mediaInput" accept="image/*,video/*" multiple></label><p class="help">Selecting media replaces the existing carousel when you save.</p><div class="media-order-wrap" id="mediaOrderWrap" hidden><p class="media-order-help">Drag media or use the arrows to change its order.</p><div class="media-order" id="mediaOrder"></div></div><div class="editor-actions"><button id="saveBtn" class="primary">Save post</button><button id="clearBtn">Clear content</button></div><p id="uploadProgress" class="notice" role="status" aria-live="polite"></p></div></section>
+</main></div>
 <script type="module">
 import { supabase } from "/assets/js/supabase.js";
 
@@ -409,6 +315,8 @@ if (!user || user.user_metadata.role !== "admin") {
   throw new Error("Not authorised");
 }
 
+document.getElementById("userLabel").textContent = user.email || "Admin";
+document.getElementById("signOutBtn").onclick = async () => { await supabase.auth.signOut(); window.location.href = "/admin/login/"; };
 /* ---------- DOM ---------- */
 const grid = document.getElementById("grid");
 const preview = document.getElementById("preview");
@@ -492,6 +400,7 @@ async function loadPosts(client) {
 
   if (error) {
     console.error("Load posts failed:", error);
+    document.getElementById("workspaceMessage").textContent = "Could not load posts. Refresh to try again.";
     return [];
   }
 
@@ -511,9 +420,12 @@ async function uploadFile(path, file) {
 }
 
 function showSlide(index) {
+  document.getElementById("slideCount").textContent = slides.length ? `${index + 1} / ${slides.length}` : "No media";
+  prevBtn.disabled = nextBtn.disabled = slides.length < 2;
   slides.forEach((el, i) => {
     el.classList.toggle("active", i === index);
     el.classList.toggle("prev", i < index);
+    if (el.tagName === "VIDEO") { if (i === index) el.play().catch(() => {}); else el.pause(); }
   });
 }
 
@@ -524,11 +436,11 @@ function createMediaElement(url) {
   if (cleanUrl.endsWith(".webm") || cleanUrl.endsWith(".mp4")) {
     el = document.createElement("video");
     el.src = url;
-    el.muted = false;
+    el.muted = true;
     el.playsInline = true;
     el.loop = true;
     el.autoplay = true;
-    el.controls = false;
+    el.controls = true;
   } else {
     el = document.createElement("img");
     el.src = url;
@@ -630,6 +542,18 @@ function renderMediaOrder() {
       renderMediaOrder();
     });
 
+    const controls = document.createElement("div");
+    controls.className = "media-move";
+    [-1, 1].forEach(direction => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = direction < 0 ? "←" : "→";
+      button.setAttribute("aria-label", `Move media ${index + 1} ${direction < 0 ? "earlier" : "later"}`);
+      button.disabled = index + direction < 0 || index + direction >= mediaItems.length;
+      button.onclick = () => { if (saveBtn.disabled) return; const [moved] = mediaItems.splice(index, 1); mediaItems.splice(index + direction, 0, moved); renderMediaOrder(); };
+      controls.appendChild(button);
+    });
+    tile.appendChild(controls);
     mediaOrder.appendChild(tile);
   });
 }
@@ -682,12 +606,13 @@ function renderLinkedInMedia(urls) {
 }
 
 function renderPostPreview(post) {
+  document.querySelectorAll(".preview video").forEach(video => video.pause());
   const platform = post?.platform || "instagram";
 
   setPreviewMode(platform);
 
   if (platform === "linkedin") {
-    linkedinBrand.textContent = currentClient;
+    linkedinBrand.textContent = clientSelect.selectedOptions[0].textContent;
     linkedinCaption.textContent = post?.caption || "";
     renderLinkedInMedia(post?.media_urls || []);
     return;
@@ -720,6 +645,7 @@ carousel.style.aspectRatio = aspectRatioMap[post?.aspect] || "4 / 5";
 carousel.style.maxHeight = maxHeightMap[post?.aspect] || "630px";
 
   captionEl.textContent = post?.caption || "";
+  showSlide(0);
 }
 
 /* ---------- DRAG & DROP SWAP ---------- */
@@ -780,11 +706,18 @@ async function swapSlots(slotA, slotB) {
 
 /* ---------- GRID RENDER ---------- */
 async function render(client) {
+  document.querySelectorAll("video").forEach(video => video.pause());
   grid.innerHTML = "";
+  document.getElementById("emptyPreview").hidden = false;
+  document.getElementById("emptyEditor").hidden = false;
+  document.getElementById("previewLabel").textContent = "No post selected";
+  document.getElementById("editorSlot").textContent = "—";
+  document.getElementById("workspaceMessage").textContent = "";
   preview.hidden = true;
   editor.hidden = true;
 
   const posts = await loadPosts(client);
+  document.getElementById("queueSummary").textContent = `${posts.length} posts · ${posts.filter(p => p.review_status === "approved").length} approved · ${posts.filter(p => p.review_status === "changes_requested").length} changes`;
   const slots = Array.from({ length: 12 }, (_, i) => i + 1);
 
   slots.forEach((slot) => {
@@ -794,8 +727,13 @@ async function render(client) {
     cell.className = "grid-cell";
     cell.draggable = true;
     cell.dataset.slot = slot;
+    cell.tabIndex = 0;
+    cell.setAttribute("role", "button");
+    cell.setAttribute("aria-label", `Slot ${slot}: ${post ? (post.review_status || "awaiting review").replaceAll("_", " ") : "empty"}`);
+    cell.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cell.click(); } });
 
     const img = document.createElement("img");
+    img.alt = `Slot ${slot} thumbnail`;
     img.src = post?.thumbnail_url || "/assets/empty.png";
     cell.appendChild(img);
 
@@ -824,6 +762,16 @@ async function render(client) {
     }
 
     cell.addEventListener("click", () => {
+      if (saveBtn.disabled) return;
+      grid.querySelectorAll(".grid-cell").forEach(c => { c.classList.toggle("selected", c === cell); c.setAttribute("aria-pressed", String(c === cell)); });
+      document.getElementById("emptyPreview").hidden = true;
+      document.getElementById("emptyEditor").hidden = true;
+      document.getElementById("previewLabel").textContent = `Post ${slot}`;
+      document.getElementById("editorSlot").textContent = `Slot ${slot}`;
+      document.getElementById("reviewStatus").textContent = !post ? "Empty slot" : post.review_status === "approved" ? "Approved" : post.review_status === "changes_requested" ? "Changes requested" : "Awaiting review";
+      document.getElementById("reviewFeedback").textContent = post?.review_feedback || "No client feedback.";
+      thumbInput.value = "";
+      uploadProgress.textContent = "";
       currentPost = {
         id: post?.id || null,
         client: currentClient,
@@ -839,6 +787,7 @@ async function render(client) {
       mediaInput.value = "";
       setExistingMediaItems(post?.media_urls || []);
 
+      if (window.matchMedia("(max-width: 760px)").matches) document.querySelector(".preview-panel").scrollIntoView({behavior: "smooth", block: "start"});
       renderPostPreview(post || {
         platform: "instagram",
         caption: "",
@@ -848,6 +797,7 @@ async function render(client) {
     });
 
     cell.addEventListener("dragstart", (e) => {
+      if (saveBtn.disabled) { e.preventDefault(); return; }
       dragSourceSlot = Number(slot);
       e.dataTransfer.effectAllowed = "move";
       e.dataTransfer.setData("text/plain", String(slot));
@@ -880,7 +830,7 @@ async function render(client) {
 
       console.log("Dropped", { sourceSlot, targetSlot });
 
-      if (!sourceSlot || sourceSlot === targetSlot) return;
+      if (saveBtn.disabled || !sourceSlot || sourceSlot === targetSlot) return;
 
       const success = await swapSlots(sourceSlot, targetSlot);
 
@@ -913,7 +863,11 @@ nextBtn.onclick = () => {
 /* ---------- SAVE ---------- */
 saveBtn.onclick = async () => {
   if (!currentPost) return;
-  uploadProgress.textContent = "0%";
+  saveBtn.disabled = clearBtn.disabled = addNewBtn.disabled = clientSelect.disabled = true;
+  editor.querySelectorAll("input, select, textarea").forEach(el => el.disabled = true);
+  uploadProgress.textContent = "Saving…";
+  document.querySelector(".admin-workspace").setAttribute("aria-busy", "true");
+  try {
 
   let existing = { thumbnail_url: null, media_urls: [] };
 
@@ -1041,11 +995,15 @@ saveBtn.onclick = async () => {
   thumbInput.value = "";
   uploadProgress.textContent = "";
   await render(currentClient);
+  document.getElementById("workspaceMessage").textContent = "Post saved.";
+  } catch (error) { uploadProgress.textContent = "Save failed. Please try again."; console.error(error); }
+  finally { document.querySelector(".admin-workspace").removeAttribute("aria-busy"); saveBtn.disabled = clearBtn.disabled = addNewBtn.disabled = clientSelect.disabled = false; editor.querySelectorAll("input, select, textarea").forEach(el => el.disabled = false); }
 };
 
 /* ---------- CLEAR ---------- */
 clearBtn.onclick = async () => {
   if (!currentPost) return;
+  if (!confirm("Clear this post’s caption and media? This removes its uploaded files.")) return;
 
   if (currentPost.id) {
     const { data: existing } = await supabase
@@ -1093,6 +1051,7 @@ clearBtn.onclick = async () => {
 
 /* ---------- SHIFT + NEW ---------- */
 addNewBtn.onclick = async () => {
+  if (!confirm("Add a post at slot 1 and shift the queue? Any post in slot 12 and its media will be removed.")) return;
   const posts = await loadPosts(currentClient);
 
   const slot12 = posts.find((p) => Number(p.slot) === 12);
@@ -1138,6 +1097,12 @@ addNewBtn.onclick = async () => {
   aspectSelect.value = "5:4";
   carousel.style.aspectRatio = "4 / 5";
 
+  document.getElementById("emptyPreview").hidden = true;
+  document.getElementById("emptyEditor").hidden = true;
+  document.getElementById("editorSlot").textContent = "Slot 1";
+  document.getElementById("previewLabel").textContent = "New post";
+  document.getElementById("reviewStatus").textContent = "New post";
+  document.getElementById("reviewFeedback").textContent = "Not yet shared for review.";
   currentPost = { id: null, client: currentClient, slot: 1 };
   preview.hidden = false;
   editor.hidden = false;
@@ -1170,6 +1135,7 @@ platformSelect.onchange = async () => {
 
 /* ---------- CLIENT CHANGE ---------- */
 clientSelect.onchange = () => {
+  thumbInput.value = "";
   currentClient = clientSelect.value;
   currentPost = null;
   clearMediaItemPreviews();
