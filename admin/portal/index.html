@@ -296,6 +296,7 @@
 <link rel="stylesheet" href="/assets/css/editorial.css">
 <link rel="stylesheet" href="/assets/css/facebook-preview.css">
 <link rel="stylesheet" href="/assets/css/calendar.css">
+<link rel="stylesheet" href="/assets/css/approved-grid.css">
 </head>
 <body>
 
@@ -805,6 +806,7 @@ async function render(client) {
 
     const cell = document.createElement("div");
     cell.className = "grid-cell";
+    cell.classList.toggle("is-approved", post?.review_status === "approved");
     cell.draggable = true;
     cell.dataset.slot = slot;
     cell.tabIndex = 0;
