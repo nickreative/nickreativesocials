@@ -29,3 +29,13 @@ Each saved client feedback submission with changes_requested creates a snapshot 
 The receipt queue is service-only, with an explicit service_role policy and no anon/authenticated grants. The feedback-receipt-email worker authenticates the existing private webhook secret, claims jobs atomically and uses Resend idempotency keys. Failed deliveries retry up to five times through feedback-receipt-retry every five minutes. Sent indicates provider acceptance; inbox delivery is not assumed. Replies are ordinary email and have no inbound CMS integration. The receipt email has plain text and HTML versions, a saved-content snapshot, AEST submission time and a post-specific portal link that survives login.
 
 Validation uses tests/feedback-receipt.test.mjs and rollback-only supabase/tests/feedback_receipts.sql. The Post 000 setup email was sent only to Nick's Hotmail address using sample data; no client feedback or posts were modified by that test.
+
+# Calendar rescheduling and date headings
+
+Admins can reschedule ideas with pointer drag/drop or Shift + arrows (one day horizontally, one week vertically). The save changes only idea_date and notify_clients=false, checks the prior updated_at to prevent overwriting concurrent edits, and preserves the original author and notes. Clients retain the existing date editor for their own ideas but do not receive drag controls.
+
+calendar-seasons.js provides 17 focused Australian messaging dates every year, including Gregorian Easter, Australian Mother's/Father's Day, four season starts, EOFY and Christmas/New Year. These are actual occasion dates for content planning, not a regional public-holiday closure calendar. Easter dates for 2026–2029 were checked against https://www.qld.gov.au/recreation/travel/holidays/public and season starts against https://www.bom.gov.au/news-and-media/solstices-equinoxes-and-the-seasons.
+
+Admins can override headings for the selected client's date through Date heading or the pencil beside a date. Blank text hides the default; Use seasonal default restores it. Clients see plain text beside the date, without editing controls. Overrides are stored in calendar_date_headers with protected admin-only writes and client-scoped reads. No date-heading emails are sent. Date headings are specific to that date/year; built-in dates recur automatically.
+
+Tests: tests/calendar-seasons.test.mjs and rollback-only supabase/tests/calendar_date_headings.sql. Sample UI checks cover pointer drag, keyboard year rollover, heading rename/hide/restore and client/mobile rendering.
