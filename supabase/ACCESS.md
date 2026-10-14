@@ -21,3 +21,11 @@ calendar_notifications is service-only: RLS is enabled and anon/authenticated ha
 The archived Calendar setup verification entry records the live admin-only email test. It is excluded from the visible calendar. No client test emails were sent.
 
 Calendar dates are all-day planning dates, not publication schedules. This feature does not publish to social networks. Tests: tests/calendar-model.test.mjs, tests/calendar-email.test.mjs and rollback-only supabase/tests/calendar_access.sql. Email unit tests require Node 24 TypeScript stripping support.
+
+# Feedback receipts
+
+Each saved client feedback submission with changes_requested creates a snapshot in feedback_receipts, including the post/caption/media, actual submitter's account email/name and server submission time. Only that submitter receives the receipt, with Reply-To set to nicholasgoodridge@hotmail.com. Approvals do not create feedback receipts. The existing post-review-email function also detects updated submissions when review_status stays unchanged, preserving admin visibility.
+
+The receipt queue is service-only, with an explicit service_role policy and no anon/authenticated grants. The feedback-receipt-email worker authenticates the existing private webhook secret, claims jobs atomically and uses Resend idempotency keys. Failed deliveries retry up to five times through feedback-receipt-retry every five minutes. Sent indicates provider acceptance; inbox delivery is not assumed. Replies are ordinary email and have no inbound CMS integration. The receipt email has plain text and HTML versions, a saved-content snapshot, AEST submission time and a post-specific portal link that survives login.
+
+Validation uses tests/feedback-receipt.test.mjs and rollback-only supabase/tests/feedback_receipts.sql. The Post 000 setup email was sent only to Nick's Hotmail address using sample data; no client feedback or posts were modified by that test.
