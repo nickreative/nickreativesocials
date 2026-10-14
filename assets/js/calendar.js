@@ -1,4 +1,5 @@
-import { localDate, monthCells, monthRange, canEditIdea } from './calendar-model.js';
+import { localDate, monthCells, canEditIdea } from './calendar-model.js';
+import {dateHeading, defaultDateHeading} from './calendar-seasons.js';
 
 export function createPortalCalendar({supabase,user,content,client,clientLabel,clientSelect}) {
   const admin=user.app_metadata?.role==='admin';
@@ -16,7 +17,7 @@ export function createPortalCalendar({supabase,user,content,client,clientLabel,c
   document.body.append(dialog);
   const form=dialog.querySelector('form'),fields=form.elements,credit=dialog.querySelector('.idea-credit'),error=dialog.querySelector('.idea-error'),save=dialog.querySelector('.idea-save'),archive=dialog.querySelector('.idea-archive');
   const message=host.querySelector('.calendar-message'),grid=host.querySelector('.calendar-month');
-  let selectedClient=client,view=new Date(),ideas=[],request=0,activeIdea=null,newId=null,opener=null,busy=false;
+  let selectedClient=client,view=new Date(),ideas=[],headings=[],request=0,activeIdea=null,newId=null,opener=null,busy=false;
   const calendarClient=admin?document.createElement('select'):null;
   if(admin){
     const label=document.createElement('label');label.append('Client ');
@@ -27,6 +28,18 @@ export function createPortalCalendar({supabase,user,content,client,clientLabel,c
     calendarClient.onchange=()=>{selectedClient=calendarClient.value;const value=selectedClient==='belmo'?'belmogroup':selectedClient;if(clientSelect.value!==value){clientSelect.value=value;clientSelect.dispatchEvent(new Event('change'));}else load();};
     clientSelect.addEventListener('change',()=>{calendarClient.value=clientSelect.value==='belmogroup'?'belmo':clientSelect.value;selectedClient=calendarClient.value;load();});
   }
+  const headingDialog=document.createElement('dialog');headingDialog.className='idea-dialog';headingDialog.setAttribute('aria-labelledby','date-heading-title');
+  headingDialog.innerHTML=`<form><h2 id="date-heading-title">Date heading</h2><label>Date<input name="date" type="date" required></label><label>Heading<input name="heading" maxlength="160" placeholder="Christmas Day"></label><p class="idea-notification-note">This heading is visible to the client beside the date number. Leave it blank to hide the heading for this date. Saving it does not send an email.</p><p class="idea-error" role="status"></p><div class="idea-actions"><button type="button" data-action="default">Use seasonal default</button><button type="button" data-action="cancel">Cancel</button><button type="submit" class="primary">Save heading</button></div></form>`;
+  if(admin){document.body.append(headingDialog);const addHeading=document.createElement('button');addHeading.type='button';addHeading.textContent='Date heading';addHeading.onclick=()=>openHeading(localDate(new Date()),addHeading);host.querySelector('.calendar-controls').append(addHeading);host.querySelector('.calendar-legend').textContent+=' Admins can drag ideas to another date, or use Shift + arrow keys on a focused idea to move it by a day or week.';}
+  let headingOpener=null;
+  function openHeading(date,button){if(!admin||busy)return;headingOpener=button;const f=headingDialog.querySelector('form');f.elements.date.value=date;f.elements.heading.value=dateHeading(date,headings);headingDialog.querySelector('.idea-error').textContent='';headingDialog.showModal();f.elements.heading.focus();}
+  headingDialog.querySelector('[data-action=cancel]').onclick=()=>headingDialog.close();
+  headingDialog.querySelector('[data-action=default]').onclick=()=>{const f=headingDialog.querySelector('form');f.elements.heading.value=defaultDateHeading(f.elements.date.value);};
+  headingDialog.querySelector('input[name=date]').onchange=async()=>{const f=headingDialog.querySelector('form'),date=f.elements.date.value,submit=f.querySelector('[type=submit]');f.elements.heading.value=dateHeading(date,headings);submit.disabled=true;try{const result=await supabase.from('calendar_date_headers').select('*').eq('client',selectedClient).eq('heading_date',date);if(result.error)throw result.error;if(f.elements.date.value!==date)return;headings=headings.filter(x=>x.heading_date!==date).concat(result.data||[]);f.elements.heading.value=dateHeading(date,headings);}catch{headingDialog.querySelector('.idea-error').textContent='Could not load the date heading. Close and reload Calendar before saving.';}finally{if(f.elements.date.value===date)submit.disabled=false;}};
+  headingDialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();});headingDialog.addEventListener('close',()=>headingOpener?.isConnected&&headingOpener.focus());
+  headingDialog.querySelector('form').onsubmit=async e=>{e.preventDefault();if(!admin||busy)return;const f=e.currentTarget,date=f.elements.date.value,payload={client:selectedClient,heading_date:date,heading:f.elements.heading.value.trim()},existing=headings.find(x=>x.heading_date===date);busy=true;f.querySelectorAll('button,input').forEach(x=>x.disabled=true);try{const result=existing?await supabase.from('calendar_date_headers').update({heading:payload.heading}).eq('client',selectedClient).eq('heading_date',date).eq('updated_at',existing.updated_at).select().single():await supabase.from('calendar_date_headers').insert(payload).select().single();if(result.error)throw result.error;view=new Date(`${date}T12:00:00`);headingDialog.close();await load();message.textContent='Date heading saved.';}catch{headingDialog.querySelector('.idea-error').textContent='Could not save the heading. Close and reload Calendar to check for changes before retrying.';}finally{busy=false;f.querySelectorAll('button,input').forEach(x=>x.disabled=false);}};
+  async function moveIdea(idea,date){if(!admin||busy||date===idea.idea_date)return;busy=true;host.setAttribute('aria-busy','true');host.querySelectorAll('button,select').forEach(x=>x.disabled=true);message.textContent='Moving idea…';try{const result=await supabase.from('calendar_ideas').update({idea_date:date,notify_clients:false}).eq('id',idea.id).eq('updated_at',idea.updated_at).select().single();if(result.error)throw result.error;view=new Date(`${date}T12:00:00`);await load();grid.querySelector(`[data-idea-id="${idea.id}"]`)?.focus();message.textContent='Idea moved. No client email was sent.';}catch{await load();message.textContent='Could not move this idea. Its date may have changed, or your connection was interrupted. Check the calendar before retrying.';}finally{busy=false;host.removeAttribute('aria-busy');host.querySelectorAll('button,select').forEach(x=>x.disabled=false);}}
+  function clearDrag(){grid.querySelectorAll('.is-drop-target,.is-dragging').forEach(el=>el.classList.remove('is-drop-target','is-dragging'));}
   function label(){return admin?calendarClient.selectedOptions[0]?.textContent:clientLabel;}
   function switchTab(calendar){
     if(busy)return;
@@ -43,21 +56,25 @@ export function createPortalCalendar({supabase,user,content,client,clientLabel,c
     host.querySelector('.calendar-client-label').textContent=`${label()} · Shared content planning`;
     grid.replaceChildren();
     for(const date of monthCells(view.getFullYear(),view.getMonth())){
-      const key=localDate(date),cell=document.createElement('div');cell.className='calendar-day';
+      const key=localDate(date),cell=document.createElement('div');cell.className='calendar-day';cell.dataset.date=key;
+
       if(date.getMonth()!==view.getMonth())cell.classList.add('is-outside');if(key===localDate(new Date()))cell.classList.add('is-today');
-      const b=document.createElement('button');b.type='button';b.className='calendar-date';b.textContent=date.getDate();b.setAttribute('aria-label',`Add idea for ${date.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`);b.onclick=()=>open(null,key,b);cell.onclick=e=>{if(e.target===cell)open(null,key,b);};cell.append(b);
+      const b=document.createElement('button');b.type='button';b.className='calendar-date';b.textContent=date.getDate();b.setAttribute('aria-label',`Add idea for ${date.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`);b.onclick=()=>open(null,key,b);cell.onclick=e=>{if(e.target===cell)open(null,key,b);};const dateRow=document.createElement('div');dateRow.className='calendar-date-row';dateRow.append(b);const heading=document.createElement('span');heading.className='calendar-date-heading';heading.textContent=dateHeading(key,headings);dateRow.append(heading);if(admin){const edit=document.createElement('button');edit.type='button';edit.className='calendar-heading-edit';edit.textContent='✎';edit.setAttribute('aria-label',`Edit date heading for ${key}`);edit.onclick=()=>openHeading(key,edit);dateRow.append(edit);}cell.append(dateRow);
       for(const idea of ideas.filter(x=>x.idea_date===key)){
-        const entry=document.createElement('button');entry.type='button';entry.className='calendar-idea';entry.dataset.ideaId=idea.id;const title=document.createElement('span');title.className='calendar-idea-title';title.textContent=idea.description;entry.append(title);const by=document.createElement('small');by.textContent=`${idea.author_role==='admin'?'Studio':'Client'} · ${idea.author_label}`;entry.append(by);entry.onclick=()=>open(idea,key,entry);entry.setAttribute('aria-label',`${idea.description}, by ${idea.author_label}`);cell.append(entry);
+        const entry=document.createElement('button');entry.type='button';entry.className='calendar-idea';entry.dataset.ideaId=idea.id;const title=document.createElement('span');title.className='calendar-idea-title';title.textContent=idea.description;entry.append(title);const by=document.createElement('small');by.textContent=`${idea.author_role==='admin'?'Studio':'Client'} · ${idea.author_label}`;entry.append(by);entry.onclick=()=>open(idea,key,entry);entry.setAttribute('aria-label',`${idea.description}, by ${idea.author_label}`);if(admin){entry.dataset.draggable='true';entry.draggable=false;entry.title='Drag to another date; Shift + arrow keys also move this idea';entry.onkeydown=e=>{if(e.shiftKey&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();e.stopPropagation();const delta={ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[e.key],date=new Date(`${idea.idea_date}T12:00:00`);date.setDate(date.getDate()+delta);moveIdea(idea,localDate(date));}};
+        let touchStart=null,touchMoved=false,suppressClick=false;entry.addEventListener('pointerdown',e=>{if((e.pointerType==='mouse'&&e.button!==0)||busy)return;touchStart={x:e.clientX,y:e.clientY};touchMoved=false;entry.setPointerCapture(e.pointerId);});entry.addEventListener('pointermove',e=>{if(!touchStart)return;if(Math.hypot(e.clientX-touchStart.x,e.clientY-touchStart.y)>8)touchMoved=true;if(touchMoved){entry.classList.add('is-dragging');grid.querySelectorAll('.is-drop-target').forEach(x=>x.classList.remove('is-drop-target'));document.elementFromPoint(e.clientX,e.clientY)?.closest('.calendar-day')?.classList.add('is-drop-target');}});entry.addEventListener('pointerup',e=>{if(!touchStart)return;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.calendar-day');touchStart=null;if(touchMoved){suppressClick=true;clearDrag();if(target&&grid.contains(target))moveIdea(idea,target.dataset.date);setTimeout(()=>suppressClick=false,500);}});entry.addEventListener('pointercancel',()=>{touchStart=null;clearDrag();});entry.onclick=e=>{if(suppressClick){e.preventDefault();return;}open(idea,key,entry);};}
+        cell.append(entry);
       }
       grid.append(cell);
     }
   }
   async function load(){
-    const token=++request,[start,end]=monthRange(view.getFullYear(),view.getMonth());
-    ideas=[];render();message.textContent='Loading ideas…';
+    const token=++request,cells=monthCells(view.getFullYear(),view.getMonth()),start=localDate(cells[0]),after=new Date(cells.at(-1));after.setDate(after.getDate()+1);const end=localDate(after);
+    ideas=[];headings=[];clearDrag();render();message.textContent='Loading ideas…';
     try{
-      const {data,error:loadError}=await supabase.from('calendar_ideas').select('*').eq('client',selectedClient).is('archived_at',null).gte('idea_date',start).lt('idea_date',end).order('created_at');
-      if(token!==request)return;if(loadError)throw loadError;ideas=data||[];render();message.textContent=ideas.length?`${ideas.length} ${ideas.length===1?'idea':'ideas'} this month`:'No ideas this month yet. Select a date to start planning.';
+      const [ideaResult,headingResult]=await Promise.all([supabase.from('calendar_ideas').select('*').eq('client',selectedClient).is('archived_at',null).gte('idea_date',start).lt('idea_date',end).order('created_at'),supabase.from('calendar_date_headers').select('*').eq('client',selectedClient).gte('heading_date',start).lt('heading_date',end)]);
+      const {data,error:loadError}=ideaResult;
+      if(token!==request)return;if(loadError||headingResult.error)throw loadError||headingResult.error;ideas=data||[];headings=headingResult.data||[];render();const count=ideas.filter(x=>x.idea_date.slice(0,7)===localDate(view).slice(0,7)).length;message.textContent=count?`${count} ${count===1?'idea':'ideas'} this month`:'No ideas this month yet. Select a date to start planning.';
     }catch{if(token===request)message.textContent='Could not load the calendar. Select Calendar again to retry.';}
   }
   function open(idea,date,button){
