@@ -1,0 +1,11 @@
+.grid-item.is-approved::after,
+.grid-cell.is-approved::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(112, 58, 69, 0.30);
+  pointer-events: none;
+  z-index: 2;
+}
+.grid-cell .slot-label,
+.grid-cell .review-badge { z-index: 3; }

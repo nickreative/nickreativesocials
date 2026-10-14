@@ -804,6 +804,7 @@
   </style>
   <link rel="stylesheet" href="/assets/css/facebook-preview.css">
 <link rel="stylesheet" href="/assets/css/calendar.css">
+<link rel="stylesheet" href="/assets/css/approved-grid.css">
 </head>
 <body>
   <div class="page">
@@ -1214,6 +1215,7 @@ import { createPortalCalendar } from "/assets/js/calendar.js";
     function updateGridBadge(post) {
       const item = grid.querySelector(`[data-post-id="${post.id}"]`);
       if (!item) return;
+      item.classList.toggle("is-approved", post.review_status === "approved");
       item.querySelector(".status-badge")?.remove();
       item.appendChild(makeStatusBadge(post));
     }
@@ -1269,6 +1271,7 @@ import { createPortalCalendar } from "/assets/js/calendar.js";
 
       const item = document.createElement("div");
       item.className = "grid-item";
+      item.classList.toggle("is-approved", post.review_status === "approved");
       item.dataset.postId = post.id;
       item.tabIndex = 0;
       item.setAttribute("role", "button");
