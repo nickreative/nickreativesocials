@@ -938,7 +938,7 @@ import { createPortalCalendar } from "/assets/js/calendar.js";
     const user = sessionData?.session?.user;
 
     if (!user || user.app_metadata?.role !== "client") {
-      window.location.href = location.hash === "#calendar" ? "/login/?next=calendar" : "/login/";
+      window.location.href = location.hash === "#calendar" ? "/login/?next=calendar" : new URLSearchParams(location.search).get("post") ? `/login/?next=review&post=${encodeURIComponent(new URLSearchParams(location.search).get("post"))}` : "/login/";
       throw new Error("Not authorised");
     }
 
@@ -1355,7 +1355,7 @@ import { createPortalCalendar } from "/assets/js/calendar.js";
       updateReviewPanel(currentPost);
       feedbackMessage.textContent = status === "approved"
         ? "Approval saved."
-        : "Feedback saved and changes requested.";
+        : "Your feedback has been received and saved. A receipt will be emailed to you for your records.";
       feedbackInput.disabled = false;
     }
 
@@ -1397,8 +1397,10 @@ import { createPortalCalendar } from "/assets/js/calendar.js";
     });
 
     if (postList.length) {
-      const firstItem = grid.querySelector(".grid-item");
-      selectPost(postList[0], firstItem, false);
+      const linkedPost = new URLSearchParams(location.search).get("post");
+      const selectedPost = postList.find(post => post.id === linkedPost) || postList[0];
+      const selectedItem = [...grid.querySelectorAll(".grid-item")].find(item => item.dataset.postId === selectedPost.id);
+      selectPost(selectedPost, selectedItem, false);
     } else {
       document.getElementById("postCount").textContent = "No posts";
       emptyPreview.textContent = "There are currently no posts awaiting review.";
