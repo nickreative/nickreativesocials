@@ -803,6 +803,7 @@
     }
   </style>
   <link rel="stylesheet" href="/assets/css/facebook-preview.css">
+<link rel="stylesheet" href="/assets/css/calendar.css">
 </head>
 <body>
   <div class="page">
@@ -931,12 +932,13 @@
   <script type="module">
     import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-preview.js";
     import { supabase } from "/assets/js/supabase.js";
+import { createPortalCalendar } from "/assets/js/calendar.js";
 
     const { data: sessionData } = await supabase.auth.refreshSession();
     const user = sessionData?.session?.user;
 
     if (!user || user.app_metadata?.role !== "client") {
-      window.location.href = "/login/";
+      window.location.href = location.hash === "#calendar" ? "/login/?next=calendar" : "/login/";
       throw new Error("Not authorised");
     }
 
@@ -958,6 +960,8 @@
     document.getElementById("clientHeading").textContent = clientLabel;
     document.getElementById("userLabel").textContent =
       user.user_metadata?.name || user.email || "Client access";
+
+    createPortalCalendar({supabase,user,content:document.querySelector(".workspace"),client,clientLabel});
 
     const { data: posts, error } = await supabase
       .from("posts")

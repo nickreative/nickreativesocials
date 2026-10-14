@@ -32,7 +32,7 @@
     const meta = data.user.app_metadata;
 
     if (meta.role === "client") {
-      window.location.href = `/client/portal/?client=${meta.client}`;
+      window.location.href = `/client/portal/?client=${encodeURIComponent(meta.client)}${new URLSearchParams(location.search).get("next") === "calendar" ? "#calendar" : ""}`;
     } else {
       errorEl.textContent = "Not a client account.";
     }

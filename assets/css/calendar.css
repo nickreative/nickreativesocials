@@ -1,0 +1,43 @@
+.portal-tabs{display:flex;gap:0;border-bottom:1px solid var(--ink,#703a45);margin:0 0 24px;overflow-x:auto}
+.portal-tabs button{border:0;background:transparent;color:#703a45;padding:15px 24px;font:inherit;font-size:13px;letter-spacing:.05em;white-space:nowrap;border-bottom:3px solid transparent;cursor:pointer}
+.portal-tabs button[aria-selected=true]{border-bottom-color:#703a45;background:#f8f3ec;font-weight:700}
+[hidden]{display:none!important}
+.calendar-panel{background:#f8f3ec;border:1px solid rgba(84,40,50,.22);color:#542832;font-family:Helvetica,Arial,sans-serif}
+.calendar-toolbar{padding:24px;display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(84,40,50,.22)}
+.calendar-toolbar h2{font-family:Didot,'Bodoni MT',Georgia,serif;font-size:30px;margin:0 0 5px;font-weight:400}
+.calendar-toolbar p{margin:0;font-size:13px;line-height:1.5;color:#765a55}
+.calendar-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.calendar-panel button,.idea-dialog button{font-family:inherit;font-size:13px;border:1px solid #b49a91;background:transparent;color:#542832;padding:10px 14px;cursor:pointer;border-radius:0}
+.calendar-panel button:hover,.idea-dialog button:hover{background:#eee1d4}
+.calendar-panel button:focus-visible,.idea-dialog button:focus-visible{outline:2px solid #703a45;outline-offset:2px}
+.calendar-panel button.primary,.idea-dialog button.primary{background:#703a45;border-color:#703a45;color:#fff}
+.calendar-client label{display:flex;align-items:center;gap:8px;font-size:13px}
+.calendar-client select{padding:10px;font:inherit;border:1px solid #b49a91;background:#fffaf5;color:#542832;border-radius:0}
+.calendar-weekdays,.calendar-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.calendar-weekdays span{padding:12px 8px;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:.08em;background:#ece1d5}
+.calendar-day{min-height:135px;border-right:1px solid #ddcfc3;border-top:1px solid #ddcfc3;padding:7px;min-width:0}
+.calendar-day:nth-child(7n){border-right:0}
+.calendar-day.is-outside{background:#eee6dc;color:#998579}
+.calendar-panel .calendar-date{border:0;padding:5px 7px;display:block;margin-bottom:5px;font-weight:700;font-size:12px}
+.calendar-day.is-today .calendar-date{background:#703a45;color:white}
+.calendar-panel .calendar-idea{display:block;width:100%;text-align:left;padding:8px 7px;background:#eadacf;border:0;border-left:3px solid #703a45;font-size:12px;margin-bottom:5px;overflow-wrap:anywhere;line-height:1.4}
+.calendar-idea small{display:block;font-size:10px;color:#785b54;margin-top:4px}
+.calendar-legend{padding:14px 24px;font-size:12px;color:#765a55;line-height:1.5;margin:0}
+.calendar-message{padding:0 24px;font-size:13px;line-height:1.5}
+.calendar-message:empty{display:none}
+.idea-dialog{box-sizing:border-box;width:min(560px,calc(100% - 24px));max-height:calc(100dvh - 24px);padding:0;border:1px solid #703a45;background:#f8f3ec;color:#542832;border-radius:0;font-family:Helvetica,Arial,sans-serif}
+.idea-dialog::backdrop{background:rgba(45,25,30,.6)}
+.idea-dialog form{padding:24px;display:grid;gap:16px}
+.idea-dialog h2{margin:0;font-family:Didot,'Bodoni MT',Georgia,serif;font-weight:400;font-size:30px}
+.idea-dialog label{display:grid;gap:7px;font-size:13px}
+.idea-dialog input,.idea-dialog textarea{box-sizing:border-box;width:100%;font:inherit;color:#542832;padding:11px;border:1px solid #b49a91;background:#fffaf5;border-radius:0}
+.idea-dialog textarea{resize:vertical;min-height:95px}
+.idea-dialog .idea-notify{display:flex;gap:9px;align-items:center;line-height:1.5}
+.idea-notify input{width:16px;height:16px;accent-color:#703a45}
+.idea-credit,.idea-notification-note{font-size:12px;line-height:1.5;margin:0;color:#765a55}
+.idea-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.idea-actions .idea-archive{margin-right:auto}
+.idea-error{margin:0;color:#9a2236;font-size:13px;line-height:1.5}
+@media(max-width:760px){.calendar-toolbar{padding:16px;gap:14px}.calendar-day{min-height:95px;padding:3px}.calendar-weekdays span{font-size:10px;letter-spacing:0;padding:10px 2px}.calendar-panel .calendar-idea{padding:5px 3px;font-size:10px;line-height:1.3}.calendar-idea small{display:none}.calendar-panel .calendar-date{padding:5px;font-size:11px}.calendar-toolbar h2{font-size:26px}.calendar-controls{gap:5px}.calendar-controls button{padding:9px 11px}.portal-tabs button{padding:13px 18px}.calendar-legend{padding:14px 16px}.idea-dialog form{padding:20px}}
+
+.calendar-idea-title{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
