@@ -1,0 +1,38 @@
+/* Portfolio studio only; the public portfolio and client portals are unaffected. */
+.portfolio-studio main{padding-bottom:100px}
+.portfolio-studio .admin-intro{padding:34px 0 8px}
+.portfolio-studio .panel{padding:16px 20px;margin:12px 0}
+.portfolio-studio summary{cursor:pointer;font-size:14px}
+.upload-panel[open] summary{margin-bottom:20px}
+.studio-gallery-bar{flex-wrap:wrap}
+.studio-gallery-bar h2{font-size:20px;font-weight:400;margin:0 0 5px}
+.studio-layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;align-items:start;gap:26px}
+.admin-gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.photo-tile{padding:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;text-align:left;min-width:0;background:#fff;position:relative;cursor:grab;touch-action:manipulation}
+.photo-tile[aria-pressed=true]{outline:2px solid #49553e;outline-offset:2px}
+.photo-tile.is-dirty::after{content:'';position:absolute;top:9px;right:9px;width:10px;height:10px;border-radius:50%;background:#a65c25;border:2px solid #fff}
+.photo-tile.is-dragging{opacity:.4}
+.photo-tile.drop-target{outline:3px dashed #49553e;outline-offset:3px}
+.tile-stage{display:flex;align-items:center;justify-content:center;aspect-ratio:4/3;background:#eeede7;padding:5px;pointer-events:none}
+.tile-stage img{width:100%;height:100%;object-fit:contain;min-height:0}
+.tile-stage img:not([src]){visibility:hidden}
+.tile-caption{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;pointer-events:none}
+.tile-name{font-size:12px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.tile-state{font-size:10px;color:var(--muted);flex-shrink:0}
+.photo-editor{position:sticky;top:20px;background:#f2f1eb;border:1px solid var(--line);padding:20px;min-width:0}
+.photo-editor h2{font-size:17px;font-weight:400;margin:0 0 16px}
+.editor-preview{display:block;width:100%;max-height:190px;object-fit:contain;margin-bottom:20px;background:#e9e7e0}
+.detail-fields{display:flex;flex-direction:column;gap:16px}
+.detail-fields label{display:flex;flex-direction:column;gap:7px}
+.detail-fields label:has(input[type=checkbox]){flex-direction:row;align-items:center;gap:12px}
+.detail-fields textarea{font:inherit;padding:10px;border:1px solid var(--line);resize:vertical;width:100%;background:#fff;color:inherit}
+.detail-fields input,.detail-fields select{width:100%}
+.detail-fields input[type=checkbox]{width:auto}
+.master-save-bar{position:fixed;bottom:0;left:0;right:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 4vw;border-top:1px solid var(--line);background:#faf9f6;box-shadow:0 -3px 14px #24231f0c;font-size:13px}
+.master-save-bar .primary{min-width:155px}
+.portfolio-studio .empty{grid-column:1/-1}
+@media(max-width:1200px){.admin-gallery{grid-template-columns:repeat(3,minmax(0,1fr))}.studio-layout{grid-template-columns:minmax(0,1fr) 275px;gap:20px}}
+@media(max-width:900px){.admin-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-layout{grid-template-columns:minmax(0,1fr) 260px;gap:16px}.tile-caption{flex-direction:column;align-items:start;gap:4px}}
+@media(max-width:650px){.studio-layout{grid-template-columns:1fr}.photo-editor{position:static;grid-row:1}.photo-editor:has(.editor-preview){max-height:60dvh;overflow:auto}.admin-gallery{gap:12px}.tile-caption{padding:8px}.master-save-bar{padding:12px 6vw;font-size:12px}.master-save-bar .primary{min-width:125px;padding:12px}.studio-gallery-bar .toolbar{gap:10px}.studio-gallery-bar .toolbar label{font-size:12px}.studio-gallery-bar select{max-width:145px}.editor-preview{max-height:100px}.detail-fields{gap:12px}.photo-editor{padding:15px}}
+.delete-photo{margin-top:20px;border:0;padding:0;color:#8d4537;font-size:12px;text-decoration:underline}
+@media(min-width:651px){.photo-editor{max-height:calc(100dvh - 120px);overflow:auto}}

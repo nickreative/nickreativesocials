@@ -33,7 +33,7 @@
 
     if (meta.role === "admin") {
       const params = new URLSearchParams(location.search);
-      window.location.href = params.get("next") === "calendar" ? `/admin/portal/?calendar_client=${encodeURIComponent(params.get("client") || "")}#calendar` : "/admin/portal/";
+      window.location.href = params.get("next") === "portfolio" ? "/admin/portfolio/" : params.get("next") === "calendar" ? `/admin/portal/?calendar_client=${encodeURIComponent(params.get("client") || "")}#calendar` : "/admin/portal/";
     } else {
       errorEl.textContent = "Not an admin account.";
     }
