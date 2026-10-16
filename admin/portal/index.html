@@ -297,18 +297,20 @@
 <link rel="stylesheet" href="/assets/css/facebook-preview.css">
 <link rel="stylesheet" href="/assets/css/calendar.css">
 <link rel="stylesheet" href="/assets/css/approved-grid.css">
+<link rel="stylesheet" href="/assets/css/post-download.css">
 </head>
 <body>
 
 <div class="page"><header class="topbar"><div class="brand-block"><h1 class="brand">Nickreative</h1><span class="product-name">Socials · Admin studio</span></div><div class="account-block"><span id="userLabel"></span><button id="signOutBtn" type="button" class="text-button">Sign out</button></div></header>
 <main class="admin-workspace">
 <section class="panel queue-panel" aria-label="Content queue"><div class="panel-heading"><h2>Content queue</h2><span class="panel-meta">12 slots</span></div><div class="queue-controls"><label>Client<select id="clientSelect"><option value="suitecollection">Suite Collection</option><option value="pocky">Pocky</option><option value="vicalates">Vicalates</option><option value="livencommunities">Liven Communities</option><option value="belmogroup">Belmo Group</option></select></label><button id="addNewBtn" class="primary" type="button">Add post at the top</button><p class="help">Shifts the queue down one slot. If slot 12 is occupied, that post is removed.</p></div><div id="queueSummary" class="summary" aria-live="polite"></div><p id="workspaceMessage" class="notice" role="status"></p><div class="grid" id="grid"></div><p class="help legend">✓ Approved · ? Changes · NEW Awaiting review<br>Select a slot to edit. Drag slots to swap their order.</p></section>
-<section class="panel preview-panel" aria-label="Post preview"><div class="panel-heading"><h2>Preview</h2><span id="previewLabel" class="panel-meta">No post selected</span></div><div id="adminVersions" class="preview-versions" hidden aria-label="Post versions"><button id="primaryVersionBtn" type="button" class="version-button" aria-pressed="true">Instagram</button><button id="facebookVersionBtn" type="button" class="version-button" aria-pressed="false">Facebook</button><p class="fb-version-note">Preview your current edits. Both versions share the caption and approval.</p></div><div id="emptyPreview">Select a post from the queue to preview its media and caption.</div><div class="preview" id="preview" hidden><div id="facebookPreview" hidden></div><div id="instagramPreview"><div id="carousel" class="carousel"></div><div class="carousel-controls"><button id="prevSlide" aria-label="Previous slide">←</button><span id="slideCount" class="panel-meta"></span><button id="nextSlide" aria-label="Next slide">→</button></div><p id="caption"></p></div><div id="linkedinPreview" hidden><div class="linkedin-card"><div class="linkedin-header"><div class="linkedin-avatar">N</div><div class="linkedin-meta"><strong id="linkedinBrand">Client Preview</strong><br><span>Preview only</span></div></div><div id="linkedinCaption" class="linkedin-caption"></div><div id="linkedinMedia" class="linkedin-media"></div></div></div></div></section>
+<section class="panel preview-panel" aria-label="Post preview"><div class="panel-heading"><h2>Preview</h2><span id="previewLabel" class="panel-meta">No post selected</span><button id="downloadPostBtn" class="download-post-button" type="button" hidden>Download post ↓</button></div><div id="adminVersions" class="preview-versions" hidden aria-label="Post versions"><button id="primaryVersionBtn" type="button" class="version-button" aria-pressed="true">Instagram</button><button id="facebookVersionBtn" type="button" class="version-button" aria-pressed="false">Facebook</button><p class="fb-version-note">Preview your current edits. Both versions share the caption and approval.</p></div><div id="emptyPreview">Select a post from the queue to preview its media and caption.</div><div class="preview" id="preview" hidden><div id="facebookPreview" hidden></div><div id="instagramPreview"><div id="carousel" class="carousel"></div><div class="carousel-controls"><button id="prevSlide" aria-label="Previous slide">←</button><span id="slideCount" class="panel-meta"></span><button id="nextSlide" aria-label="Next slide">→</button></div><p id="caption"></p></div><div id="linkedinPreview" hidden><div class="linkedin-card"><div class="linkedin-header"><div class="linkedin-avatar">N</div><div class="linkedin-meta"><strong id="linkedinBrand">Client Preview</strong><br><span>Preview only</span></div></div><div id="linkedinCaption" class="linkedin-caption"></div><div id="linkedinMedia" class="linkedin-media"></div></div></div></div></section>
 <section class="panel editor-panel" aria-label="Content editor"><div class="panel-heading"><h2>Post details</h2><span id="editorSlot" class="panel-meta">—</span></div><div id="emptyEditor">Select an existing post or an empty slot to start editing.</div><div id="editor" class="panel-body" hidden><div class="review-details"><span class="eyebrow">Client review</span><strong id="reviewStatus"></strong><p id="reviewFeedback"></p></div><label>Platform<select id="platformSelect"><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option></select></label><label>Format<select id="aspectSelect"><option value="5:4">Portrait · 4:5</option><option value="9:16">Reel · 9:16</option><option value="16:9">Landscape · 16:9</option></select></label><label>Caption<textarea id="captionInput" rows="6" placeholder="Write the post caption…"></textarea></label><label>Queue thumbnail<input type="file" id="thumbInput" accept="image/*"></label><section class="media-section"><h3 id="primaryMediaHeading">Instagram media</h3><label>Images and videos<input type="file" id="mediaInput" accept="image/*,video/*" multiple></label><p class="help">Selecting media replaces the existing carousel when you save.</p><div class="media-order-wrap" id="mediaOrderWrap" hidden><p class="media-order-help">Drag media or use the arrows to change its order.</p><div class="media-order" id="mediaOrder"></div></div></section><section class="media-section"><h3>Facebook media · stills only</h3><label class="fb-reuse"><input type="checkbox" id="facebookReuse" checked>Reuse photos from the primary version</label><p class="help">Videos are omitted. Upload a separate set of exported stills when Facebook needs different content.</p><div id="facebookCustom" hidden><label>Facebook stills<input type="file" id="facebookInput" accept="image/*" multiple></label><p class="help">Selecting files replaces the Facebook set when you save. Use the arrows to arrange them.</p><div id="facebookOrder" class="fb-order"></div></div><p id="facebookMessage" class="notice" role="status"></p></section><div class="editor-actions"><button id="saveBtn" class="primary">Save post</button><button id="clearBtn">Clear content</button></div><p id="uploadProgress" class="notice" role="status" aria-live="polite"></p></div></section>
 </main></div>
 <script type="module">
 import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-preview.js";
 import { supabase } from "/assets/js/supabase.js";
+import { createPostDownload } from "/assets/js/post-download.js";
 import { createPortalCalendar } from "/assets/js/calendar.js";
 
 /* ---------- AUTH ---------- */
@@ -368,6 +370,16 @@ const facebookReuse = document.getElementById("facebookReuse");
 const facebookOrder = document.getElementById("facebookOrder");
 const facebookMessage = document.getElementById("facebookMessage");
 const facebookView = createFacebookPreview(document.getElementById("facebookPreview"));
+
+const downloadPostBtn = document.getElementById("downloadPostBtn");
+createPostDownload(downloadPostBtn, () => {
+  if (!currentPost) return null;
+  const items = viewingFacebook ? (facebookReuse.checked ? mediaItems.filter(item => !isVideoItem(item)) : facebookItems) : mediaItems;
+  const platform = viewingFacebook ? "facebook" : platformSelect.value;
+  return {client:currentClient, clientLabel:clientSelect.selectedOptions[0].textContent, slot:currentPost.slot,
+    version:platform, versionLabel:platform === "facebook" ? "Facebook" : platform === "linkedin" ? "LinkedIn" : "Instagram",
+    caption:captionInput.value, media:items.map(item => ({url:mediaItemSource(item),name:item.file?.name,type:item.file?.type}))};
+});
 
 function clearFacebookItems() {
   facebookItems.forEach(item => { if (item.previewUrl) URL.revokeObjectURL(item.previewUrl); });
@@ -675,6 +687,7 @@ function renderPostPreview(post) {
   document.querySelectorAll(".preview video").forEach(video => video.pause());
   const platform = post?.platform || "instagram";
   selectedPreviewPost = post;
+  downloadPostBtn.hidden = false;
   document.getElementById("adminVersions").hidden = false;
   document.getElementById("primaryVersionBtn").textContent = platform === "linkedin" ? "LinkedIn" : "Instagram";
   document.getElementById("primaryMediaHeading").textContent = platform === "linkedin" ? "LinkedIn media" : "Instagram media";
@@ -788,6 +801,7 @@ async function render(client) {
   clearFacebookItems();
   facebookView.close();
   document.getElementById("adminVersions").hidden = true;
+  downloadPostBtn.hidden = true;
   grid.innerHTML = "";
   document.getElementById("emptyPreview").hidden = false;
   document.getElementById("emptyEditor").hidden = false;

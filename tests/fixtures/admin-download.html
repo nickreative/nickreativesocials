@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"><title>Nickreative — Admin Portal</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      padding: 24px;
+    }
+    select {
+      margin-bottom: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-template-rows: repeat(4, 150px);
+      gap: 6px;
+    }
+    .grid-cell {
+      position: relative;
+      width: 120px;
+      height: 150px;
+      cursor: grab;
+    }
+    .grid-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      aspect-ratio: 5 / 4;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+    }
+    .grid-cell.dragging {
+      opacity: 0.4;
+      cursor: grabbing;
+    }
+    .grid-cell.drag-over {
+      outline: 2px dashed #555;
+      outline-offset: -2px;
+    }
+    .slot-label {
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 4px;
+      border-radius: 2px;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .review-badge {
+      position: absolute;
+      right: 6px;
+      bottom: 6px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(0,0,0,0.28);
+      color: #222;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .review-badge.new {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .preview {
+      margin-top: 24px;
+      max-width: 630px;
+    }
+    #caption {
+      white-space: pre-line;
+    }
+    .preview img {
+      width: 100%;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .carousel {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid #ccc;
+      aspect-ratio: 4 / 5;
+    }
+    .carousel img,
+    .carousel video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: translateX(100%);
+      transition: transform 0.35s ease;
+    }
+    .carousel .active {
+      transform: translateX(0);
+    }
+    .carousel .prev {
+      transform: translateX(-100%);
+    }
+    .carousel-controls {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 520px;
+      gap: 32px;
+      align-items: start;
+    }
+    .preview {
+      height: auto;
+    }
+    .carousel {
+      height: auto;
+    }
+    #linkedinCaption,
+    #caption {
+      white-space: pre-line;
+    }
+    .linkedin-card {
+      width: 100%;
+      border: 1px solid #d9d9d9;
+      background: #fff;
+    }
+    .linkedin-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px 12px;
+    }
+    .linkedin-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .linkedin-meta {
+      font-size: 14px;
+      line-height: 1.3;
+    }
+    .linkedin-meta span {
+      color: #666;
+      font-size: 12px;
+    }
+    .linkedin-caption {
+      padding: 0 16px 16px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+    .linkedin-media {
+      display: grid;
+      gap: 2px;
+      background: #fff;
+    }
+    .linkedin-media.one { grid-template-columns: 1fr; }
+    .linkedin-media.two { grid-template-columns: 1fr 1fr; }
+    .linkedin-media.three { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr); }
+    .linkedin-media.four-plus { grid-template-columns: 2fr 1fr; grid-template-rows: repeat(3, 1fr); }
+    .linkedin-tile {
+      position: relative;
+      overflow: hidden;
+      background: #f3f3f3;
+      min-height: 160px;
+    }
+    .linkedin-tile img,
+    .linkedin-tile video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .linkedin-media.three .linkedin-tile:first-child { grid-row: 1 / 3; }
+    .linkedin-media.four-plus .linkedin-tile:first-child { grid-row: 1 / 4; }
+    .linkedin-more {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.38);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 600;
+    }
+    .media-order-wrap {
+      margin-top: 12px;
+    }
+
+    .media-order-help {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .media-order {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .media-order-item {
+      position: relative;
+      width: 88px;
+      height: 110px;
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      cursor: grab;
+      overflow: hidden;
+    }
+
+    .media-order-item.dragging {
+      opacity: 0.4;
+      cursor: grabbing;
+    }
+
+    .media-order-item.drag-over {
+      outline: 2px dashed #555;
+      outline-offset: -2px;
+    }
+
+    .media-order-item img,
+    .media-order-item video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .media-order-number {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 4px;
+      border-radius: 9px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .media-order-type {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      padding: 2px 5px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      font-size: 9px;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+
+    #uploadProgress {
+      font-size: 14px;
+      color: #555;
+    }
+    .left-column {
+      width: 380px;
+    }
+    #editor {
+      margin-top: 24px;
+    }
+  </style>
+<link rel="stylesheet" href="/assets/css/editorial.css">
+<link rel="stylesheet" href="/assets/css/facebook-preview.css">
+<link rel="stylesheet" href="/assets/css/calendar.css">
+<link rel="stylesheet" href="/assets/css/approved-grid.css">
+<link rel="stylesheet" href="/assets/css/post-download.css">
+</head>
+<body>
+
+<div class="page"><header class="topbar"><div class="brand-block"><h1 class="brand">Nickreative</h1><span class="product-name">Socials · Admin studio</span></div><div class="account-block"><span id="userLabel"></span><button id="signOutBtn" type="button" class="text-button">Sign out</button></div></header>
+<main class="admin-workspace">
+<section class="panel queue-panel" aria-label="Content queue"><div class="panel-heading"><h2>Content queue</h2><span class="panel-meta">12 slots</span></div><div class="queue-controls"><label>Client<select id="clientSelect"><option value="suitecollection">Suite Collection</option><option value="pocky">Pocky</option><option value="vicalates">Vicalates</option><option value="livencommunities">Liven Communities</option><option value="belmogroup">Belmo Group</option></select></label><button id="addNewBtn" class="primary" type="button">Add post at the top</button><p class="help">Shifts the queue down one slot. If slot 12 is occupied, that post is removed.</p></div><div id="queueSummary" class="summary" aria-live="polite"></div><p id="workspaceMessage" class="notice" role="status"></p><div class="grid" id="grid"></div><p class="help legend">✓ Approved · ? Changes · NEW Awaiting review<br>Select a slot to edit. Drag slots to swap their order.</p></section>
+<section class="panel preview-panel" aria-label="Post preview"><div class="panel-heading"><h2>Preview</h2><span id="previewLabel" class="panel-meta">No post selected</span><button id="downloadPostBtn" class="download-post-button" type="button" hidden>Download post ↓</button></div><div id="adminVersions" class="preview-versions" hidden aria-label="Post versions"><button id="primaryVersionBtn" type="button" class="version-button" aria-pressed="true">Instagram</button><button id="facebookVersionBtn" type="button" class="version-button" aria-pressed="false">Facebook</button><p class="fb-version-note">Preview your current edits. Both versions share the caption and approval.</p></div><div id="emptyPreview">Select a post from the queue to preview its media and caption.</div><div class="preview" id="preview" hidden><div id="facebookPreview" hidden></div><div id="instagramPreview"><div id="carousel" class="carousel"></div><div class="carousel-controls"><button id="prevSlide" aria-label="Previous slide">←</button><span id="slideCount" class="panel-meta"></span><button id="nextSlide" aria-label="Next slide">→</button></div><p id="caption"></p></div><div id="linkedinPreview" hidden><div class="linkedin-card"><div class="linkedin-header"><div class="linkedin-avatar">N</div><div class="linkedin-meta"><strong id="linkedinBrand">Client Preview</strong><br><span>Preview only</span></div></div><div id="linkedinCaption" class="linkedin-caption"></div><div id="linkedinMedia" class="linkedin-media"></div></div></div></div></section>
+<section class="panel editor-panel" aria-label="Content editor"><div class="panel-heading"><h2>Post details</h2><span id="editorSlot" class="panel-meta">—</span></div><div id="emptyEditor">Select an existing post or an empty slot to start editing.</div><div id="editor" class="panel-body" hidden><div class="review-details"><span class="eyebrow">Client review</span><strong id="reviewStatus"></strong><p id="reviewFeedback"></p></div><label>Platform<select id="platformSelect"><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option></select></label><label>Format<select id="aspectSelect"><option value="5:4">Portrait · 4:5</option><option value="9:16">Reel · 9:16</option><option value="16:9">Landscape · 16:9</option></select></label><label>Caption<textarea id="captionInput" rows="6" placeholder="Write the post caption…"></textarea></label><label>Queue thumbnail<input type="file" id="thumbInput" accept="image/*"></label><section class="media-section"><h3 id="primaryMediaHeading">Instagram media</h3><label>Images and videos<input type="file" id="mediaInput" accept="image/*,video/*" multiple></label><p class="help">Selecting media replaces the existing carousel when you save.</p><div class="media-order-wrap" id="mediaOrderWrap" hidden><p class="media-order-help">Drag media or use the arrows to change its order.</p><div class="media-order" id="mediaOrder"></div></div></section><section class="media-section"><h3>Facebook media · stills only</h3><label class="fb-reuse"><input type="checkbox" id="facebookReuse" checked>Reuse photos from the primary version</label><p class="help">Videos are omitted. Upload a separate set of exported stills when Facebook needs different content.</p><div id="facebookCustom" hidden><label>Facebook stills<input type="file" id="facebookInput" accept="image/*" multiple></label><p class="help">Selecting files replaces the Facebook set when you save. Use the arrows to arrange them.</p><div id="facebookOrder" class="fb-order"></div></div><p id="facebookMessage" class="notice" role="status"></p></section><div class="editor-actions"><button id="saveBtn" class="primary">Save post</button><button id="clearBtn">Clear content</button></div><p id="uploadProgress" class="notice" role="status" aria-live="polite"></p></div></section>
+</main></div>
+<script type="module">
+import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-preview.js";
+import { supabase } from "/tests/fixtures/download-supabase.js";
+import { createPostDownload } from "/assets/js/post-download.js";
+import { createPortalCalendar } from "/assets/js/calendar.js";
+
+/* ---------- AUTH ---------- */
+const { data: sessionData } = await supabase.auth.refreshSession();
+const user = sessionData?.session?.user;
+
+if (!user || user.app_metadata?.role !== "admin") {
+  window.location.href = location.hash === "#calendar" ? `/admin/login/?next=calendar&client=${encodeURIComponent(new URLSearchParams(location.search).get("calendar_client") || "")}` : "/admin/login/";
+  throw new Error("Not authorised");
+}
+
+document.getElementById("userLabel").textContent = user.email || "Admin";
+document.getElementById("signOutBtn").onclick = async () => { await supabase.auth.signOut(); window.location.href = "/admin/login/"; };
+/* ---------- DOM ---------- */
+const grid = document.getElementById("grid");
+const preview = document.getElementById("preview");
+const carousel = document.getElementById("carousel");
+const captionEl = document.getElementById("caption");
+
+const clientSelect = document.getElementById("clientSelect");
+const platformSelect = document.getElementById("platformSelect");
+const aspectSelect = document.getElementById("aspectSelect");
+const captionInput = document.getElementById("captionInput");
+const saveBtn = document.getElementById("saveBtn");
+const editor = document.getElementById("editor");
+const uploadProgress = document.getElementById("uploadProgress");
+
+const instagramPreview = document.getElementById("instagramPreview");
+const linkedinPreview = document.getElementById("linkedinPreview");
+const linkedinCaption = document.getElementById("linkedinCaption");
+const linkedinMedia = document.getElementById("linkedinMedia");
+const linkedinBrand = document.getElementById("linkedinBrand");
+
+const thumbInput = document.getElementById("thumbInput");
+const mediaInput = document.getElementById("mediaInput");
+const mediaOrderWrap = document.getElementById("mediaOrderWrap");
+const mediaOrder = document.getElementById("mediaOrder");
+
+const prevBtn = document.getElementById("prevSlide");
+const nextBtn = document.getElementById("nextSlide");
+const clearBtn = document.getElementById("clearBtn");
+const addNewBtn = document.getElementById("addNewBtn");
+
+/* ---------- STATE ---------- */
+let currentClient = clientSelect.value;
+let currentPost = null;
+let slides = [];
+let currentSlideIndex = 0;
+let dragSourceSlot = null;
+let mediaItems = [];
+let mediaDragIndex = null;
+let facebookItems = [];
+let viewingFacebook = false;
+let selectedPreviewPost = null;
+const facebookInput = document.getElementById("facebookInput");
+const facebookReuse = document.getElementById("facebookReuse");
+const facebookOrder = document.getElementById("facebookOrder");
+const facebookMessage = document.getElementById("facebookMessage");
+const facebookView = createFacebookPreview(document.getElementById("facebookPreview"));
+
+const downloadPostBtn = document.getElementById("downloadPostBtn");
+createPostDownload(downloadPostBtn, () => {
+  if (!currentPost) return null;
+  const items = viewingFacebook ? (facebookReuse.checked ? mediaItems.filter(item => !isVideoItem(item)) : facebookItems) : mediaItems;
+  const platform = viewingFacebook ? "facebook" : platformSelect.value;
+  return {client:currentClient, clientLabel:clientSelect.selectedOptions[0].textContent, slot:currentPost.slot,
+    version:platform, versionLabel:platform === "facebook" ? "Facebook" : platform === "linkedin" ? "LinkedIn" : "Instagram",
+    caption:captionInput.value, media:items.map(item => ({url:mediaItemSource(item),name:item.file?.name,type:item.file?.type}))};
+});
+
+function clearFacebookItems() {
+  facebookItems.forEach(item => { if (item.previewUrl) URL.revokeObjectURL(item.previewUrl); });
+  facebookItems = [];
+  facebookInput.value = "";
+}
+function loadFacebookItems(post) {
+  clearFacebookItems();
+  facebookReuse.checked = !Array.isArray(post?.facebook_media_urls);
+  facebookItems = (post?.facebook_media_urls || []).map(url => ({kind:"existing",url}));
+  facebookMessage.textContent = "";
+  renderFacebookOrder();
+}
+function renderFacebookOrder() {
+  document.getElementById("facebookCustom").hidden = facebookReuse.checked;
+  facebookOrder.replaceChildren();
+  facebookItems.forEach((item, index) => {
+    const tile = document.createElement("div"); tile.className = "fb-order-item";
+    const image = document.createElement("img"); image.src = mediaItemSource(item); image.alt = `Facebook still ${index + 1}`;
+    const controls = document.createElement("div"); controls.className = "fb-order-actions";
+    [-1,1].forEach(direction => {
+      const button = document.createElement("button"); button.type = "button"; button.textContent = direction < 0 ? "←" : "→";
+      button.setAttribute("aria-label", `Move Facebook still ${index + 1} ${direction < 0 ? "earlier" : "later"}`);
+      button.disabled = index + direction < 0 || index + direction >= facebookItems.length;
+      button.onclick = () => { if (saveBtn.disabled) return; const [moved] = facebookItems.splice(index,1); facebookItems.splice(index + direction,0,moved); renderFacebookOrder(); refreshPreview(); };
+      controls.appendChild(button);
+    });
+    tile.append(image,controls); facebookOrder.appendChild(tile);
+  });
+}
+facebookInput.onchange = () => {
+  const files = Array.from(facebookInput.files);
+  if (files.some(file => !file.type.startsWith("image/"))) { facebookMessage.textContent = "Facebook accepts images only. Export video frames as stills first."; facebookInput.value = ""; return; }
+  if (!files.length) return;
+  clearFacebookItems();
+  facebookItems = files.map(file => ({kind:"file",file,previewUrl:URL.createObjectURL(file)}));
+  facebookMessage.textContent = `${files.length} Facebook stills ready to save.`;
+  renderFacebookOrder(); refreshPreview();
+};
+facebookReuse.onchange = () => { renderFacebookOrder(); refreshPreview(); };
+function refreshPreview() {
+  if (!currentPost) return;
+  const urls = mediaItems.map(mediaItemSource);
+  const facebookUrls = facebookReuse.checked ? mediaItems.filter(item => !isVideoItem(item)).map(mediaItemSource) : facebookItems.map(mediaItemSource);
+  renderPostPreview({...selectedPreviewPost, platform:platformSelect.value,caption:captionInput.value,aspect:aspectSelect.value,media_urls:urls,facebook_media_urls:facebookUrls});
+}
+function setAdminVersion(facebook) { viewingFacebook = facebook; refreshPreview(); }
+document.getElementById("primaryVersionBtn").onclick = () => setAdminVersion(false);
+document.getElementById("facebookVersionBtn").onclick = () => setAdminVersion(true);
+captionInput.addEventListener("input", refreshPreview);
+aspectSelect.addEventListener("change", refreshPreview);
+
+/* ---------- HELPERS ---------- */
+function storagePathFromPublicUrl(publicUrl) {
+  try {
+    const u = new URL(publicUrl);
+    const marker = "/storage/v1/object/public/social-media/";
+    const idx = u.pathname.indexOf(marker);
+    if (idx === -1) return null;
+    return decodeURIComponent(u.pathname.slice(idx + marker.length));
+  } catch {
+    return null;
+  }
+}
+
+async function removeFilesForPost(post) {
+  const paths = [];
+
+  if (post?.thumbnail_url) {
+    const p = storagePathFromPublicUrl(post.thumbnail_url.split("?")[0]);
+    if (p) paths.push(p);
+  }
+
+  [...(post?.media_urls || []), ...(post?.facebook_media_urls || [])].forEach((url) => {
+    const p = storagePathFromPublicUrl(String(url).split("?")[0]);
+    if (p) paths.push(p);
+  });
+
+  if (!paths.length) return;
+
+  const { error } = await supabase.storage
+    .from("social-media")
+    .remove(paths);
+
+  if (error) console.error("Storage remove failed:", error);
+}
+
+async function loadPosts(client) {
+  const { data, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("client", client)
+    .order("slot", { ascending: true });
+
+  if (error) {
+    console.error("Load posts failed:", error);
+    document.getElementById("workspaceMessage").textContent = "Could not load posts. Refresh to try again.";
+    return [];
+  }
+
+  return data || [];
+}
+
+async function uploadFile(path, file) {
+  const { error } = await supabase.storage
+    .from("social-media")
+    .upload(path, file, { upsert: true });
+
+  if (error) throw error;
+
+  return supabase.storage
+    .from("social-media")
+    .getPublicUrl(path).data.publicUrl;
+}
+
+function showSlide(index) {
+  document.getElementById("slideCount").textContent = slides.length ? `${index + 1} / ${slides.length}` : "No media";
+  prevBtn.disabled = nextBtn.disabled = slides.length < 2;
+  slides.forEach((el, i) => {
+    el.classList.toggle("active", i === index);
+    el.classList.toggle("prev", i < index);
+    if (el.tagName === "VIDEO") { if (i === index) el.play().catch(() => {}); else el.pause(); }
+  });
+}
+
+function createMediaElement(url) {
+  const cleanUrl = url.split("?")[0].toLowerCase();
+  let el;
+
+  if (cleanUrl.endsWith(".webm") || cleanUrl.endsWith(".mp4")) {
+    el = document.createElement("video");
+    el.src = url;
+    el.muted = true;
+    el.playsInline = true;
+    el.loop = true;
+    el.autoplay = true;
+    el.controls = true;
+  } else {
+    el = document.createElement("img");
+    el.src = url;
+  }
+
+  return el;
+}
+
+function setPreviewMode(platform) {
+  if (platform === "linkedin") {
+    instagramPreview.hidden = true;
+    linkedinPreview.hidden = false;
+  } else {
+    instagramPreview.hidden = false;
+    linkedinPreview.hidden = true;
+  }
+}
+
+function clearMediaItemPreviews() {
+  mediaItems.forEach((item) => {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+  });
+}
+
+function mediaItemSource(item) {
+  return item.kind === "file" ? item.previewUrl : item.url;
+}
+
+function isVideoItem(item) {
+  if (item.kind === "file") return item.file.type.startsWith("video/");
+  const cleanUrl = String(item.url || "").split("?")[0].toLowerCase();
+  return cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm");
+}
+
+function renderMediaOrder() {
+  mediaOrder.innerHTML = "";
+  mediaOrderWrap.hidden = mediaItems.length === 0;
+
+  mediaItems.forEach((item, index) => {
+    const tile = document.createElement("div");
+    tile.className = "media-order-item";
+    tile.draggable = true;
+    tile.dataset.index = index;
+
+    const source = mediaItemSource(item);
+    const mediaEl = document.createElement(isVideoItem(item) ? "video" : "img");
+    mediaEl.src = source;
+    if (mediaEl.tagName === "VIDEO") {
+      mediaEl.muted = true;
+      mediaEl.playsInline = true;
+      mediaEl.preload = "metadata";
+    }
+    tile.appendChild(mediaEl);
+
+    const number = document.createElement("span");
+    number.className = "media-order-number";
+    number.textContent = index + 1;
+    tile.appendChild(number);
+
+    const type = document.createElement("span");
+    type.className = "media-order-type";
+    type.textContent = isVideoItem(item) ? "Video" : "Photo";
+    tile.appendChild(type);
+
+    tile.addEventListener("dragstart", (e) => {
+      mediaDragIndex = index;
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(index));
+      setTimeout(() => tile.classList.add("dragging"), 0);
+    });
+
+    tile.addEventListener("dragend", () => {
+      mediaDragIndex = null;
+      tile.classList.remove("dragging");
+      mediaOrder.querySelectorAll(".drag-over").forEach((el) => el.classList.remove("drag-over"));
+    });
+
+    tile.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      tile.classList.add("drag-over");
+    });
+
+    tile.addEventListener("dragleave", () => tile.classList.remove("drag-over"));
+
+    tile.addEventListener("drop", (e) => {
+      e.preventDefault();
+      tile.classList.remove("drag-over");
+
+      const sourceFromData = Number(e.dataTransfer.getData("text/plain"));
+      const sourceIndex = Number.isInteger(sourceFromData) ? sourceFromData : mediaDragIndex;
+      const targetIndex = index;
+
+      if (sourceIndex === null || sourceIndex === targetIndex) return;
+      if (sourceIndex < 0 || sourceIndex >= mediaItems.length) return;
+
+      const [moved] = mediaItems.splice(sourceIndex, 1);
+      mediaItems.splice(targetIndex, 0, moved);
+      renderMediaOrder();
+      refreshPreview();
+    });
+
+    const controls = document.createElement("div");
+    controls.className = "media-move";
+    [-1, 1].forEach(direction => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = direction < 0 ? "←" : "→";
+      button.setAttribute("aria-label", `Move media ${index + 1} ${direction < 0 ? "earlier" : "later"}`);
+      button.disabled = index + direction < 0 || index + direction >= mediaItems.length;
+      button.onclick = () => { if (saveBtn.disabled) return; const [moved] = mediaItems.splice(index, 1); mediaItems.splice(index + direction, 0, moved); renderMediaOrder(); refreshPreview(); };
+      controls.appendChild(button);
+    });
+    tile.appendChild(controls);
+    mediaOrder.appendChild(tile);
+  });
+}
+
+function setExistingMediaItems(urls = []) {
+  clearMediaItemPreviews();
+  mediaItems = urls.map((url) => ({ kind: "existing", url }));
+  renderMediaOrder();
+}
+
+mediaInput.addEventListener("change", () => {
+  clearMediaItemPreviews();
+  mediaItems = Array.from(mediaInput.files).map((file) => ({
+    kind: "file",
+    file,
+    previewUrl: URL.createObjectURL(file)
+  }));
+  renderMediaOrder();
+  refreshPreview();
+});
+
+function renderLinkedInMedia(urls) {
+  linkedinMedia.innerHTML = "";
+
+  const count = urls.length;
+  if (!count) return;
+
+  if (count === 1) linkedinMedia.className = "linkedin-media one";
+  else if (count === 2) linkedinMedia.className = "linkedin-media two";
+  else if (count === 3) linkedinMedia.className = "linkedin-media three";
+  else linkedinMedia.className = "linkedin-media four-plus";
+
+  const visibleUrls = urls.slice(0, 4);
+
+  visibleUrls.forEach((url, index) => {
+    const tile = document.createElement("div");
+    tile.className = "linkedin-tile";
+
+    const mediaEl = createMediaElement(url);
+    tile.appendChild(mediaEl);
+
+    if (count > 4 && index === 3) {
+      const more = document.createElement("div");
+      more.className = "linkedin-more";
+      more.textContent = `+${count - 4}`;
+      tile.appendChild(more);
+    }
+
+    linkedinMedia.appendChild(tile);
+  });
+}
+
+function renderPostPreview(post) {
+  document.querySelectorAll(".preview video").forEach(video => video.pause());
+  const platform = post?.platform || "instagram";
+  selectedPreviewPost = post;
+  downloadPostBtn.hidden = false;
+  document.getElementById("adminVersions").hidden = false;
+  document.getElementById("primaryVersionBtn").textContent = platform === "linkedin" ? "LinkedIn" : "Instagram";
+  document.getElementById("primaryMediaHeading").textContent = platform === "linkedin" ? "LinkedIn media" : "Instagram media";
+  document.getElementById("primaryVersionBtn").setAttribute("aria-pressed", String(!viewingFacebook));
+  document.getElementById("facebookVersionBtn").setAttribute("aria-pressed", String(viewingFacebook));
+  document.getElementById("facebookPreview").hidden = !viewingFacebook;
+  facebookView.close();
+  if (viewingFacebook) {
+    instagramPreview.hidden = linkedinPreview.hidden = true;
+    facebookView.render({brand:clientSelect.selectedOptions[0].textContent,caption:post?.caption,urls:facebookMedia(post)});
+    return;
+  }
+  setPreviewMode(platform);
+
+  if (platform === "linkedin") {
+    linkedinBrand.textContent = clientSelect.selectedOptions[0].textContent;
+    linkedinCaption.textContent = post?.caption || "";
+    renderLinkedInMedia(post?.media_urls || []);
+    return;
+  }
+
+  carousel.innerHTML = "";
+  slides = [];
+  currentSlideIndex = 0;
+
+  (post?.media_urls || []).forEach((url, i) => {
+    const el = createMediaElement(url);
+    if (i === 0) el.classList.add("active");
+    carousel.appendChild(el);
+    slides.push(el);
+  });
+
+const aspectRatioMap = {
+  "9:16": "9 / 16",
+  "16:9": "16 / 9",
+  "5:4": "4 / 5"
+};
+
+const maxHeightMap = {
+  "9:16": "1344px",
+  "16:9": "1200px",
+  "5:4": "630px"
+};
+
+carousel.style.aspectRatio = aspectRatioMap[post?.aspect] || "4 / 5";
+carousel.style.maxHeight = maxHeightMap[post?.aspect] || "630px";
+
+  captionEl.textContent = post?.caption || "";
+  showSlide(0);
+}
+
+/* ---------- DRAG & DROP SWAP ---------- */
+async function swapSlots(slotA, slotB) {
+  if (slotA === slotB) return true;
+
+  const posts = await loadPosts(currentClient);
+  const postA = posts.find((p) => Number(p.slot) === Number(slotA)) || null;
+  const postB = posts.find((p) => Number(p.slot) === Number(slotB)) || null;
+
+  console.log("Swapping", { slotA, slotB, postA, postB });
+
+  if (!postA && !postB) return true;
+
+  const tempSlot = 0;
+
+  if (postA) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: tempSlot })
+      .eq("id", postA.id);
+
+    if (error) {
+      console.error("Swap step 1 failed", error);
+      alert("Swap failed at step 1. Your database may not allow temporary slot 0.");
+      return false;
+    }
+  }
+
+  if (postB) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: Number(slotA) })
+      .eq("id", postB.id);
+
+    if (error) {
+      console.error("Swap step 2 failed", error);
+      alert("Swap failed at step 2.");
+      return false;
+    }
+  }
+
+  if (postA) {
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: Number(slotB) })
+      .eq("id", postA.id);
+
+    if (error) {
+      console.error("Swap step 3 failed", error);
+      alert("Swap failed at step 3.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/* ---------- GRID RENDER ---------- */
+async function render(client) {
+  document.querySelectorAll("video").forEach(video => video.pause());
+  clearFacebookItems();
+  facebookView.close();
+  document.getElementById("adminVersions").hidden = true;
+  downloadPostBtn.hidden = true;
+  grid.innerHTML = "";
+  document.getElementById("emptyPreview").hidden = false;
+  document.getElementById("emptyEditor").hidden = false;
+  document.getElementById("previewLabel").textContent = "No post selected";
+  document.getElementById("editorSlot").textContent = "—";
+  document.getElementById("workspaceMessage").textContent = "";
+  preview.hidden = true;
+  editor.hidden = true;
+
+  const posts = await loadPosts(client);
+  document.getElementById("queueSummary").textContent = `${posts.length} posts · ${posts.filter(p => p.review_status === "approved").length} approved · ${posts.filter(p => p.review_status === "changes_requested").length} changes`;
+  const slots = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  slots.forEach((slot) => {
+    const post = posts.find((p) => Number(p.slot) === Number(slot));
+
+    const cell = document.createElement("div");
+    cell.className = "grid-cell";
+    cell.classList.toggle("is-approved", post?.review_status === "approved");
+    cell.draggable = true;
+    cell.dataset.slot = slot;
+    cell.tabIndex = 0;
+    cell.setAttribute("role", "button");
+    cell.setAttribute("aria-label", `Slot ${slot}: ${post ? (post.review_status || "awaiting review").replaceAll("_", " ") : "empty"}`);
+    cell.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cell.click(); } });
+
+    const img = document.createElement("img");
+    img.alt = `Slot ${slot} thumbnail`;
+    img.src = post?.thumbnail_url || "/assets/empty.png";
+    cell.appendChild(img);
+
+    const label = document.createElement("span");
+    label.className = "slot-label";
+    label.textContent = slot;
+    cell.appendChild(label);
+
+    if (post) {
+      const reviewBadge = document.createElement("span");
+      reviewBadge.className = "review-badge";
+
+      if (post.review_status === "approved") {
+        reviewBadge.textContent = "✓";
+        reviewBadge.title = "Approved";
+      } else if (post.review_status === "changes_requested") {
+        reviewBadge.textContent = "?";
+        reviewBadge.title = "Changes requested";
+      } else {
+        reviewBadge.textContent = "New";
+        reviewBadge.classList.add("new");
+        reviewBadge.title = "Not yet reviewed";
+      }
+
+      cell.appendChild(reviewBadge);
+    }
+
+    cell.addEventListener("click", () => {
+      if (saveBtn.disabled) return;
+      grid.querySelectorAll(".grid-cell").forEach(c => { c.classList.toggle("selected", c === cell); c.setAttribute("aria-pressed", String(c === cell)); });
+      document.getElementById("emptyPreview").hidden = true;
+      document.getElementById("emptyEditor").hidden = true;
+      document.getElementById("previewLabel").textContent = `Post ${slot}`;
+      document.getElementById("editorSlot").textContent = `Slot ${slot}`;
+      document.getElementById("reviewStatus").textContent = !post ? "Empty slot" : post.review_status === "approved" ? "Approved" : post.review_status === "changes_requested" ? "Changes requested" : "Awaiting review";
+      document.getElementById("reviewFeedback").textContent = post?.review_feedback || "No client feedback.";
+      thumbInput.value = "";
+      uploadProgress.textContent = "";
+      currentPost = {
+        id: post?.id || null,
+        client: currentClient,
+        slot: slot
+      };
+
+      preview.hidden = false;
+      editor.hidden = false;
+
+      platformSelect.value = post?.platform || "instagram";
+      captionInput.value = post?.caption || "";
+      aspectSelect.value = post?.aspect || "5:4";
+      mediaInput.value = "";
+      setExistingMediaItems(post?.media_urls || []);
+      loadFacebookItems(post);
+      viewingFacebook = false;
+
+      if (window.matchMedia("(max-width: 760px)").matches) document.querySelector(".preview-panel").scrollIntoView({behavior: "smooth", block: "start"});
+      renderPostPreview(post || {
+        platform: "instagram",
+        caption: "",
+        aspect: "5:4",
+        media_urls: []
+      });
+    });
+
+    cell.addEventListener("dragstart", (e) => {
+      if (saveBtn.disabled) { e.preventDefault(); return; }
+      dragSourceSlot = Number(slot);
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(slot));
+      setTimeout(() => cell.classList.add("dragging"), 0);
+    });
+
+    cell.addEventListener("dragend", () => {
+      cell.classList.remove("dragging");
+      cell.classList.remove("drag-over");
+      dragSourceSlot = null;
+    });
+
+    cell.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      cell.classList.add("drag-over");
+    });
+
+    cell.addEventListener("dragleave", () => {
+      cell.classList.remove("drag-over");
+    });
+
+    cell.addEventListener("drop", async (e) => {
+      e.preventDefault();
+      cell.classList.remove("drag-over");
+
+      const sourceFromData = Number(e.dataTransfer.getData("text/plain"));
+      const sourceSlot = sourceFromData || dragSourceSlot;
+      const targetSlot = Number(cell.dataset.slot);
+
+      console.log("Dropped", { sourceSlot, targetSlot });
+
+      if (saveBtn.disabled || !sourceSlot || sourceSlot === targetSlot) return;
+
+      const success = await swapSlots(sourceSlot, targetSlot);
+
+      if (!success) return;
+
+      await render(currentClient);
+
+      currentPost = null;
+      preview.hidden = true;
+      editor.hidden = true;
+    });
+
+    grid.appendChild(cell);
+  });
+}
+
+/* ---------- NAV ---------- */
+prevBtn.onclick = () => {
+  if (!slides.length) return;
+  currentSlideIndex = (currentSlideIndex - 1 + slides.length) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+nextBtn.onclick = () => {
+  if (!slides.length) return;
+  currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+  showSlide(currentSlideIndex);
+};
+
+/* ---------- SAVE ---------- */
+saveBtn.onclick = async () => {
+  if (!currentPost || saveBtn.disabled) return;
+  if (!facebookReuse.checked && !facebookItems.length) { facebookMessage.textContent = "Add Facebook stills or choose to reuse the primary photos."; return; }
+  saveBtn.disabled = clearBtn.disabled = addNewBtn.disabled = clientSelect.disabled = true;
+  editor.querySelectorAll("input, select, textarea").forEach(el => el.disabled = true);
+  uploadProgress.textContent = "Saving…";
+  document.querySelector(".admin-workspace").setAttribute("aria-busy", "true");
+  const newUploadPaths = [];
+  let postSaved = false;
+  async function saveUpload(path, file) {
+    const url = await uploadFile(path, file);
+    newUploadPaths.push(path);
+    return url;
+  }
+  try {
+
+  let existing = { thumbnail_url: null, media_urls: [], facebook_media_urls: null };
+
+  if (!currentPost.id) {
+    const { data: inserted, error: insertError } = await supabase
+      .from("posts")
+      .insert({
+        client: currentPost.client,
+        slot: currentPost.slot,
+        platform: platformSelect.value,
+        caption: captionInput.value,
+        aspect: aspectSelect.value,
+        thumbnail_url: null,
+        media_urls: []
+      })
+      .select("id")
+      .single();
+
+    if (insertError) {
+      alert(insertError.message);
+      console.error(insertError);
+      return;
+    }
+
+    currentPost.id = inserted.id;
+  } else {
+    const { data, error: existingError } = await supabase
+      .from("posts")
+      .select("thumbnail_url,media_urls,facebook_media_urls")
+      .eq("id", currentPost.id)
+      .single();
+
+    if (existingError) {
+      alert("Save failed (could not load existing post)");
+      console.error(existingError);
+      return;
+    }
+
+    existing = data || existing;
+  }
+
+  const folder = `${currentPost.client}/post-${currentPost.id}`;
+  let thumbnailUrl = existing.thumbnail_url || null;
+  let mediaUrls = [];
+  const cacheBust = Date.now();
+  const newMediaItems = mediaItems.filter((item) => item.kind === "file");
+  const replacingMedia = newMediaItems.length > 0;
+  const newFacebookItems = facebookReuse.checked ? [] : facebookItems.filter(item => item.kind === "file");
+  const totalUploads = (thumbInput.files[0] ? 1 : 0) + newMediaItems.length + newFacebookItems.length;
+  let uploadedCount = 0;
+
+  function updateProgress() {
+    if (!totalUploads) {
+      uploadProgress.textContent = "";
+      return;
+    }
+    const percent = Math.round((uploadedCount / totalUploads) * 100);
+    uploadProgress.textContent = `${percent}%`;
+  }
+
+  if (thumbInput.files[0]) {
+    const thumbPublicUrl = await saveUpload(
+      `${folder}/thumb-${crypto.randomUUID()}.${thumbInput.files[0].name.split(".").pop()}`,
+      thumbInput.files[0]
+    );
+    thumbnailUrl = `${thumbPublicUrl}?v=${cacheBust}`;
+    uploadedCount++;
+    updateProgress();
+  }
+
+  if (replacingMedia) {
+    // A newly selected batch replaces the old carousel, but uses the drag/drop order.
+    for (let i = 0; i < mediaItems.length; i++) {
+      const item = mediaItems[i];
+      if (item.kind !== "file") continue;
+
+      const file = item.file;
+      const ext = file.name.split(".").pop();
+      const publicUrl = await saveUpload(
+        `${folder}/media/${crypto.randomUUID()}.${ext}`,
+        file
+      );
+      mediaUrls.push(`${publicUrl}?v=${cacheBust}`);
+      uploadedCount++;
+      updateProgress();
+    }
+
+  } else {
+    // No replacement files selected: preserve existing files and only save their new order.
+    mediaUrls = mediaItems.map((item) => item.url).filter(Boolean);
+  }
+
+  let facebookUrls = null;
+  if (!facebookReuse.checked) {
+    facebookUrls = [];
+    if (!facebookItems.length) throw new Error("Add Facebook stills or choose to reuse the primary photos.");
+    for (let i = 0; i < facebookItems.length; i++) {
+      const item = facebookItems[i];
+      if (item.kind === "existing") { facebookUrls.push(item.url); continue; }
+      const ext = item.file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const url = await saveUpload(`${folder}/facebook/${crypto.randomUUID()}.${ext}`, item.file);
+      facebookUrls.push(`${url}?v=${cacheBust}`);
+      uploadedCount++; updateProgress();
+    }
+  }
+
+  const payload = {
+    platform: platformSelect.value,
+    caption: captionInput.value,
+    aspect: aspectSelect.value,
+    thumbnail_url: thumbnailUrl,
+    media_urls: mediaUrls,
+    facebook_media_urls: facebookUrls
+  };
+
+  const { error: updateError } = await supabase
+    .from("posts")
+    .update(payload)
+    .eq("id", currentPost.id);
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  postSaved = true;
+  // Delete obsolete media only after both variants have been saved successfully.
+  const retained = new Set([thumbnailUrl, ...mediaUrls, ...(facebookUrls || [])].filter(Boolean).map(storagePathFromPublicUrl));
+  const obsolete = [existing.thumbnail_url, ...(existing.media_urls || []), ...(existing.facebook_media_urls || [])].filter(Boolean).map(storagePathFromPublicUrl).filter(path => path && !retained.has(path));
+  if (obsolete.length) {
+    const {error:cleanupError} = await supabase.storage.from("social-media").remove([...new Set(obsolete)]);
+    if (cleanupError) console.error("Old media cleanup failed", cleanupError);
+  }
+  clearMediaItemPreviews();
+  clearFacebookItems();
+  mediaInput.value = "";
+  thumbInput.value = "";
+  uploadProgress.textContent = "";
+  await render(currentClient);
+  document.getElementById("workspaceMessage").textContent = "Post saved.";
+  } catch (error) {
+    if (!postSaved && newUploadPaths.length) {
+      try { await supabase.storage.from("social-media").remove(newUploadPaths); } catch (cleanupError) { console.error("Upload cleanup failed", cleanupError); }
+    }
+    uploadProgress.textContent = `Save failed: ${error.message || "Please try again."}`; console.error(error); }
+  finally { document.querySelector(".admin-workspace").removeAttribute("aria-busy"); saveBtn.disabled = clearBtn.disabled = addNewBtn.disabled = clientSelect.disabled = false; editor.querySelectorAll("input, select, textarea").forEach(el => el.disabled = false); }
+};
+
+/* ---------- CLEAR ---------- */
+clearBtn.onclick = async () => {
+  if (!currentPost) return;
+  if (!confirm("Clear this post’s caption and media? This removes its uploaded files.")) return;
+
+  if (currentPost.id) {
+    const { data: existing } = await supabase
+      .from("posts")
+      .select("thumbnail_url,media_urls,facebook_media_urls")
+      .eq("id", currentPost.id)
+      .single();
+
+    await removeFilesForPost(existing);
+  }
+
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      thumbnail_url: null,
+      media_urls: [],
+      facebook_media_urls: null,
+      platform: "instagram",
+      caption: "",
+      aspect: "5:4"
+    })
+    .eq("client", currentPost.client)
+    .eq("slot", currentPost.slot);
+
+  if (error) {
+    alert("Clear failed");
+    console.error(error);
+    return;
+  }
+
+  carousel.innerHTML = "";
+  slides = [];
+  preview.hidden = true;
+
+  captionInput.value = "";
+  platformSelect.value = "instagram";
+  aspectSelect.value = "5:4";
+  thumbInput.value = "";
+  mediaInput.value = "";
+  clearMediaItemPreviews();
+  mediaItems = [];
+  renderMediaOrder();
+
+  render(currentClient);
+};
+
+/* ---------- SHIFT + NEW ---------- */
+addNewBtn.onclick = async () => {
+  if (!confirm("Add a post at slot 1 and shift the queue? Any post in slot 12 and its media will be removed.")) return;
+  const posts = await loadPosts(currentClient);
+
+  const slot12 = posts.find((p) => Number(p.slot) === 12);
+  if (slot12) {
+    await removeFilesForPost(slot12);
+    await supabase.from("posts").delete().eq("id", slot12.id);
+  }
+
+  for (let s = 11; s >= 1; s--) {
+    const p = posts.find((x) => Number(x.slot) === s);
+    if (!p) continue;
+
+    const { error } = await supabase
+      .from("posts")
+      .update({ slot: s + 1 })
+      .eq("id", p.id);
+
+    if (error) {
+      alert("Shift failed. Check console.");
+      console.error(error);
+      return;
+    }
+  }
+
+  await render(currentClient);
+
+  currentPost = null;
+  carousel.innerHTML = "";
+  slides = [];
+  currentSlideIndex = 0;
+
+  preview.hidden = true;
+  editor.hidden = true;
+
+  captionEl.textContent = "";
+  captionInput.value = "";
+  platformSelect.value = "instagram";
+  thumbInput.value = "";
+  mediaInput.value = "";
+  clearMediaItemPreviews();
+  mediaItems = [];
+  renderMediaOrder();
+  aspectSelect.value = "5:4";
+  carousel.style.aspectRatio = "4 / 5";
+
+  document.getElementById("emptyPreview").hidden = true;
+  document.getElementById("emptyEditor").hidden = true;
+  document.getElementById("editorSlot").textContent = "Slot 1";
+  document.getElementById("previewLabel").textContent = "New post";
+  document.getElementById("reviewStatus").textContent = "New post";
+  document.getElementById("reviewFeedback").textContent = "Not yet shared for review.";
+  loadFacebookItems(null);
+  viewingFacebook = false;
+  currentPost = { id: null, client: currentClient, slot: 1 };
+  refreshPreview();
+  preview.hidden = false;
+  editor.hidden = false;
+};
+
+/* ---------- PLATFORM CHANGE ---------- */
+platformSelect.onchange = refreshPreview;
+
+/* ---------- CLIENT CHANGE ---------- */
+clientSelect.onchange = () => {
+  thumbInput.value = "";
+  currentClient = clientSelect.value;
+  currentPost = null;
+  clearMediaItemPreviews();
+  mediaItems = [];
+  mediaInput.value = "";
+  renderMediaOrder();
+  render(currentClient);
+};
+
+createPortalCalendar({supabase,user,content:document.querySelector(".admin-workspace"),client:currentClient,clientSelect});
+
+/* ---------- INIT ---------- */
+render(currentClient);
+</script>
+
+</body>
+</html>
