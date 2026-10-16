@@ -37,7 +37,7 @@ export function createPostDownload(button, getSnapshot) {
     const item = snapshot.media[index], row = rows[index];
     row.button.disabled = true; row.button.textContent = 'Preparing…';
     pending[index] = (async () => {
-      const response = await fetch(item.url, {signal:operation.signal, credentials:'omit'});
+      const response = await fetch(item.url, {signal:operation.signal, credentials:'same-origin'});
       if (!response.ok) throw new Error(`File ${index + 1} couldn’t be fetched (${response.status}).`);
       const blob = await response.blob();
       operation.signal.throwIfAborted();
