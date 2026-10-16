@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "headers": [
+    {"source":"/admin/portfolio/:path*","headers":[{"key":"X-Robots-Tag","value":"noindex, nofollow"},{"key":"Cache-Control","value":"no-store"}]},
+    {"source":"/assets/js/portfolio:path*","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]}
+  ]
+}
