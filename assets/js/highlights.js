@@ -1,3 +1,4 @@
+import {requireHighlightAdminSession} from './portal-auth.js';
 import {createHighlightsPlayer} from './highlights-player.js';
 import {validateFiles, moveItem} from './highlights-model.js';
 
@@ -146,6 +147,7 @@ export function createContentHighlights({supabase, user, content, client, client
     disabledStates.forEach(([node]) => { node.disabled = true; });
     const paths = [], uploadedItems = [], saveId = crypto.randomUUID(), target = {...active}; let metadataAttempted = false;
     try {
+      await requireHighlightAdminSession(supabase, user);
       const uploadOne = async (file, id) => {
         const extension = file.name.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8) || 'bin';
         const path = `highlights/${target.client}/${target.id}/${saveId}/${id}.${extension}`;
@@ -160,14 +162,21 @@ export function createContentHighlights({supabase, user, content, client, client
       }
       const cover = coverFile ? await uploadOne(coverFile, 'cover') : {url:target.cover_url};
       metadataAttempted = true;
-      const result = await supabase.from('story_highlights').update({title, media:uploadedItems, cover_url:cover.url, revision:target.revision + 1}).eq('id', target.id).eq('client', target.client).eq('revision', target.revision).select().single();
+      const result = await supabase.from('story_highlights').update({title, media:uploadedItems, cover_url:cover.url, revision:target.revision + 1}).eq('id', target.id).eq('client', target.client).eq('revision', target.revision).select().maybeSingle();
       if (result.error) throw result.error;
+      if (!result.data) {
+        await requireHighlightAdminSession(supabase, user);
+        throw new Error('This highlight changed since you opened it. Reload its saved version before applying your edits again.');
+      }
       resetDraft(); await load(); openEditor(result.data, {saved:true}); editorStatus.textContent = 'Highlight saved. The client preview is updated.';
     } catch (e) {
       // An interrupted metadata response may already have committed. Keep uploaded
       // bytes on ambiguous responses so a successful save can never lose its media.
       if (!metadataAttempted && paths.length) await supabase.storage.from('social-media').remove(paths);
-      editorStatus.textContent = `Could not save: ${e.message || 'connection interrupted'}. Your edits are still here. If another Admin changed this highlight, discard changes and reload before saving again.`;
+      if (e.code === 'HIGHLIGHT_AUTH') {
+        editorStatus.textContent = `${e.message} Your edits are still here. `;
+        const signIn = el('a', '', 'Open Admin sign-in'); signIn.href = '/admin/login/'; signIn.target = '_blank'; signIn.rel = 'noopener'; editorStatus.append(signIn);
+      } else editorStatus.textContent = `Could not save: ${e.message || 'connection interrupted'}. Your edits are still here. If another Admin changed this highlight, discard changes and reload before saving again.`;
     } finally {
       busy = false; editor.removeAttribute('aria-busy'); disabledStates.forEach(([node, disabled]) => { if (node.isConnected) node.disabled = disabled; });
       if (dirty && saveButton) saveButton.disabled = false;
