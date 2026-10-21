@@ -25,7 +25,7 @@ export function createPortalCalendar({supabase,user,content,client,clientLabel,c
     calendarClient.value=selectedClient==='belmogroup'?'belmo':selectedClient;selectedClient=calendarClient.value;
     const linkedClient=new URLSearchParams(location.search).get('calendar_client');if(linkedClient&&[...calendarClient.options].some(o=>o.value===linkedClient)){calendarClient.value=linkedClient;selectedClient=linkedClient;}
     calendarClient.setAttribute('aria-label','Calendar client');label.append(calendarClient);host.querySelector('.calendar-client').append(label);host.querySelector('.calendar-client').hidden=false;
-    calendarClient.onchange=()=>{selectedClient=calendarClient.value;const value=selectedClient==='belmo'?'belmogroup':selectedClient;if(clientSelect.value!==value){clientSelect.value=value;clientSelect.dispatchEvent(new Event('change'));}else load();};
+    calendarClient.onchange=()=>{selectedClient=calendarClient.value;const value=selectedClient==='belmo'?'belmogroup':selectedClient;if(clientSelect.value!==value){clientSelect.value=value;clientSelect.dispatchEvent(new Event('change'));if(clientSelect.value!==value){calendarClient.value=clientSelect.value==='belmogroup'?'belmo':clientSelect.value;selectedClient=calendarClient.value;load();}}else load();};
     clientSelect.addEventListener('change',()=>{calendarClient.value=clientSelect.value==='belmogroup'?'belmo':clientSelect.value;selectedClient=calendarClient.value;load();});
   }
   const headingDialog=document.createElement('dialog');headingDialog.className='idea-dialog';headingDialog.setAttribute('aria-labelledby','date-heading-title');

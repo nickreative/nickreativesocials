@@ -298,6 +298,7 @@
 <link rel="stylesheet" href="/assets/css/calendar.css">
 <link rel="stylesheet" href="/assets/css/approved-grid.css">
 <link rel="stylesheet" href="/assets/css/post-download.css">
+<link rel="stylesheet" href="/assets/css/highlights.css">
 </head>
 <body>
 
@@ -312,6 +313,7 @@ import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-previe
 import { supabase } from "/assets/js/supabase.js";
 import { createPostDownload } from "/assets/js/post-download.js";
 import { createPortalCalendar } from "/assets/js/calendar.js";
+import { createContentHighlights } from "/assets/js/highlights.js";
 
 /* ---------- AUTH ---------- */
 const { data: sessionData } = await supabase.auth.refreshSession();
@@ -1248,7 +1250,8 @@ clientSelect.onchange = () => {
   render(currentClient);
 };
 
-createPortalCalendar({supabase,user,content:document.querySelector(".admin-workspace"),client:currentClient,clientSelect});
+const contentModule = createContentHighlights({supabase,user,content:document.querySelector(".admin-workspace"),client:currentClient,clientSelect});
+createPortalCalendar({supabase,user,content:contentModule,client:currentClient,clientSelect});
 
 /* ---------- INIT ---------- */
 render(currentClient);
