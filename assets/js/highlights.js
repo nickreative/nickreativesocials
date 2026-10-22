@@ -1,3 +1,4 @@
+import {createHighlightSorter} from './highlights-sorter.js';
 import {requireHighlightAdminSession} from './portal-auth.js';
 import {createHighlightsPlayer} from './highlights-player.js';
 import {validateFiles, moveItem} from './highlights-model.js';
@@ -17,7 +18,7 @@ export function createContentHighlights({supabase, user, content, client, client
   const find = s => host.querySelector(s), message = find('.highlights-message'), circles = find('.highlight-circles'), editor = find('.highlights-editor');
   const player = createHighlightsPlayer();
   let selectedClient = client, groups = [], active = null, draft = [], coverFile = null, coverObjectURL = null, dirty = false, busy = false, request = 0;
-  let titleInput, itemsHost, editorStatus, saveButton, titleCounter;
+  let titleInput, itemsHost, editorStatus, saveButton, titleCounter, sorter;
   const highlightClient = admin ? clientSelect.cloneNode(true) : null;
   if (admin) {
     highlightClient.removeAttribute('id'); highlightClient.value = client;
@@ -36,6 +37,7 @@ export function createContentHighlights({supabase, user, content, client, client
     });
   }
   function resetDraft() {
+    sorter?.cancel();
     draft.forEach(item => { if (item.file) URL.revokeObjectURL(item.url); });
     if (coverObjectURL) URL.revokeObjectURL(coverObjectURL);
     draft = []; active = null; coverFile = null; coverObjectURL = null; dirty = false; editor.replaceChildren(); editor.hidden = true;
@@ -110,7 +112,12 @@ export function createContentHighlights({supabase, user, content, client, client
       } catch (e) { editorStatus.textContent = e.message; } finally { upload.value = ''; }
     };
     uploadLabel.append(upload); editor.append(uploadLabel, el('p', 'highlight-help', 'Uploads append to this highlight. Up to 100 items, 50 MB per file. MP4 is recommended for videos. Images play for 5 seconds; videos play to the end.'));
-    itemsHost = el('ol', 'highlight-items'); editor.append(itemsHost);
+    editor.append(el('p', 'highlight-help', 'Drag a thumbnail onto another tile to change its position, then Save highlight. On a phone, drag the thumbnail and scroll outside it. Keyboard: focus a thumbnail and use Alt + arrow keys.'));
+    itemsHost = el('ol', 'highlight-items'); itemsHost.setAttribute('aria-label', 'Story order'); editor.append(itemsHost);
+    sorter = createHighlightSorter(itemsHost, {isBusy:()=>busy, onMove:(from,to)=>{
+      draft = moveItem(draft,from,to); markDirty(); renderItems(to,'drag');
+      editorStatus.textContent = `Story moved from position ${from + 1} to ${to + 1}. Save highlight to keep this order.`;
+    }});
     const actions = el('div', 'highlight-actions');
     saveButton = button('Save highlight', save, 'primary'); saveButton.disabled = true;
     actions.append(button('Preview edits', e => {
@@ -127,7 +134,12 @@ export function createContentHighlights({supabase, user, content, client, client
       const row = el('li', 'highlight-item'), thumb = el(item.kind === 'video' ? 'video' : 'img'); thumb.src = item.url;
       if (item.kind === 'video') { thumb.muted = true; thumb.playsInline = true; thumb.preload = 'metadata'; } else thumb.alt = '';
       const info = el('div', '', `${index + 1}. ${item.name || item.kind}`), controls = el('div', 'highlight-item-actions');
-      row.append(thumb, info);
+      row.dataset.index = index;
+      const handle = button('', null, 'highlight-drag'); handle.setAttribute('aria-label', `Drag story ${index + 1} to reorder`);
+      handle.setAttribute('aria-keyshortcuts', 'Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown');
+      thumb.draggable = false; handle.append(thumb, el('span', 'highlight-position', String(index + 1)), el('span', 'highlight-kind', item.kind === 'video' ? 'Video' : 'Image'));
+      info.className = 'highlight-item-name'; info.title = item.name || item.kind;
+      row.append(handle, info);
       for (const [text, delta] of [['↑', -1], ['↓', 1]]) {
         const b = button(text, () => { draft = moveItem(draft, index, index + delta); markDirty(); renderItems(index + delta, delta < 0 ? 0 : 1); });
         b.setAttribute('aria-label', `Move story ${index + 1} ${delta < 0 ? 'earlier' : 'later'}`); b.disabled = index + delta < 0 || index + delta >= draft.length; controls.append(b);
@@ -135,13 +147,17 @@ export function createContentHighlights({supabase, user, content, client, client
       const remove = button('Remove', () => { if (item.file) URL.revokeObjectURL(item.url); draft.splice(index, 1); markDirty(); renderItems(Math.min(index, draft.length - 1), 2); }); remove.setAttribute('aria-label', `Remove story ${index + 1}`); controls.append(remove); row.append(controls); itemsHost.append(row);
     });
     if (!draft.length) itemsHost.append(el('li', 'highlight-help', 'No stories yet. Add images or videos above.'));
-    if (focusIndex >= 0) itemsHost.children[focusIndex]?.querySelectorAll('button')[action]?.focus();
+    if (focusIndex >= 0) {
+      const tile = itemsHost.children[focusIndex];
+      const control = action === 'drag' ? tile?.querySelector('.highlight-drag') : tile?.querySelectorAll('.highlight-item-actions button')[action];
+      control?.focus({preventScroll:true}); tile?.scrollIntoView({block:'nearest',inline:'nearest'});
+    }
   }
   async function save() {
     if (busy || !active) return;
     const title = titleInput.value.trim();
     if (!title || title.length > 15) { editorStatus.textContent = 'Enter a highlight name of 1–15 characters.'; return; }
-    busy = true; editor.setAttribute('aria-busy', 'true');
+    sorter?.cancel(); busy = true; editor.setAttribute('aria-busy', 'true');
     // Freeze navigation and inputs while bytes and metadata are saved together.
     const disabledStates = [...module.querySelectorAll('button,input,select'), ...document.querySelectorAll('.portal-tabs button')].map(node => [node, node.disabled]);
     disabledStates.forEach(([node]) => { node.disabled = true; });
