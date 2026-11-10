@@ -7,4 +7,7 @@ assert.deepEqual(module.facebookMedia({...mixed,facebook_media_urls:['f.jpg','g.
 assert.deepEqual(module.facebookMedia({...mixed,facebook_media_urls:[]}),[]);
 assert.deepEqual(module.facebookMedia({...mixed,facebook_media_urls:null}),['a.jpg','c.PNG']);
 assert.deepEqual(module.facebookMedia({media_urls:['video.mp4']}),[]);
+assert.deepEqual(module.facebookMedia({...mixed, facebook_mirror_primary: true, facebook_media_urls: ['custom.jpg']}), mixed.media_urls);
+assert.deepEqual(module.facebookMedia({media_urls:['video.mp4'], facebook_mirror_primary: true}), ['video.mp4']);
+assert.deepEqual(module.facebookMedia({...mixed, facebook_mirror_primary: false}), ['a.jpg','c.PNG']);
 console.log('PASS: fallback excludes videos, explicit variants take priority, empty/legacy/video-only posts are handled.');

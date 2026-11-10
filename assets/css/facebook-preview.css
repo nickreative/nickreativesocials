@@ -25,8 +25,9 @@
 .fb-tile { position:relative; border:0; padding:0; border-radius:0; min-width:0; min-height:0; background:var(--paper-2); cursor:pointer; aspect-ratio:1; overflow:hidden; }
 .fb-grid-1 .fb-tile { aspect-ratio:4/5; max-height:650px; }
 .fb-grid-3 .fb-tile:first-child, .fb-grid-4 .fb-tile { aspect-ratio:auto; }
-.fb-tile img { display:block; width:100%; height:100%; object-fit:cover; }
-.fb-grid-4 .fb-tile img { position:absolute; inset:0; object-fit:contain; }
+.fb-tile :is(img,video) { display:block; width:100%; height:100%; border:0; object-fit:cover; }
+.fb-grid-4 .fb-tile :is(img,video) { position:absolute; inset:0; }
+.fb-play { position:absolute; inset:50% auto auto 50%; transform:translate(-50%,-50%); border-radius:50%; background:#27211fba; color:white; padding:8px 12px; }
 .fb-more { position:absolute; inset:0; background:rgba(39,33,31,.56); color:white; display:grid; place-items:center; font-size:36px; }
 .fb-empty { font-size:13px; line-height:1.6; padding:24px 16px; color:var(--muted); }
 .fb-gallery { box-sizing:border-box; position:fixed; inset:0; width:100%; height:100%; max-width:none; max-height:none; margin:0; padding:16px; border:0; background:#211b1b; color:#fffdf9; }
@@ -37,7 +38,7 @@
 .fb-gallery button:disabled { opacity:.4; }
 .fb-gallery button:focus-visible { outline:2px solid white; outline-offset:3px; }
 .fb-gallery-stage { min-height:0; display:flex; justify-content:center; align-items:center; touch-action:pan-y; }
-.fb-gallery-stage img { max-width:100%; max-height:100%; width:100%; height:100%; object-fit:contain; user-select:none; }
+.fb-gallery-stage :is(img,video) { max-width:100%; max-height:100%; width:100%; height:100%; object-fit:contain; user-select:none; }
 body.fb-gallery-open { overflow:hidden; }
 .media-section { padding:16px 0; border-top:1px solid var(--line); }
 .media-section h3 { font-size:12px; text-transform:uppercase; letter-spacing:.1em; margin:0 0 16px; }

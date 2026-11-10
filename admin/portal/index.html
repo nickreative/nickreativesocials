@@ -306,10 +306,10 @@
 <main class="admin-workspace">
 <section class="panel queue-panel" aria-label="Content queue"><div class="panel-heading"><h2>Content queue</h2><span class="panel-meta">12 slots</span></div><div class="queue-controls"><label>Client<select id="clientSelect"><option value="suitecollection">Suite Collection</option><option value="pocky">Pocky</option><option value="vicalates">Vicalates</option><option value="livencommunities">Liven Communities</option><option value="belmogroup">Belmo Group</option></select></label><button id="addNewBtn" class="primary" type="button">Add post at the top</button><p class="help">Shifts the queue down one slot. If slot 12 is occupied, that post is removed.</p></div><div id="queueSummary" class="summary" aria-live="polite"></div><p id="workspaceMessage" class="notice" role="status"></p><div class="grid" id="grid"></div><p class="help legend">✓ Approved · ? Changes · NEW Awaiting review<br>Select a slot to edit. Drag slots to swap their order.</p></section>
 <section class="panel preview-panel" aria-label="Post preview"><div class="panel-heading"><h2>Preview</h2><span id="previewLabel" class="panel-meta">No post selected</span><button id="downloadPostBtn" class="download-post-button" type="button" hidden>Download post ↓</button></div><div id="adminVersions" class="preview-versions" hidden aria-label="Post versions"><button id="primaryVersionBtn" type="button" class="version-button" aria-pressed="true">Instagram</button><button id="facebookVersionBtn" type="button" class="version-button" aria-pressed="false">Facebook</button><p class="fb-version-note">Preview your current edits. Both versions share the caption and approval.</p></div><div id="emptyPreview">Select a post from the queue to preview its media and caption.</div><div class="preview" id="preview" hidden><div id="facebookPreview" hidden></div><div id="instagramPreview"><div id="carousel" class="carousel"></div><div class="carousel-controls"><button id="prevSlide" aria-label="Previous slide">←</button><span id="slideCount" class="panel-meta"></span><button id="nextSlide" aria-label="Next slide">→</button></div><p id="caption"></p></div><div id="linkedinPreview" hidden><div class="linkedin-card"><div class="linkedin-header"><div class="linkedin-avatar">N</div><div class="linkedin-meta"><strong id="linkedinBrand">Client Preview</strong><br><span>Preview only</span></div></div><div id="linkedinCaption" class="linkedin-caption"></div><div id="linkedinMedia" class="linkedin-media"></div></div></div></div></section>
-<section class="panel editor-panel" aria-label="Content editor"><div class="panel-heading"><h2>Post details</h2><span id="editorSlot" class="panel-meta">—</span></div><div id="emptyEditor">Select an existing post or an empty slot to start editing.</div><div id="editor" class="panel-body" hidden><div class="review-details"><span class="eyebrow">Client review</span><strong id="reviewStatus"></strong><p id="reviewFeedback"></p></div><label>Platform<select id="platformSelect"><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option></select></label><label>Format<select id="aspectSelect"><option value="5:4">Portrait · 4:5</option><option value="9:16">Reel · 9:16</option><option value="16:9">Landscape · 16:9</option></select></label><label>Caption<textarea id="captionInput" rows="6" placeholder="Write the post caption…"></textarea></label><label>Queue thumbnail<input type="file" id="thumbInput" accept="image/*"></label><section class="media-section"><h3 id="primaryMediaHeading">Instagram media</h3><label>Images and videos<input type="file" id="mediaInput" accept="image/*,video/*" multiple></label><p class="help">Selecting media replaces the existing carousel when you save.</p><div class="media-order-wrap" id="mediaOrderWrap" hidden><p class="media-order-help">Drag media or use the arrows to change its order.</p><div class="media-order" id="mediaOrder"></div></div></section><section class="media-section"><h3>Facebook media · stills only</h3><label class="fb-reuse"><input type="checkbox" id="facebookReuse" checked>Reuse photos from the primary version</label><p class="help">Videos are omitted. Upload a separate set of exported stills when Facebook needs different content.</p><div id="facebookCustom" hidden><label>Facebook stills<input type="file" id="facebookInput" accept="image/*" multiple></label><p class="help">Selecting files replaces the Facebook set when you save. Use the arrows to arrange them.</p><div id="facebookOrder" class="fb-order"></div></div><p id="facebookMessage" class="notice" role="status"></p></section><div class="editor-actions"><button id="saveBtn" class="primary">Save post</button><button id="clearBtn">Clear content</button></div><p id="uploadProgress" class="notice" role="status" aria-live="polite"></p></div></section>
+<section class="panel editor-panel" aria-label="Content editor"><div class="panel-heading"><h2>Post details</h2><span id="editorSlot" class="panel-meta">—</span></div><div id="emptyEditor">Select an existing post or an empty slot to start editing.</div><div id="editor" class="panel-body" hidden><div class="review-details"><span class="eyebrow">Client review</span><strong id="reviewStatus"></strong><p id="reviewFeedback"></p></div><label>Platform<select id="platformSelect"><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option></select></label><label>Format<select id="aspectSelect"><option value="5:4">Portrait · 4:5</option><option value="9:16">Reel · 9:16</option><option value="16:9">Landscape · 16:9</option></select></label><label>Caption<textarea id="captionInput" rows="6" placeholder="Write the post caption…"></textarea></label><label>Queue thumbnail<input type="file" id="thumbInput" accept="image/*"></label><section class="media-section"><h3 id="primaryMediaHeading">Instagram media</h3><label>Images and videos<input type="file" id="mediaInput" accept="image/*,video/*" multiple></label><p class="help">Selecting media replaces the existing carousel when you save.</p><div class="media-order-wrap" id="mediaOrderWrap" hidden><p class="media-order-help">Drag media or use the arrows to change its order.</p><div class="media-order" id="mediaOrder"></div></div></section><section class="media-section"><h3>Facebook media</h3><label class="fb-reuse"><input type="checkbox" id="facebookReuse" checked>Reuse photos from the primary version</label><p class="help">Stills only by default. Upload separate stills when Facebook needs different artwork.</p><label class="fb-reuse"><input type="checkbox" id="facebookMirror">Mirror the primary carousel, including videos</label><p class="help">Uses the same media and order as Instagram or LinkedIn for this post.</p><div id="facebookCustom" hidden><label>Facebook stills<input type="file" id="facebookInput" accept="image/*" multiple></label><p class="help">Selecting files replaces the Facebook set when you save. Use the arrows to arrange them.</p><div id="facebookOrder" class="fb-order"></div></div><p id="facebookMessage" class="notice" role="status"></p></section><div class="editor-actions"><button id="saveBtn" class="primary">Save post</button><button id="clearBtn">Clear content</button></div><p id="uploadProgress" class="notice" role="status" aria-live="polite"></p></div></section>
 </main></div>
 <script type="module">
-import { createFacebookPreview, facebookMedia } from "/assets/js/facebook-preview.js";
+import { createFacebookPreview, facebookMedia, isVideoUrl } from "/assets/js/facebook-preview.js";
 import { supabase } from "/assets/js/supabase.js";
 import { createPostDownload } from "/assets/js/post-download.js";
 import { createPortalCalendar } from "/assets/js/calendar.js";
@@ -369,6 +369,7 @@ let viewingFacebook = false;
 let selectedPreviewPost = null;
 const facebookInput = document.getElementById("facebookInput");
 const facebookReuse = document.getElementById("facebookReuse");
+const facebookMirror = document.getElementById("facebookMirror");
 const facebookOrder = document.getElementById("facebookOrder");
 const facebookMessage = document.getElementById("facebookMessage");
 const facebookView = createFacebookPreview(document.getElementById("facebookPreview"));
@@ -376,7 +377,7 @@ const facebookView = createFacebookPreview(document.getElementById("facebookPrev
 const downloadPostBtn = document.getElementById("downloadPostBtn");
 createPostDownload(downloadPostBtn, () => {
   if (!currentPost) return null;
-  const items = viewingFacebook ? (facebookReuse.checked ? mediaItems.filter(item => !isVideoItem(item)) : facebookItems) : mediaItems;
+  const items = viewingFacebook ? (facebookMirror.checked ? mediaItems : facebookReuse.checked ? mediaItems.filter(item => !isVideoItem(item)) : facebookItems) : mediaItems;
   const platform = viewingFacebook ? "facebook" : platformSelect.value;
   return {client:currentClient, clientLabel:clientSelect.selectedOptions[0].textContent, slot:currentPost.slot,
     version:platform, versionLabel:platform === "facebook" ? "Facebook" : platform === "linkedin" ? "LinkedIn" : "Instagram",
@@ -391,12 +392,14 @@ function clearFacebookItems() {
 function loadFacebookItems(post) {
   clearFacebookItems();
   facebookReuse.checked = !Array.isArray(post?.facebook_media_urls);
+  facebookMirror.checked = post?.facebook_mirror_primary === true;
   facebookItems = (post?.facebook_media_urls || []).map(url => ({kind:"existing",url}));
   facebookMessage.textContent = "";
   renderFacebookOrder();
 }
 function renderFacebookOrder() {
-  document.getElementById("facebookCustom").hidden = facebookReuse.checked;
+  document.getElementById("facebookCustom").hidden = facebookMirror.checked || facebookReuse.checked;
+  facebookReuse.closest("label").hidden = facebookMirror.checked;
   facebookOrder.replaceChildren();
   facebookItems.forEach((item, index) => {
     const tile = document.createElement("div"); tile.className = "fb-order-item";
@@ -414,19 +417,19 @@ function renderFacebookOrder() {
 }
 facebookInput.onchange = () => {
   const files = Array.from(facebookInput.files);
-  if (files.some(file => !file.type.startsWith("image/"))) { facebookMessage.textContent = "Facebook accepts images only. Export video frames as stills first."; facebookInput.value = ""; return; }
+  if (files.some(file => !file.type.startsWith("image/"))) { facebookMessage.textContent = "Upload images for custom Facebook stills, or turn on mirroring to include primary videos."; facebookInput.value = ""; return; }
   if (!files.length) return;
   clearFacebookItems();
   facebookItems = files.map(file => ({kind:"file",file,previewUrl:URL.createObjectURL(file)}));
   facebookMessage.textContent = `${files.length} Facebook stills ready to save.`;
   renderFacebookOrder(); refreshPreview();
 };
-facebookReuse.onchange = () => { renderFacebookOrder(); refreshPreview(); };
+facebookReuse.onchange = facebookMirror.onchange = () => { renderFacebookOrder(); refreshPreview(); };
 function refreshPreview() {
   if (!currentPost) return;
   const urls = mediaItems.map(mediaItemSource);
   const facebookUrls = facebookReuse.checked ? mediaItems.filter(item => !isVideoItem(item)).map(mediaItemSource) : facebookItems.map(mediaItemSource);
-  renderPostPreview({...selectedPreviewPost, platform:platformSelect.value,caption:captionInput.value,aspect:aspectSelect.value,media_urls:urls,facebook_media_urls:facebookUrls});
+  renderPostPreview({...selectedPreviewPost, platform:platformSelect.value,caption:captionInput.value,aspect:aspectSelect.value,media_urls:urls,facebook_media_urls:facebookUrls,facebook_mirror_primary:facebookMirror.checked});
 }
 function setAdminVersion(facebook) { viewingFacebook = facebook; refreshPreview(); }
 document.getElementById("primaryVersionBtn").onclick = () => setAdminVersion(false);
@@ -549,8 +552,7 @@ function mediaItemSource(item) {
 
 function isVideoItem(item) {
   if (item.kind === "file") return item.file.type.startsWith("video/");
-  const cleanUrl = String(item.url || "").split("?")[0].toLowerCase();
-  return cleanUrl.endsWith(".mp4") || cleanUrl.endsWith(".webm");
+  return isVideoUrl(item.url);
 }
 
 function renderMediaOrder() {
@@ -699,7 +701,8 @@ function renderPostPreview(post) {
   facebookView.close();
   if (viewingFacebook) {
     instagramPreview.hidden = linkedinPreview.hidden = true;
-    facebookView.render({brand:clientSelect.selectedOptions[0].textContent,caption:post?.caption,urls:facebookMedia(post)});
+    const videoUrls = new Set(mediaItems.filter(isVideoItem).map(mediaItemSource));
+    facebookView.render({brand:clientSelect.selectedOptions[0].textContent,caption:post?.caption,urls:facebookMedia(post),isVideo:url => videoUrls.has(url)});
     return;
   }
   setPreviewMode(platform);
@@ -955,7 +958,7 @@ nextBtn.onclick = () => {
 /* ---------- SAVE ---------- */
 saveBtn.onclick = async () => {
   if (!currentPost || saveBtn.disabled) return;
-  if (!facebookReuse.checked && !facebookItems.length) { facebookMessage.textContent = "Add Facebook stills or choose to reuse the primary photos."; return; }
+  if (!facebookMirror.checked && !facebookReuse.checked && !facebookItems.length) { facebookMessage.textContent = "Add Facebook stills or choose to reuse the primary photos."; return; }
   saveBtn.disabled = clearBtn.disabled = addNewBtn.disabled = clientSelect.disabled = true;
   editor.querySelectorAll("input, select, textarea").forEach(el => el.disabled = true);
   uploadProgress.textContent = "Saving…";
@@ -1061,9 +1064,8 @@ saveBtn.onclick = async () => {
   }
 
   let facebookUrls = null;
-  if (!facebookReuse.checked) {
+  if (!facebookReuse.checked && facebookItems.length) {
     facebookUrls = [];
-    if (!facebookItems.length) throw new Error("Add Facebook stills or choose to reuse the primary photos.");
     for (let i = 0; i < facebookItems.length; i++) {
       const item = facebookItems[i];
       if (item.kind === "existing") { facebookUrls.push(item.url); continue; }
@@ -1080,7 +1082,8 @@ saveBtn.onclick = async () => {
     aspect: aspectSelect.value,
     thumbnail_url: thumbnailUrl,
     media_urls: mediaUrls,
-    facebook_media_urls: facebookUrls
+    facebook_media_urls: facebookUrls,
+    facebook_mirror_primary: facebookMirror.checked
   };
 
   const { error: updateError } = await supabase
@@ -1136,6 +1139,7 @@ clearBtn.onclick = async () => {
       thumbnail_url: null,
       media_urls: [],
       facebook_media_urls: null,
+      facebook_mirror_primary: false,
       platform: "instagram",
       caption: "",
       aspect: "5:4"
