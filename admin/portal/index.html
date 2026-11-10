@@ -722,20 +722,12 @@ function renderPostPreview(post) {
     slides.push(el);
   });
 
-const aspectRatioMap = {
-  "9:16": "9 / 16",
-  "16:9": "16 / 9",
-  "5:4": "4 / 5"
-};
-
-const maxHeightMap = {
-  "9:16": "1344px",
-  "16:9": "1200px",
-  "5:4": "630px"
-};
-
-carousel.style.aspectRatio = aspectRatioMap[post?.aspect] || "4 / 5";
-carousel.style.maxHeight = maxHeightMap[post?.aspect] || "630px";
+  const aspectRatios = {
+    "9:16": "9 / 16",
+    "16:9": "16 / 9",
+    "5:4": "4 / 5"
+  };
+  carousel.style.aspectRatio = aspectRatios[post?.aspect] || "4 / 5";
 
   captionEl.textContent = post?.caption || "";
   showSlide(0);
