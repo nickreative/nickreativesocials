@@ -31,3 +31,11 @@ A Vercel preview should be reviewed before assigning Nickreative.com. The existi
 ## Format import
 
 All 76 unique photographs published in Format's public homepage/travel/fashion galleries were imported successfully into Supabase Storage through an authenticated one-time local tool. They are not hotlinked. The local migration tool requires the existing admin account and writes through ordinary RLS-protected Storage and database APIs. Source images were deduplicated by Format asset ID. The available published web copies are used, not presumed original master files. Suggested categories and descriptive alt text can be revised in the studio. Imported public work is published; new manual uploads default to hidden.
+
+## Editable homepage text and typography
+
+The portfolio admin includes Heading and Subheading fields above the image tools. Both use the existing master Save changes button, retain unsaved drafts after failed requests and warn before leaving. The public homepage reads the singleton portfolio_settings row and renders text with textContent; newlines are preserved, and HTML is never interpreted. Current homepage copy seeds the row, so publishing this feature does not replace the owner's message. A static fallback remains visible if the settings request fails.
+
+The settings table is publicly readable, with column-limited UPDATE grants and RLS restricted to the existing protected app_metadata admin role. No browser INSERT/DELETE or timestamp editing is granted. Optimistic updated_at checks reject concurrent edits while retaining the editor's draft. Rollback-only tests are in supabase/tests/portfolio_settings_access.sql.
+
+Portfolio pages self-host the licensed Manrope variable font (300–700). Main text uses a light weight; small public and portfolio-admin text increases by exactly 2pt (2.6667 CSS pixels) relative to prior sizes. Client portal CSS and functionality are untouched. Browser checks cover master-save failure/retry alongside a photograph draft, literal HTML rendering, line breaks, and desktop/mobile layouts.

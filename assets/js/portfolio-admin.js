@@ -1,3 +1,4 @@
+import {readHeader,writeHeader,headerValues} from './portfolio-settings.js';
 import {supabase,check,categories,signed,el,optimize,BUCKET} from './portfolio-data.js';
 import {PortfolioDraft} from './portfolio-draft.js';
 
@@ -5,12 +6,21 @@ const status=document.querySelector('#adminStatus'),content=document.querySelect
 const list=document.querySelector('#adminImages'),queue=document.querySelector('#queue'),retry=document.querySelector('#retryUploads');
 const saveAll=document.querySelector('#saveAll'),saveStatus=document.querySelector('#saveStatus'),editor=document.querySelector('#photoEditor');
 const model=new PortfolioDraft();
+const headingInput=document.querySelector('#headerHeading'),subheadingInput=document.querySelector('#headerSubheading');
+let savedHeader=null;
+function headerDirty(){return !!savedHeader&&(headingInput.value!==savedHeader.heading||subheadingInput.value!==savedHeader.subheading);}
+async function loadHeader(){
+  try{savedHeader=await readHeader();headingInput.value=savedHeader.heading;subheadingInput.value=savedHeader.subheading;document.querySelector('#headerFields').disabled=false;document.querySelector('#headerStatus').textContent='';}
+  catch(error){document.querySelector('#headerStatus').textContent='Homepage text could not load. Reload to try again. Your photograph tools are still available.';}
+}
+for(const input of [headingInput,subheadingInput])input.addEventListener('input',updateSave);
 let cats=[],jobs=[],uploading=false,saving=false,dragId=null,selectedId=null;
 function notice(message,error=false){status.textContent=message;status.classList.toggle('error',error);}
 function updateSave(){
   const count=model.edits.size;
-  saveStatus.textContent=saving?'Saving changes…':model.dirty?`${count?`${count} photograph${count===1?'':'s'} edited`:''}${count&&model.orderDirty?' · ':''}${model.orderDirty?'Order changed':''} — unsaved`:'All changes saved';
-  saveAll.disabled=!model.dirty||saving||uploading;
+  const parts=[headerDirty()?'Header edited':'',count?`${count} photograph${count===1?'':'s'} edited`:'',model.orderDirty?'Order changed':''].filter(Boolean);
+  saveStatus.textContent=saving?'Saving changes…':parts.length?`${parts.join(' · ')} — unsaved`:'All changes saved';
+  saveAll.disabled=!(model.dirty||headerDirty())||saving||uploading;
   document.querySelector('#photoCount').textContent=`${model.order.length} photographs`;
 }
 function options(select,value=''){
@@ -111,11 +121,14 @@ function renderEditor(){
   editor.append(el('h2',{},'Photograph details'),preview,fields,el('p',{class:'hint'},'Use Save changes below to save photograph details and arrangement.'),actions,remove);
 }
 async function saveChanges(){
-  if(saving||uploading||!model.dirty)return;
+  if(saving||uploading||!(model.dirty||headerDirty()))return;
+  let headerUpdate;
+  try{if(headerDirty())headerUpdate=headerValues(headingInput.value,subheadingInput.value);}catch(error){notice(error.message,true);headingInput.focus();return;}
   // Validate the entire draft before writing any image.
   for(const [id] of model.edits){const image=model.row(id);if(image.published&&!image.alt_text.trim()){selectedId=id;renderImages();renderEditor();notice('Add descriptive alt text to each published photograph before saving.',true);return;}}
   saving=true;content.inert=true;updateSave();const errors=[];
   try{
+    if(headerUpdate){try{savedHeader=await writeHeader(headerUpdate,savedHeader.updated_at);headingInput.value=savedHeader.heading;subheadingInput.value=savedHeader.subheading;}catch(error){errors.push(error.message);}}
     for(const [id,patch] of [...model.edits]){
       try{
         const values={...patch};for(const key of ['title','alt_text'])if(key in values)values[key]=values[key].trim();
@@ -132,7 +145,7 @@ async function saveChanges(){
       }catch(error){errors.push(error.message);}
     }
     renderImages();renderEditor();
-    notice(errors.length?`Some changes could not be saved. ${model.edits.size} photograph draft(s)${model.orderDirty?' and the arrangement':''} kept for retry.\n${[...new Set(errors)].join('\n')}`:'All photograph details and arrangement saved.',errors.length>0);
+    notice(errors.length?`Some changes could not be saved. Your unsaved edits are kept for retry.\n${[...new Set(errors)].join('\n')}`:'All changes saved, including homepage text, photograph details and arrangement.',errors.length>0);
   }finally{saving=false;content.inert=false;updateSave();}
 }
 saveAll.onclick=saveChanges;
@@ -174,13 +187,13 @@ document.querySelector('#addCategory').onsubmit=async event=>{
   try{const name=input.value.trim();if(!name)throw new Error('Enter a category name.');check(await supabase.from('portfolio_categories').insert({name,sort_order:cats.reduce((max,c)=>Math.max(max,c.sort_order),-1)+1}));input.value='';await refresh();notice('Category added. Unsaved photograph edits are kept.');}catch(error){notice(error.message,true);}finally{button.disabled=false;}
 };
 document.querySelector('#signOut').onclick=async()=>{
-  if(model.dirty&&!confirm('You have unsaved photograph changes. Sign out and discard them?'))return;
+  if((model.dirty||headerDirty())&&!confirm('You have unsaved photograph changes. Sign out and discard them?'))return;
   try{check(await supabase.auth.signOut());location.href='/admin/login/?next=portfolio';}catch(error){notice(error.message,true);}
 };
-window.addEventListener('beforeunload',event=>{if(uploading||saving||model.dirty){event.preventDefault();event.returnValue='';}});
+window.addEventListener('beforeunload',event=>{if(uploading||saving||model.dirty||headerDirty()){event.preventDefault();event.returnValue='';}});
 try{
   const {data,error}=await supabase.auth.getUser();
   if(error||!data.user)location.replace('/admin/login/?next=portfolio');
   else if(data.user.app_metadata?.role!=='admin')notice('This page is available to the portfolio administrator only.',true);
-  else{await supabase.auth.refreshSession();await refresh();content.hidden=false;notice('Select a photograph to edit. Save all your changes together.');}
+  else{await supabase.auth.refreshSession();await refresh();await loadHeader();content.hidden=false;updateSave();notice('Select a photograph to edit. Save all your changes together.');}
 }catch(error){notice(`Could not open the studio: ${error.message}`,true);}
