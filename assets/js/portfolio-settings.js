@@ -1,5 +1,4 @@
 import {supabase,check} from './portfolio-data.js';
-export const DEFAULT_HEADER={heading:'Artistic Director. Photographer. Editor.',subheading:'Photography by Nicholas Goodridge.\nBrisbane & wherever the story takes me.'};
 export async function readHeader(){
   return check(await supabase.from('portfolio_settings').select('id,heading,subheading,updated_at').eq('id','homepage').single());
 }
