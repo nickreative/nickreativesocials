@@ -4,3 +4,6 @@
 .photo img:not([src]){visibility:hidden}
 
 .intro h1{min-width:0;flex:1;max-width:20ch;line-height:1.1;letter-spacing:-.04em;overflow-wrap:break-word;white-space:pre-line}.intro p{flex:0 1 360px;min-width:240px;white-space:pre-line;font-weight:400}.site-header nav,.filters button,.small-label,footer,.lightbox-top,dialog figcaption{font-weight:400}@media(max-width:650px){.intro p{min-width:0}.site-header nav{font-size:calc(12px + 2pt)}}
+
+/* Empty space while loading, never a stale version of the owner's message. */
+.intro[data-header-state="loading"]{visibility:hidden;min-height:260px}.header-load-error{padding:28px 0;color:var(--muted);font-size:calc(13px + 2pt)}.header-load-error button{margin-left:8px}@media(max-width:650px){.intro[data-header-state="loading"]{min-height:300px}}

@@ -22,7 +22,22 @@ more.onclick=()=>load();
 function filterButton(id,name){const button=el('button',{'aria-pressed':String(id===selected)},name);button.onclick=()=>{selected=id;for(const b of filters.children)b.setAttribute('aria-pressed',String(b===button));more.textContent='More photographs ↓';load(true);};filters.append(button);}
 async function openImage(index,button){current=(index+items.length)%items.length;if(button)opener=button;const item=items[current],request=++lightboxRequest;large.removeAttribute('src');large.alt=item.alt_text||'';document.querySelector('#lightboxCaption').textContent=item.title||'';document.querySelector('#imageCounter').textContent=`${current+1} / ${items.length}${hasMore?' loaded':''}`;if(!dialog.open)dialog.showModal();try{const url=await signed(item.storage_path);if(request===lightboxRequest)large.src=url;}catch{if(request===lightboxRequest)document.querySelector('#lightboxCaption').textContent='Could not load photograph. Please try again.';}}
 document.querySelector('#closeLightbox').onclick=()=>dialog.close();document.querySelector('#previousImage').onclick=()=>openImage(current-1);document.querySelector('#nextImage').onclick=()=>openImage(current+1);dialog.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();openImage(current-1);}if(e.key==='ArrowRight'){e.preventDefault();openImage(current+1);}});dialog.addEventListener('close',()=>{lightboxRequest++;large.removeAttribute('src');opener?.focus();});let touchStart=0;dialog.addEventListener('touchstart',e=>touchStart=e.changedTouches[0].clientX,{passive:true});dialog.addEventListener('touchend',e=>{const delta=e.changedTouches[0].clientX-touchStart;if(Math.abs(delta)>60)openImage(current+(delta<0?1:-1));},{passive:true});
-// Header text is plain text, independent of gallery loading.
-readHeader().then(header=>{document.querySelector('#portfolioHeading').textContent=header.heading;const sub=document.querySelector('#portfolioSubheading');sub.textContent=header.subheading;sub.hidden=!header.subheading;}).catch(()=>{/* Keep the server-rendered heading if the connection is unavailable. */});
+// Reveal both fields together only after the current portal copy has loaded.
+// The HTML contains no old heading, subheading or cached copy to flash first.
+async function loadHeader(){
+  const intro=document.querySelector('.intro'),heading=document.querySelector('#portfolioHeading'),sub=document.querySelector('#portfolioSubheading'),error=document.querySelector('#headerLoadError');
+  heading.textContent='';sub.textContent='';intro.hidden=false;
+  intro.dataset.headerState='loading';intro.setAttribute('aria-busy','true');error.hidden=true;
+  try{
+    const header=await readHeader();
+    if(typeof header?.heading!=='string'||!header.heading.trim()||typeof header.subheading!=='string')throw new Error('Invalid homepage text');
+    heading.textContent=header.heading;sub.textContent=header.subheading;sub.hidden=!header.subheading;
+    intro.dataset.headerState='ready';
+  }catch{
+    intro.dataset.headerState='error';intro.hidden=true;error.hidden=false;
+  }finally{intro.setAttribute('aria-busy','false');}
+}
+document.querySelector('#retryHeader').onclick=loadHeader;
+loadHeader();
 
 try{filterButton('','All');for(const category of await categories())filterButton(category.id,category.name);await load();}catch{status.textContent='The portfolio could not load. Please refresh to try again.';}
